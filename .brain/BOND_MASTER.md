@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-08-27 (added repo-check ground rule)
+**Last updated:** 2026-08-28 (breakup flow + baby AI interaction model + design directions)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -88,12 +88,34 @@ The creature is also the front door to every feature. Natural-language "tool use
 - **Build note:** starts small (companion only), then we add tools one by one
   as underlying features get built. It's a Phase 2+ capability layered on.
 
+### Baby AI — INTERACTION MODEL (locked)
+The creature lives in THREE connected ways (NOT a floating chatbot — it's the
+same creature everywhere, with its name/face/personality):
+1. **Home presence** — greets you, emotional center, first thing you see on open.
+2. **Dedicated room/page** — where you set it up, feed, play, dress, customize,
+   watch it grow, see stats. Where you RAISE it. (MVP: simple room; grow over time.)
+3. **Floating quick-access** — ALWAYS floats by default; tap from any screen to
+   ask it something. This is where it acts as the ASSISTANT.
+
+- **Floating toggle:** on by default, but a settings switch lets users turn
+  floating OFF (cleaner screen). When off, reach it via home or its room.
+- **Input:** BOTH type and voice — a little chat opens; type freely OR hold to
+  speak. Natural language requests.
+- **When it speaks:** ONLY when tapped. Never interrupts, never pops up on its
+  own, no unsolicited thought bubbles. Quiet and respectful — waits for you.
+- **Future revisit (not now):** may later allow rare, genuinely-timely
+  reactions (milestone completion, care needs) — but tap-only is the safe
+  default for MVP. Decide once it's built and can be felt.
+- **Design note:** the floating assistant is how the "AI as interface" works
+  naturally — same companion, reachable anywhere, helpful when you talk to it.
+  NOT a generic chatbot bubble (that was explicitly rejected as cheapening it).
+
 ### Still to decide on Baby AI
 - Name for it (BOND fits — "grow your Bond")
 - Same starting creature for all couples, or pick a species?
-- Lives on home screen as centerpiece, or its own tab?
-- How they talk to it: type, voice, or both?
-- Exact MVP tool set
+- Exact MVP tool set (which "assistant" abilities ship in v1)
+- Visual design of the creature itself (co-decided with girlfriend)
+- DECIDED: placement (home + room + floating), input (type+voice), speaks-when-tapped
 
 ---
 
@@ -201,6 +223,36 @@ pending (A waiting, can accept B) → active (2 linked, unlocked) → sealed (2 
 
 ---
 
+## BREAKUP / UNLINK FLOW (locked)
+
+Either partner can initiate; humane 48-hour wind-down; clean deletion.
+
+### The flow
+1. Either partner taps "Break up" (buried in settings, NOT a prominent button).
+2. Confirmation screen with clear warning: "This starts a 48-hour countdown."
+3. **48-hour countdown begins.** Both partners notified in-app + email. Couple
+   enters "winding down" state — app still works, softly.
+4. During the 48h, BOTH can export their souvenirs/data (photos, messages) as a
+   keepsake, and say goodbye to the baby AI.
+5. **Cancel rule (anti-abuse):** EITHER partner can cancel — but ONLY ONCE each.
+   Once both have used their one cancel, it proceeds no matter what. (Prevents
+   endless tug-of-war AND stops a controlling partner from trapping someone who
+   wants out, while still allowing reconciliation from a heated-moment decision.)
+6. **At expiry — the fork:**
+   - Premium couple → offered 3-YEAR data preservation (data frozen, both
+     accounts closed; if they reunite within 3 years, their whole story restores).
+     This is a real premium upgrade hook.
+   - Free couple → straight to deletion.
+7. **Deletion:** both BOND accounts fully deleted, couple gone, baby AI gone
+   ("baby AI dies, bye bye"). To return, sign up fresh.
+8. Follow-up email with support resources sent to both.
+
+### Schema implications (build these in from the start)
+couples table needs: a `winding_down` status, `breakup_initiated_by`,
+`breakup_expires_at` timestamp, and a per-partner `cancels_used` counter.
+
+---
+
 ## DESIGN DIRECTION (locked)
 
 Modern, transparent, fun + elegant. Light-first glassmorphism.
@@ -216,6 +268,20 @@ Modern, transparent, fun + elegant. Light-first glassmorphism.
 ### Reference images (J provided 6)
 - Primary refs: plant app (glass system) + floral cards (photo-forward, minimal chrome).
 - Also: Daylog fashion (editorial serif typography, gold CTA), food app (bottom-sheet detail pattern).
+
+### DESIGN IS CO-DECIDED WITH J'S GIRLFRIEND
+Major visual decisions get her input (she's a real target user — most couples
+apps are downloaded by women). Revisit big design calls with her before locking.
+
+### Open design decisions (in progress)
+- Light vs dark: leaning "adaptive theme that shifts with mood/baby AI" — but
+  REVISIT with girlfriend before locking.
+- Roundness: chose "cleaner + tighter (less round, modern-minimal)."
+- Fun vs elegant lead: THREE directions mocked up for J + girlfriend to pick:
+  (01) Warm+Playful — rosy, Cormorant, most romantic;
+  (02) Elegant+Calm — Fraunces, gold, premium/keepsake;
+  (03) Modern+Fresh — Space Grotesk, coral pop, clean/current.
+  Not yet chosen. Mix-and-match allowed (e.g. "01 warmth + 03 cleaner cards").
 
 ### Color palette
 - Background: warm cream (#FEF9F5 / #FAF7F2)
@@ -307,9 +373,24 @@ Open todos, in priority order:
 
 ## SESSION LOG
 
-### 2026-08-27 — Planning session
+### 2026-08-27 — Planning session (part 1)
 - Locked the whole product vision, feature universe (23 features), and Layer 1 spec.
 - Defined the Baby AI concept + the "AI as interface" architecture.
 - Locked design direction and tech stack.
 - Set up this brain file + the git/Claude Code workflow.
 - Nothing built yet — still in planning.
+
+### 2026-08-28 — Planning session (part 2)
+- Locked the BREAKUP/UNLINK flow (48h wind-down, once-each cancel, premium
+  3-year preservation, clean deletion). Added schema implications.
+- Locked the Baby AI INTERACTION MODEL (home + room + always-floating assistant
+  with off-toggle; type+voice; speaks only when tapped). Rejected pure floating
+  chatbot as cheapening it.
+- Explored founder capacity honestly — J is running Turf + GhostCheck + school
+  (12 credits) + a funding campaign, and wants to go solo-full-send on BOND like
+  Turf. Flagged that "all equal priority" is the real risk; J acknowledged, wants
+  to proceed solo. Protections: brain file (no lost context), layer discipline
+  (never broken half-state), and a tight MVP for a close finish line.
+- Design flagged as CO-DECIDED with girlfriend; mocked up 3 visual directions
+  for them to choose (warm/playful, elegant/calm, modern/fresh). Not yet picked.
+- Still no code — planning. MVP line still the top open decision.
