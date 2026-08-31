@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-08-28 (breakup flow + baby AI interaction model + design directions)
+**Last updated:** 2026-08-28 (messaging deep-dive done; feature-by-feature method adopted)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -223,6 +223,62 @@ pending (A waiting, can accept B) → active (2 linked, unlocked) → sealed (2 
 
 ---
 
+## FEATURE DEEP-DIVES (launch version + future version)
+
+> Each feature is thought through to a launchable definition, then banked here.
+> LAUNCH = what we build first (lean). FUTURE = captured so it's off our mind.
+
+### MESSAGING [deep-dive DONE]
+
+**LAUNCH VERSION:**
+- Send: text + voice notes + photos (rich from day one).
+- Reactions: emoji reactions on any message.
+- Reply-to-specific-message (quoting a message). Important for couples —
+  reacting/replying to a specific text IS the intimacy.
+- Delete: BOTH options — "delete for me" OR "unsend for both."
+- Media gallery: tap the couple header at top of chat → opens shared view with
+  tabs: Photos & Videos / Voice notes / Links (newest first). Copies the proven
+  WhatsApp/Instagram pattern. Voice-notes tab is emotional for couples.
+  Gallery connects to Memory Vault — a shared chat photo is one tap from being
+  saved as a memory. Chat and vault feed each other.
+- Privacy: STANDARD PRIVATE at launch (Supabase row-level security so only the
+  two partners can ever access; encrypted in transit + at rest). NOT fake E2E.
+  Architected so true E2E can be added later as a premium/privacy upgrade.
+  (Rationale: doing E2E wrong gives false security, worse than being honest.
+  Promise exactly what we deliver.)
+
+**CRITICAL TECHNICAL FIXES (learned from Turf's broken chat):**
+Turf's chat had a 2-3 MINUTE delay on send because it inserted to DB then WAITED
+for the realtime stream to echo the message back before showing it. Also, much
+of Turf's chat was never verified end-to-end (trusted from IDE reports). BOND fixes:
+1. OPTIMISTIC SEND — message appears instantly on sender's screen the moment they
+   hit send; DB write + realtime broadcast happen in background. No frozen wait.
+2. DEDUPLICATION — when the realtime echo returns, match against what's already
+   shown so a message never appears twice. (Makes optimistic append safe.)
+3. DELIVERY STATES — each message shows real state: sending → sent → delivered →
+   read. If something IS slow, user sees "sending," not a frozen screen.
+4. CLEAN CHANNEL LIFECYCLE — realtime subscription opens on entering chat, closes
+   on leaving. No leaks / stale connections (a common "stopped updating" cause).
+5. TEST GATE (the Turf process lesson): messaging is NOT "done" until the full
+   path is proven on TWO PHYSICAL DEVICES — send, receive, reaction, reply, voice
+   note, photo, delete — confirmed live, never trusted from an IDE report.
+
+**FUTURE VERSION:**
+- True end-to-end encryption (premium/privacy upgrade).
+- Message search (WhatsApp-style keyword search in chat).
+- Centralized media hub across all content.
+- More gesture types beyond soft ping.
+
+**STILL OPEN (ask girlfriend / decide later):**
+- Typing indicators + online presence ("online now") — J leaning NO, but keep on
+  the list to ask girlfriend. Not in launch unless she wants it.
+- Storage limits / space allocation per tier (free vs BOND+) — TBD, comes back
+  with the overall storage-cost decision. Chosen model: free tier limited,
+  unlimited for BOND+.
+- "Last seen" — not decided.
+
+---
+
 ## BREAKUP / UNLINK FLOW (locked)
 
 Either partner can initiate; humane 48-hour wind-down; clean deletion.
@@ -360,14 +416,29 @@ apps are downloaded by women). Revisit big design calls with her before locking.
 
 ## NEXT SESSION — START HERE
 
-Open todos, in priority order:
-1. **Sort all 23 features into MVP / Phase 2 / Later** (biggest open decision — ship fast).
-2. Slot the newer features (discover, planner, to-dos, etc.) into the layer build plan.
-3. Design the solo preview (what A sees/does before B joins).
-4. Design the home screen (the daily ritual — most important screen, not yet designed).
-5. Design the reveal moment UX (countdown, animation, reaction system).
-6. Write notification copy guide (all notification types, warm not transactional).
-7. Decide the open Baby AI questions (name, species, placement, input method, MVP tools).
+METHOD: going feature-by-feature, each gets LAUNCH + FUTURE version, banked in
+"Feature Deep-Dives" section. When all features banked + schema + safety pass +
+AI/privacy decision done → thinking phase closes, cooking begins.
+
+Feature deep-dive queue (build order):
+1. ✅ Messaging — DONE
+2. Daily prompts & reveal moment (concept clear; lock mechanics, timezone, lock logic)
+3. Live games (each game's rules, realtime logic, launch set vs future)
+4. Memory vault (storage limits, flashbacks, capsules, chapters)
+5. Mood sync & bond score (the actual growth/XP/mood MATH)
+6. Discover (restaurants/movies/attractions, swipe-match, surprise us, data sources)
+7. Planner / to-dos / goals
+8. Monetization (paywall moments, gating, gift flow)
+9. Notifications system (cadence, caps, triggers)
+
+Cross-cutting (after or alongside features):
+- Unified database schema (pull all per-feature pieces into one)
+- Safety pass (abuse-resistance, age verification, App/Play store rules — esp. spicy mode)
+- Retention plan (first-7-days journey, both-partners-engaged problem)
+- AI provider + privacy promise — DECIDE
+- Design direction — pick with girlfriend (warm/elegant/modern)
+
+Standing open items to ask girlfriend: typing indicators/presence, design direction.
 
 ---
 
@@ -379,6 +450,23 @@ Open todos, in priority order:
 - Locked design direction and tech stack.
 - Set up this brain file + the git/Claude Code workflow.
 - Nothing built yet — still in planning.
+
+### 2026-08-28 — Planning session (part 3): feature deep-dives begin
+- Adopted new method (vs Turf): every feature gets a LAUNCH version + FUTURE
+  version, thought through fully BEFORE building. No rough MVP-then-iterate.
+  Keep launch versions lean so "done thinking" doesn't mean "build everything."
+- Assessed thinking progress honestly: ~35% done. Hardest structural pieces
+  (couple system, breakup, baby AI) locked; most features still need deep pass.
+- Explored AI provider landscape: Claude (if credits), Gemini (student discount),
+  self-hosted Llama, + Groq/OpenRouter/DeepSeek/Together. Recommendation: build
+  provider-agnostic ROUTER (or use OpenRouter), start on Gemini (free-ish), apply
+  for Anthropic credits, keep Llama-on-device as future privacy upgrade. NOT chosen yet.
+- Clarified baby AI "brain" = 4 jobs: assistant (smart tier), personality (cheap),
+  content (mid), state/mood/growth (NOT AI — plain code, free).
+- DEEP-DIVE DONE: MESSAGING (see Feature Deep-Dives). Diagnosed Turf's chat
+  problems (2-3min send delay from waiting for echo; unverified end-to-end) and
+  baked in fixes: optimistic send, dedupe, delivery states, clean channel
+  lifecycle, two-device test gate.
 
 ### 2026-08-28 — Planning session (part 2)
 - Locked the BREAKUP/UNLINK flow (48h wind-down, once-each cancel, premium
