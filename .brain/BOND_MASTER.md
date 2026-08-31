@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-08-29 (live games deep-dive done)
+**Last updated:** 2026-08-29 (memory vault deep-dive done)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -376,6 +376,49 @@ the first build. Fewer bugs, faster launch. J's call; not yet finalized.
 
 ---
 
+### MEMORY VAULT [deep-dive DONE]
+
+The keepsake heart. One shared vault, everything is "ours" — fits the couple-
+entity thesis. Connects to messaging (chat media gallery feeds the vault).
+
+**LAUNCH VERSION:**
+- Save: photos + videos + captions (rich from day one).
+- ONE FULLY SHARED vault — no "mine vs yours," every memory belongs to both.
+  Most on-brand (couple = one entity) AND simplest to build.
+- Organization: AUTO BY DATE — timeline, newest first. Zero effort from the couple,
+  matches how people naturally scroll back ("last summer"). Albums + milestone-
+  tagging are FUTURE.
+- FLASHBACKS at launch — "1 year ago today" surfaces old memories via notification.
+  Emotionally huge, technically cheap (daily check for date-matching memories → push).
+
+**CUT (not even future unless J revives it):**
+- TIME CAPSULES — removed entirely. Nice idea but not core to what the vault is for;
+  cutting keeps launch focused. (First feature actively CUT vs deferred — healthy.)
+
+**FUTURE VERSION:**
+- Relationship Chapters — each month auto-becomes a story chapter (mood arc,
+  highlights, AI-written recap). DEFERRED because (1) needs months of accumulated
+  data to work at all — useless for a brand-new couple, and (2) leans on the AI
+  layer which is undecided. Natural "few months post-launch" feature.
+- Custom albums / collections.
+- Milestone auto-tagging of special moments.
+- Voice notes attached to memories.
+
+**DATA/SCHEMA IMPLICATIONS:**
+- memories (couple_id, media_url, media_type photo|video, caption, taken_at date,
+  created_at). Belongs to couple, not user (fully shared).
+- Media in Supabase Storage, PRIVATE bucket, signed URLs only (never public).
+- Flashback = scheduled daily check for memories where taken_at matches today's
+  month/day in prior years → FCM push.
+- STORAGE LIMITS still open (see below) — VIDEO is the big cost driver; the free-
+  vs-BOND+ line matters most on video.
+
+**STILL OPEN (storage decision, shared with messaging):**
+- Storage caps / space per tier (free limited, unlimited BOND+ is the chosen model;
+  actual numbers TBD). Video length + size limits. Compression before upload.
+
+---
+
 ## BREAKUP / UNLINK FLOW (locked)
 
 Either partner can initiate; humane 48-hour wind-down; clean deletion.
@@ -521,8 +564,8 @@ Feature deep-dive queue (build order):
 1. ✅ Messaging — DONE
 2. ✅ Daily prompts & reveal — DONE (core locked; rhythm/expiry parked for girlfriend)
 3. ✅ Live games — DONE (engine + philosophy locked; per-game live/async parked)
-4. Memory vault (storage limits, flashbacks, capsules, chapters)  ← NEXT
-5. Mood sync & bond score (the actual growth/XP/mood MATH)
+4. ✅ Memory vault — DONE (timeline + flashbacks launch; capsules cut; chapters future)
+5. Mood sync & bond score (the actual growth/XP/mood MATH)  ← NEXT
 6. Discover (restaurants/movies/attractions, swipe-match, surprise us, data sources)
 7. Planner / to-dos / goals
 8. Monetization (paywall moments, gating, gift flow)
