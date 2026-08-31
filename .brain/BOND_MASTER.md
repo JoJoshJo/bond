@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-08-28 (messaging deep-dive done; feature-by-feature method adopted)
+**Last updated:** 2026-08-29 (live games deep-dive done)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -279,6 +279,103 @@ of Turf's chat was never verified end-to-end (trusted from IDE reports). BOND fi
 
 ---
 
+### DAILY PROMPTS & THE REVEAL MOMENT [deep-dive: mostly done, timing parked]
+
+The emotional core of the app. One shared prompt; both answer privately; reveal together.
+
+**LOCKED — core mechanics:**
+- ONE shared prompt per day for the couple (not per-person — same prompt for both).
+- Couple can REQUEST A NEW ONE if they don't like the one they got.
+- THE ANSWER LOCK (the magic, = how Paired does it): neither partner sees the
+  other's answer until BOTH have submitted. You write your honest answer BEFORE
+  seeing theirs (removes pressure to match energy / copy their vibe). Then both
+  answers reveal SIMULTANEOUSLY — a shared moment, not "answer then peek."
+- AFTER THE REVEAL: reactions (emoji) on each other's answers AND the reveal can
+  flow into a conversation ("talk about it" opens/continues chat). Both, not either.
+- HOME TIMEZONE captured during account setup (needed for any shared-clock timing).
+
+**PARKED — ask girlfriend (options already worked out, just pick):**
+- Daily RHYTHM & EXPIRY. J chose "expires at end of day" but the timezone problem
+  makes strict per-person midnight BREAK the mutual lock (see below). Options to
+  choose from:
+  (a) Couple's SHARED timezone — one clock, both always see the same prompt (safe).
+  (b) Shared timezone + GENEROUS window — doesn't die at strict midnight; lives
+      until the next prompt replaces it. (Claude's recommendation — most forgiving
+      for long-distance.)
+  (c) Let long-distance couples pick which partner's zone is "home."
+- Whether missed prompts are gone forever vs revisitable.
+
+**WHY per-person midnight breaks it (important — don't let this regress):**
+The mutual lock REQUIRES both partners answering the SAME prompt in the SAME
+window. If each has their own local midnight, long-distance partners can be on
+DIFFERENT DAYS seeing DIFFERENT prompts at the same moment → they can never answer
+the same prompt → the simultaneous reveal becomes impossible. The prompt belongs
+to the COUPLE and must live on ONE shared clock. This is exactly the timezone
+problem flagged earlier; it hits prompts hardest.
+
+**FUTURE VERSION:**
+- AI-personalized prompts (Claude, via Edge Function) that learn the couple over
+  time — draw on their persona, recent activity, mood. (MVP can start with a
+  strong curated prompt bank + light personalization; full personalization later.)
+- "Deeper" bonus prompts / themed prompt packs (Valentine's, anniversary, etc.).
+- Prompt history browsing (revisit past answers — ties to a keepsake feeling).
+
+**DATA/SCHEMA IMPLICATIONS:**
+- prompts belong to couple_id, on the couple's shared timezone.
+- prompt_responses locked per user until both submitted; reveal flips a state that
+  Realtime broadcasts to both devices simultaneously (same pattern as messaging).
+- couples table needs home_timezone (set at setup).
+
+---
+
+### LIVE GAMES [deep-dive: engine + philosophy locked, per-game details parked]
+
+The potential viral feature — nobody else has real-time couple games. Also the
+MOST technically complex feature. Strategy: build the shared ENGINE once, each
+game plugs into it.
+
+**LOCKED — engine & philosophy:**
+- The 5 games (all intended, but see launch-scope note): Would You Rather, Truth
+  or Dare, Hot Take Battle, Who Said It? (past messages as trivia), Couple Quiz.
+- LIVE vs ASYNC is a PER-GAME property, not one global rule. Some games are
+  "live-preferred" (Truth or Dare, Hot Take Battle — the fun is being together),
+  some are "async-friendly" (Who Said It?, Couple Quiz). Would You Rather works
+  both ways. THE ENGINE SUPPORTS BOTH MODES FROM THE START — each game just picks
+  which mode(s) it allows. Build the flexible foundation once, flip a setting per
+  game. (So "decide live/async per game later with girlfriend" costs nothing技术.)
+- DISCONNECT/QUIT mid-game → PAUSES & can be resumed later, nothing lost.
+  (Zero-guilt principle applied to games. No freezing, no penalty.)
+- Games FEED the baby AI's mood AND the bond score/XP. Playing together = the kind
+  of connection that makes the creature happy and earns couple XP. Connective
+  tissue tying games to the entity they're raising.
+
+**CLAUDE'S RECOMMENDATION ON LAUNCH SCOPE (J leaning "all 5"):**
+Games are the most complex feature — each has its own rules, screens, edge cases.
+Recommend: build the shared engine + 2-3 games for LAUNCH, other 2-3 as fast-
+follows. Same games, all still happening — just not 5 fighting for attention in
+the first build. Fewer bugs, faster launch. J's call; not yet finalized.
+
+**PARKED — ask girlfriend:**
+- Add more game ideas.
+- Decide live vs async PER GAME (she has good instincts on which need to be together).
+- (If accepted) which 2-3 games are the launch set vs fast-follow.
+
+**FUTURE VERSION:**
+- More games / game packs.
+- Spicy-mode games (18+, opt-in-by-both) — note: store-compliance research needed
+  BEFORE building (flagged in safety pass).
+- "How well do you know me?" style deeper games.
+
+**DATA/SCHEMA IMPLICATIONS:**
+- game_sessions (couple_id, game_type, mode live|async, status waiting|active|
+  paused|completed, started_at, ended_at).
+- game_moves (session_id, user_id, move_data jsonb) — Realtime syncs moves to both
+  devices; simultaneous reveal via broadcast (same pattern as prompts/messaging).
+- Paused sessions persist so they can be resumed.
+- On completion → award bond XP + trigger baby AI reaction.
+
+---
+
 ## BREAKUP / UNLINK FLOW (locked)
 
 Either partner can initiate; humane 48-hour wind-down; clean deletion.
@@ -422,9 +519,9 @@ AI/privacy decision done → thinking phase closes, cooking begins.
 
 Feature deep-dive queue (build order):
 1. ✅ Messaging — DONE
-2. Daily prompts & reveal moment (concept clear; lock mechanics, timezone, lock logic)
-3. Live games (each game's rules, realtime logic, launch set vs future)
-4. Memory vault (storage limits, flashbacks, capsules, chapters)
+2. ✅ Daily prompts & reveal — DONE (core locked; rhythm/expiry parked for girlfriend)
+3. ✅ Live games — DONE (engine + philosophy locked; per-game live/async parked)
+4. Memory vault (storage limits, flashbacks, capsules, chapters)  ← NEXT
 5. Mood sync & bond score (the actual growth/XP/mood MATH)
 6. Discover (restaurants/movies/attractions, swipe-match, surprise us, data sources)
 7. Planner / to-dos / goals
@@ -438,7 +535,9 @@ Cross-cutting (after or alongside features):
 - AI provider + privacy promise — DECIDE
 - Design direction — pick with girlfriend (warm/elegant/modern)
 
-Standing open items to ask girlfriend: typing indicators/presence, design direction.
+Standing open items to ask girlfriend: typing indicators/presence, design direction,
+daily-prompt rhythm & expiry (options a/b/c worked out — just pick), game ideas +
+live-vs-async per game + which games are launch set.
 
 ---
 
