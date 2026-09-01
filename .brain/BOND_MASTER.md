@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-08-29 (memory vault deep-dive done)
+**Last updated:** 2026-08-29 (mood/bond-score/flame deep-dive done)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -419,6 +419,65 @@ entity thesis. Connects to messaging (chat media gallery feeds the vault).
 
 ---
 
+### MOOD / BOND SCORE / BOND FLAME [deep-dive DONE]
+
+Three faces of ONE engine: the flame (simple visible number), the bond score
+(permanent progress), the creature's mood (emotional expression). All computed
+from the same underlying connection data.
+
+**WHAT EARNS CONNECTION (locked):**
+- EVERYTHING counts — messaging, prompts, games, memories, mood check-ins. No
+  hierarchy of "worthy" connection; any form of connecting feeds the bond.
+- Design principle (for tuning, not a feature): light touch so it CAN'T be gamed —
+  spamming 100 one-word texts shouldn't rocket the score. The FEEL should be "we
+  connected today," not "grind for points." Tune numbers with this in mind.
+
+**BOND SCORE (locked):**
+- Permanent "how far we've come" number. ONLY EVER GOES UP. Never decreases.
+- Quietly powers the creature's growth + evolutions (so it MEANS something) but is
+  NOT shoved in your face as a big competitive score.
+
+**THE BOND FLAME (locked) — Snapchat flame, reimagined WITHOUT the cruelty:**
+- Reference: Snapchat streaks (simple flame + shared number = the appeal). BUT
+  Snapchat's mechanic RESETS TO ZERO on a missed day, and its whole engine is the
+  FEAR of losing it — textbook guilt/anxiety design. That DIRECTLY violates BOND's
+  zero-guilt spine. So we take the simplicity + shared pride, DROP the punishment.
+- A simple flame + number, shared by the couple, on the home screen.
+- Grows with connection — number goes UP the more you connect.
+- NEVER RESETS TO ZERO. Busy/quiet times → it dims/cools visually and pauses, then
+  resumes when you return. The NUMBER NEVER BURNS DOWN.
+- NO hourglass-of-doom. NO "your streak is about to break!" anxiety pings.
+- Rationale (decided with conviction): a relationship app must NEVER manufacture a
+  reason for partners to be annoyed at each other ("you broke our streak"). Keeps
+  100% of the pride ("we've connected 200 days"), throws away only the fear.
+  Slightly less addictive than Snapchat's cruelty by design — that's the correct
+  trade for a relationship product; kindness is more durable + is itself a
+  differentiator ("this app is so kind").
+
+**THE CREATURE'S MOOD (locked) — emotional face of the same engine:**
+- Always happy to see you (warm floor, never distress).
+- Blooms MORE when you connect (recent connection = thriving/bright); quiet times =
+  calm/resting (never sad or sick). Difference is "peacefully resting vs joyfully
+  thriving," never "happy vs sad."
+- WARM "missed you" ON RETURN — after a gap it can greet with "I missed you two 🤍",
+  acknowledging time with warmth.
+- HARD GUARDRAILS: never counts days, never shames, never pressures. And CRITICALLY —
+  NO guilt-pings while you're away ("come back, I'm lonely 😢" = BANNED). Missing you
+  when you return = sweet; pinging while you're gone = toxic. This line (warmth on
+  return, silence while away) is what makes it a companion, not a monitor.
+
+**DATA/SCHEMA IMPLICATIONS:**
+- couples.bond_score (int, monotonic — only increases).
+- A connection/activity signal feeds flame level + creature mood; store enough to
+  compute "recent connection" (e.g. recent activity timestamps) — mood is derived,
+  not stored as a fixed value.
+- Flame "cools/dims" = a display state derived from recency; the stored count never
+  decrements.
+- This is PLAIN CODE, not AI (per the baby-AI "4 jobs" split — state/mood/growth is
+  free logic, no model calls).
+
+---
+
 ## BREAKUP / UNLINK FLOW (locked)
 
 Either partner can initiate; humane 48-hour wind-down; clean deletion.
@@ -565,8 +624,8 @@ Feature deep-dive queue (build order):
 2. ✅ Daily prompts & reveal — DONE (core locked; rhythm/expiry parked for girlfriend)
 3. ✅ Live games — DONE (engine + philosophy locked; per-game live/async parked)
 4. ✅ Memory vault — DONE (timeline + flashbacks launch; capsules cut; chapters future)
-5. Mood sync & bond score (the actual growth/XP/mood MATH)  ← NEXT
-6. Discover (restaurants/movies/attractions, swipe-match, surprise us, data sources)
+5. ✅ Mood / bond score / BOND flame — DONE (flame never resets; zero-guilt engine)
+6. Discover (restaurants/movies/attractions, swipe-match, surprise us, data sources)  ← NEXT
 7. Planner / to-dos / goals
 8. Monetization (paywall moments, gating, gift flow)
 9. Notifications system (cadence, caps, triggers)
