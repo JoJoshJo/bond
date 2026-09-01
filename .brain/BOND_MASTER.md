@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-08-29 (mood/bond-score/flame deep-dive done)
+**Last updated:** 2026-08-30 (Discover deep-dive done)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -478,6 +478,58 @@ from the same underlying connection data.
 
 ---
 
+### DISCOVER [deep-dive DONE]
+
+"What should we do?" — restaurants, movies, attractions, date ideas.
+
+**BIG DECISION — NO standalone Discover page. Discover lives ENTIRELY through the
+baby AI.** You ask the creature ("find us Thai food nearby," "what should we watch")
+and it pulls it up. Rationale: a separate browse/filter tab would just be a second
+door to the same room = duplication. This also makes the creature genuinely useful
+(solves the "what does it actually DO" question). Locked.
+
+**HOW RESULTS SHOW (important — not a page, but not plain text either):**
+- The creature renders RICH RESULT CARDS right in the conversation — restaurant
+  cards with name, photo, rating, tap-to-open-in-maps; movie posters you can tap.
+- It replaces NAVIGATION (no browse UI), not DISPLAY (results still look good).
+- So: creature is the search box, beautiful results appear right below, all inside
+  the chat with the creature.
+
+**DATA SOURCES (the real plumbing — cutting the page changed interface, not plumbing):**
+- MOVIES/SHOWS → TMDB. Free, excellent, industry standard, no billing surprises. Locked.
+  (OMDb is the only real alt; TMDB is strictly better + free, so no tradeoff.)
+- RESTAURANTS/PLACES → Google Places, but CAGED:
+  * IMPORTANT 2026 pricing change: Google RETIRED the old $200/mo universal credit
+    (March 2025). Now per-SKU free tiers (~10k basic / 5k pro calls/mo) then pay per
+    1k. Asking for rating/photos/reviews RE-PRICES THE WHOLE CALL to the most
+    expensive tier (~$40/1k). Requires a credit card, NO hard cap by default →
+    surprise-bill risk (matters for a solo dev with no backup).
+  * MITIGATIONS (required, not optional): request MINIMAL fields only (name,
+    location, one photo) to stay in cheap tier; set a HARD QUOTA CAP in the console
+    so a bug/spike CAN'T run up a bill; CACHE AGGRESSIVELY (50 couples asking "Thai
+    in Atlanta" = fetch once, reuse — huge cost lever).
+  * Put the places call behind a SWAPPABLE function (same principle as the AI Router)
+    so we can switch providers without touching the app.
+- FOURSQUARE → the cost-conscious ALTERNATIVE, kept ready. Historically more
+  generous free tier for "places nearby," no field-tier trap. Swap to it if Google's
+  bill ever creeps.
+
+**FUTURE VERSION:**
+- Swipe-to-match (both partners swipe to converge on a choice) — an INTERACTION, not
+  a question, so it doesn't fit the pure-ask model cleanly. Future: the creature could
+  SET UP a swipe round ("want me to start a swipe round?"). Deferred.
+- Bucket list, "surprise us" as distinct flows — the creature can approximate these
+  conversationally at launch; formalize later if wanted.
+- Attractions/things-to-do beyond restaurants (same Places plumbing).
+
+**DATA/SCHEMA IMPLICATIONS:**
+- No Discover tables for browsing. Results are fetched live via Edge Function →
+  external API (TMDB / Google Places / Foursquare) → rendered as cards in the creature
+  chat. Cache layer for places results (by area+query) to cut cost.
+- Ties to the baby-AI "assistant" job (the smart-tier model that does tool use).
+
+---
+
 ## BREAKUP / UNLINK FLOW (locked)
 
 Either partner can initiate; humane 48-hour wind-down; clean deletion.
@@ -625,8 +677,8 @@ Feature deep-dive queue (build order):
 3. ✅ Live games — DONE (engine + philosophy locked; per-game live/async parked)
 4. ✅ Memory vault — DONE (timeline + flashbacks launch; capsules cut; chapters future)
 5. ✅ Mood / bond score / BOND flame — DONE (flame never resets; zero-guilt engine)
-6. Discover (restaurants/movies/attractions, swipe-match, surprise us, data sources)  ← NEXT
-7. Planner / to-dos / goals
+6. ✅ Discover — DONE (no standalone page; lives through baby AI; TMDB + caged Google Places)
+7. Planner / to-dos / goals  ← NEXT
 8. Monetization (paywall moments, gating, gift flow)
 9. Notifications system (cadence, caps, triggers)
 
