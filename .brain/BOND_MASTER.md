@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-08-30 (split into MASTER + FEATURES)
+**Last updated:** 2026-08-30 (Planner deep-dive — mostly cut)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -234,7 +234,8 @@ pending (A waiting, can accept B) → active (2 linked, unlocked) → sealed (2 
 > - ✅ Memory Vault
 > - ✅ Mood / Bond Score / BOND Flame
 > - ✅ Discover
-> - ⏳ Planner, Monetization, Notifications — not yet done
+> - ✅ Planner (mostly CUT — kept only shared important dates)
+> - ⏳ Monetization, Notifications — not yet done
 > The build order, ground rules, and open decisions stay in THIS file.
 
 ## BREAKUP / UNLINK FLOW (locked)
@@ -385,8 +386,8 @@ Feature deep-dive queue (build order):
 4. ✅ Memory vault — DONE (timeline + flashbacks launch; capsules cut; chapters future)
 5. ✅ Mood / bond score / BOND flame — DONE (flame never resets; zero-guilt engine)
 6. ✅ Discover — DONE (no standalone page; lives through baby AI; TMDB + caged Google Places)
-7. Planner / to-dos / goals  ← NEXT
-8. Monetization (paywall moments, gating, gift flow)
+7. ✅ Planner — DONE (CUT general planner; kept shared important dates only)
+8. Monetization (paywall moments, gating, gift flow)  ← NEXT
 9. Notifications system (cadence, caps, triggers)
 
 Cross-cutting (after or alongside features):

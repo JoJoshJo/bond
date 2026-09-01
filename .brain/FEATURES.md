@@ -312,3 +312,50 @@ door to the same room = duplication. This also makes the creature genuinely usef
 - Ties to the baby-AI "assistant" job (the smart-tier model that does tool use).
 
 ---
+
+### PLANNER [deep-dive DONE — mostly CUT]
+
+**DECISION: CUT the general planner from launch. Keep ONLY shared important dates.**
+
+**Why cut it (decided with conviction):**
+- Nobody downloads a couples app for its calendar. BOND's magic is the creature,
+  prompts, games, memories — that's the differentiator. A shared calendar / to-do /
+  errands list is table-stakes utility that Google Calendar, Apple Reminders, and
+  dedicated couple-logistics apps already do BETTER.
+- A proper calendar is deceptively complex (recurring events, reminders, editing,
+  timezone handling — which already bit us on prompts). Big engineering cost for a
+  feature that won't move the needle on why people love BOND. Bad trade for a solo
+  dev with no backup.
+- NOTE: J's first instinct was "creature-only planner" (a). Reframed: that instinct
+  was really "I don't want a heavy planner UI" — correct direction, wrong solution.
+  Creature-only is the worst of both worlds (still build planner logic, deliver it
+  through the ONE interface bad for it — a calendar must be SEEN/glanced/scanned,
+  not interrogated conversationally). So we don't hide the planner behind the
+  creature; we DON'T BUILD the general planner at all.
+
+**WHAT WE KEEP (launch): SHARED IMPORTANT DATES only.**
+- Just the handful of dates that matter to the RELATIONSHIP: anniversary, first-kiss
+  date, custom milestones. NOT a general calendar, NOT to-dos, NOT errands.
+- Rationale for keeping: these feed the CORE emotional features —
+  * Creature can say "your anniversary is in 3 days 🤍"
+  * App surfaces a special PROMPT on the anniversary
+  * A milestone can trigger a creature EVOLUTION / celebration
+- So these dates aren't "planner logistics," they're RELATIONSHIP MEMORY that makes
+  the creature + prompts + celebrations richer. (Overlaps with "custom milestones"
+  from the feature universe — same thing.)
+- The creature can ADD these naturally ("put our anniversary on") — its instinct
+  kept, just not as a full planner.
+
+**FUTURE VERSION:**
+- Full shared planner (calendar, to-dos, errands, chores, goals) — build ONLY if
+  BOND takes off and couples actually ask for "plan our week in here too," informed
+  by real demand. Not launch effort.
+- Shared savings goals (was in feature universe) — also future.
+
+**DATA/SCHEMA IMPLICATIONS:**
+- important_dates (couple_id, label, date, recurring yearly?, type anniversary|
+  first_kiss|milestone|custom). Small, simple table.
+- Feeds: creature reminders, anniversary prompt selection, milestone → creature
+  evolution triggers. No calendar/event/todo tables at launch.
+
+---
