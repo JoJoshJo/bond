@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (competitive analysis banked; name open)
+**Last updated:** 2026-09-02 (naming brainstorm progress noted; Twindloo option + Twindle competitor)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -514,6 +514,27 @@ entire real gap. BOND is AHEAD on concept, BEHIND only on existing/being-built.
 (Bond: Couples Games & Insights; Bond: Couples Games & Quizzes; Bond44; Bonds/
 heybonds — which also shares the AI-assistant concept). Real App-Store-search / SEO /
 trademark risk. J aware; NAME NOT YET DECIDED — to brainstorm later, before launch.
+
+**NAMING PROGRESS (2026-09-02 brainstorm — still OPEN):**
+- Direction J wants: an INVENTED/ownable word, feeling warm+playful+elegant+clever all
+  at once. The COUPLE names their own creature separately, so the APP name only needs
+  to be a nice "home," not carry the creature's identity.
+- Checked & TAKEN (avoid): Nuvo, Piko (marketplace w/ AI), Solene (AI makeup app),
+  Enara (smart-home + health), Twine (device + fiction tool). Twindle = a LIVE couples
+  app, near-clone of BOND (see below).
+- CANDIDATE ON THE TABLE: "TWINDLOO" — appears fully AVAILABLE, playful, "twin" reads
+  as two. BUT flagged: collides with "Twindle" (one letter off) and sits in a crowded
+  "twin-" cluster. Kept as an option, leaning away from it for that reason.
+- Untaken directions to explore next (no couples-app collision found yet): Oomi,
+  Nestra, Wisp, Orenda, Aluma, Duvo. (Batch-2 name list.)
+- LESSON: short pretty invented words are mostly taken (often by AI apps); more
+  distinctive/invented spellings are the realistic path.
+
+**COMPETITOR TO STUDY LATER — "Twindle" (Google Play, updated Feb 2026):** near-clone of
+BOND's vision — private couple chat (voice/photo/reactions), shared love diary/
+scrapbook, daily questions & quizzes, mood tracking, private media vault, dark-mode
+premium design, connection STREAK. Closest thing to a direct BOND clone found. Worth a
+proper features/reviews/weaknesses dig before launch.
 
 **STRATEGIC CALLS:** (1) protect the creature above all — it's the only thing no one
 has; (2) win on the combination, don't out-feature specialists; (3) crowding = proof
