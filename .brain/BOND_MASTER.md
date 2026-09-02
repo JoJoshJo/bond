@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (naming brainstorm progress noted; Twindloo option + Twindle competitor)
+**Last updated:** 2026-09-02 (competitive intel + 3 adjustments banked)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -539,6 +539,45 @@ proper features/reviews/weaknesses dig before launch.
 **STRATEGIC CALLS:** (1) protect the creature above all — it's the only thing no one
 has; (2) win on the combination, don't out-feature specialists; (3) crowding = proof
 of real demand ($1.3B market), not a dead end; (4) execution is now the whole game.
+
+## WHAT COUPLES ACTUALLY SAY + ADJUSTMENTS [2026-09-02]
+
+Studied real reviews across the category (Twindle finding + cross-app pattern).
+Verdict: BOND's VISION already answers the category's complaints better than rivals.
+Research VALIDATED the plan — only 1 sequencing flag + 2 small content principles.
+
+**Twindle finding:** near-clone of BOND (private chat, diary, daily Qs, mood, vault,
+streak) but TINY + barely reviewed → having the feature list ISN'T winning. Missing
+BOND's edge: no creature, no games pillar, no AI assistant, breakable guilt-streak,
+dark "premium" look (opposite of our warm cream-glass). Easy to differentiate.
+
+**What couples PRAISE (BOND already has all 4):** daily ritual that sparks real
+conversation (= our prompt+reveal); private-answer-then-reveal (= our mutual lock);
+warm non-clinical design + fun (= creature + games + cream-glass); fits EVERY kind of
+couple (LDR/non-mono/no-kids).
+
+**What couples COMPLAIN about → BOND's status:**
+- "Content repeats fast" (THE #1 category complaint) → our AI prompts solve it. *GAP:*
+  MVP planned to START with curated bank + light personalization. ADJUSTMENT → treat
+  "never gets stale" as a NEAR-LAUNCH priority, not "someday" — it fixes the biggest
+  category weakness, so freshness must be real close to launch.
+- Pushy paywalls → answered ("connection free, depth paid" + generous free + one honest tier). ✅
+- Invasive signup (phone #) → answered (email/Apple/Google, no phone; visible privacy). ✅
+- Streak guilt → answered (flame never resets; zero-guilt). ✅ (felt win vs Twindle)
+- Feels abandoned/stale → answered (evolving creature keeps it alive). ✅
+
+**THREE ADJUSTMENTS TO BAKE IN (vision unchanged):**
+1. SEQUENCING: fresh/non-repetitive content matters NEAR LAUNCH (not deferred) — it's
+   the fix for the #1 category complaint, so don't ship the very weakness everyone hates.
+2. CONTENT PRINCIPLE — INCLUSIVE BY DEFAULT: write prompts, creature dialogue, and copy
+   to fit ANY relationship (not married/kids/hetero-assumed). Costs nothing; easy to
+   violate by accident. A lens to build through.
+3. PROMISE IT OUT LOUD: make "it never gets stale" an explicit, stated promise (couples
+   burned by repetition look for that reassurance) — not just an internal capability.
+
+**Bottom line:** vision needs NO change; it answers the complaints better than rivals.
+The gap is EXECUTION, not strategy. Build it and BOND is straightforwardly better —
+by fixing what everyone complains about, wrapped around a creature no one else has.
 
 ## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
 
