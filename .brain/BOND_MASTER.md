@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (privacy promise locked; AI decision fully closed)
+**Last updated:** 2026-09-02 (retention locked — THINKING PHASE COMPLETE)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -441,6 +441,38 @@ request, never the couple's whole history; no location/presence/surveillance.
 True end-to-end encryption stays on the V2 backlog (can't be promised honestly at
 launch, so we don't claim it yet).
 
+## RETENTION PLAN [decision LOCKED — tune with real users post-launch]
+
+An app people forget is a dead app. Two retention problems are unique to a couples
+app and were designed against deliberately.
+
+**PROBLEM 1 — "both partners must engage" (the #1 killer of couples apps):**
+BOND only works if BOTH are in. Classic failure: one's engaged, one isn't → engaged
+one churns → whole couple lost. LOCKED defense = LAYERED (all of):
+- (a) SAFETY NET: the engaged partner still gets value solo (creature, memories,
+  prompts waiting) so they don't give up while the other warms up.
+- (b) *THE PRIMARY LEVER* — WARMTH-BASED PULL: the best "come back" signal is your
+  PARTNER did something, not the app nagging. "Sam left you something 🤍." A pull the
+  person you love creates. (Ties to notifications: invite never scold.)
+- (c) THE CREATURE as shared pull: its flourishing depends on both showing up — BUT
+  carefully, never "your neglect is hurting it" (guilt = banned).
+
+**PROBLEM 2 — the first 7 days (retention is won/lost in week one):**
+Most apps lose the majority of users in ~3 days. Danger with a feature-rich app: dump
+someone in, they don't know what to DO, they leave. LOCKED fix = a DESIGNED first-week
+experience (not features just sitting there), all of:
+- (a) FRONT-LOAD the magic: the moment both partners link → immediate emotional
+  payoff (meeting the creature together, a first reveal). The onboarding IS the hook.
+- (b) GENTLE FIRST-WEEK ARC: each day offers one small delightful thing (first prompt,
+  first game, first memory, creature reacting) → a reason to return tomorrow while the
+  habit forms. Not a rigid tutorial — a light "here's one lovely thing today."
+- (c) FAST SHARED "AHA": get them to their first SHARED moment (first prompt reveal /
+  first game together) within MINUTES of both joining, not days.
+
+**IMPORTANT:** this is the piece MOST worth revisiting with REAL user behavior. Lock a
+strong v1, then TUNE post-launch by watching what actually hooks couples. Don't
+over-engineer the first-week arc before real data.
+
 ## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
 
 One place for everything we deliberately pushed past launch, so nothing quietly
@@ -498,29 +530,28 @@ disappears. These are DECIDED "laters," not open questions.
 
 ## NEXT SESSION — START HERE
 
-★ MILESTONE: ALL 9 FEATURE DEEP-DIVES ARE COMPLETE (see FEATURES.md).
-The feature-thinking chapter is closed. What remains before "cooking" (building)
-is CROSS-CUTTING synthesis work — a different kind of thinking:
+★★ THINKING PHASE ESSENTIALLY COMPLETE ★★
+All 9 feature deep-dives done (FEATURES.md). Cross-cutting done: unified SCHEMA ✅,
+safety launch-defaults ✅, AI provider + privacy ✅, retention plan ✅.
 
-1. ✅ UNIFIED DATABASE SCHEMA — DONE (first full draft in SCHEMA.md). Scaling model
-   locked (couple=tenant, RLS everywhere, indexes, media in Storage, messages
-   partition-ready). Revisit only as open items resolve (prompt expiry, storage limits).
-2. ◐ SAFETY PASS — launch defaults LOCKED (no spicy mode, no location, no presence,
-   breakup=exit). See SAFETY PASS section. Still open: real age verification, full
-   store-compliance review. Deeper abuse-resistance work deferred to next version.
-3. ✅ AI PROVIDER + PRIVACY — DONE. Provider-agnostic router (start Gemini, Claude-
-   ready, 1-config-line switch; reference impl in .brain/reference/). Privacy promise
-   LOCKED: never sell, never train AI on data, only the two of them see it — made visible.
-4. DESIGN DIRECTION — pick with girlfriend (warm / elegant / modern mockups exist).
-5. RETENTION PLAN — first-7-days journey, the both-partners-must-engage problem
-   (named as risks, no plan yet).
+THE ONLY REMAINING PRE-BUILD ITEM:
+1. DESIGN DIRECTION — pick with girlfriend (warm / elegant / modern mockups exist).
+   This is a conversation with her, not more solo thinking. Once chosen, lock the
+   theme (colors, fonts, roundness) and the thinking phase is fully closed.
 
-STANDING GIRLFRIEND-LIST ITEMS to resolve: typing indicators/presence; design
-direction; daily-prompt rhythm & expiry (options a/b/c ready); game ideas +
-live-vs-async per game + which games launch.
+STANDING GIRLFRIEND-LIST (resolve with her, mostly small): design direction (above);
+daily-prompt rhythm & expiry (options a/b/c ready); game ideas + which games launch.
+(Typing/presence + spicy already decided: presence NO ever; spicy = v2.)
 
-After cross-cutting work is done → thinking phase truly closes → COOKING BEGINS
-(Layer 1: Supabase + auth + couple linking, per the Layer Build Plan).
+THEN → COOKING BEGINS. Build order = the Layer Build Plan:
+- LAYER 1 first: Supabase (bond-dev + bond-prod) + auth + couple creation & linking,
+  built from SCHEMA.md. Claude Code turns SCHEMA.md into migrations. Repo-check first,
+  RLS verified on every table, test on two physical devices before Layer 2.
+
+Remaining pre-build judgment calls to make as you start (not blockers):
+- Launch game set (2-3 vs all 5) — Claude's rec: engine + 2-3, rest fast-follow.
+- Storage limits per tier (free vs BOND+).
+- Full store-compliance review + real age gate (right before submission).
 ## SESSION LOG
 
 ### 2026-08-27 — Planning session (part 1)
