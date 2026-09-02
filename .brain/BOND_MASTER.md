@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (retention locked — THINKING PHASE COMPLETE)
+**Last updated:** 2026-09-02 (competitive analysis banked; name open)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -473,6 +473,52 @@ experience (not features just sitting there), all of:
 strong v1, then TUNE post-launch by watching what actually hooks couples. Don't
 over-engineer the first-week arc before real data.
 
+## COMPETITIVE LANDSCAPE [researched 2026-09-02]
+
+Full audit done (web research). The honest picture:
+
+**THE ONE-LINE TRUTH:** competitors have a PRODUCT; BOND has a PLAN. That is the
+entire real gap. BOND is AHEAD on concept, BEHIND only on existing/being-built.
+
+**WHERE BOND WINS (concept — genuinely uncontested):**
+- The baby-AI CREATURE you raise together — NOBODY has this. The core differentiator.
+- ALL-IN-ONE world — rivals each do ONE thing (games OR messaging OR AI coaching);
+  BOND combines them.
+- ZERO-GUILT design — rivals use breakable streaks/guilt; BOND's flame never punishes.
+- Creature-as-ASSISTANT — ask it to do things vs tapping menus.
+- The MOAT is the COMBINATION, not any single feature.
+
+**WHERE BOND LACKS (all execution/traction, not vision):**
+- NOT BUILT YET — every competitor already exists and works. The big one.
+- No users, no trust — Flamme has 100k+ couples; Paired is a known brand; BOND = zero.
+- No real-use learning on games/AI/design yet; rivals have iterated for years.
+- Less ready content (question libraries, polished design, languages).
+
+**KEY RIVALS:**
+- FLAMME — the BENCHMARK & closest rival. 100k+ couples, already ships games + AI
+  coach + Connection Score + widgets. IMPORTANT: if BOND ever drops the creature,
+  it's "just another Flamme" and they're years ahead. The creature is the separation.
+- PAIRED — market leader; therapist-designed daily Qs + quizzes; owns the private-
+  answer-then-reveal mechanic (now widely copied); strong brand, but no games/
+  messaging/creature ("feels like homework").
+- AMORA — rising; gorgeous "liquid glass" design, 2,500+ Qs, offline-first, widgets,
+  8 languages. Questions-only.
+- BETWEEN — since 2012; the OG private couple space (messaging + memory timeline);
+  dated, no games/AI/creature.
+- CONNECTED / STAYCLOSE — games-first apps; prove "games as bonding" works.
+- AI-COACH WAVE (2026, new category) — Maia, Ember, CoupleWork, Resolve, dvoe,
+  Bonds/heybonds (NB: shares our name AND has a context-aware assistant). These are
+  therapy-ish repair tools, a different job than BOND's everyday shared world.
+
+**NAME CLASH (known, decision OPEN):** "Bond"/"Bonds" is used by 4+ couples apps
+(Bond: Couples Games & Insights; Bond: Couples Games & Quizzes; Bond44; Bonds/
+heybonds — which also shares the AI-assistant concept). Real App-Store-search / SEO /
+trademark risk. J aware; NAME NOT YET DECIDED — to brainstorm later, before launch.
+
+**STRATEGIC CALLS:** (1) protect the creature above all — it's the only thing no one
+has; (2) win on the combination, don't out-feature specialists; (3) crowding = proof
+of real demand ($1.3B market), not a dead end; (4) execution is now the whole game.
+
 ## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
 
 One place for everything we deliberately pushed past launch, so nothing quietly
@@ -542,6 +588,9 @@ THE ONLY REMAINING PRE-BUILD ITEM:
 STANDING GIRLFRIEND-LIST (resolve with her, mostly small): design direction (above);
 daily-prompt rhythm & expiry (options a/b/c ready); game ideas + which games launch.
 (Typing/presence + spicy already decided: presence NO ever; spicy = v2.)
+
+OPEN (not blocking build, decide before launch): THE NAME — "Bond" is taken by 4+
+couples apps (see Competitive Landscape). Brainstorm a distinct name. Known, not yet done.
 
 THEN → COOKING BEGINS. Build order = the Layer Build Plan:
 - LAYER 1 first: Supabase (bond-dev + bond-prod) + auth + couple creation & linking,
