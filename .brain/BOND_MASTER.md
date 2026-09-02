@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-08-30 (Monetization deep-dive done)
+**Last updated:** 2026-09-02 (unified schema built → SCHEMA.md)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -236,8 +236,19 @@ pending (A waiting, can accept B) → active (2 linked, unlocked) → sealed (2 
 > - ✅ Discover
 > - ✅ Planner (mostly CUT — kept only shared important dates)
 > - ✅ Monetization (one tier; paywall = creature depth/management)
-> - ⏳ Notifications — not yet done
+> - ✅ Notifications (invite-never-scold; phone's own DND)
+> - ★ ALL FEATURE DEEP-DIVES COMPLETE
 > The build order, ground rules, and open decisions stay in THIS file.
+
+## UNIFIED SCHEMA
+
+> The full database schema (every table, with couple_id + RLS + indexes baked in
+> per the scaling strategy) lives in **`.brain/SCHEMA.md`**. That file is the
+> source of truth Claude Code will turn into Supabase migrations at build time.
+> Scaling model (locked): couple = tenant, shared tables + couple_id, RLS on every
+> table, index (couple_id, created_at) on scrollable tables, media in Storage,
+> messages designed partition-ready (partition later at scale). Build it right, not heavy.
+
 
 ## BREAKUP / UNLINK FLOW (locked)
 
@@ -379,34 +390,30 @@ apps are downloaded by women). Revisit big design calls with her before locking.
 
 ## NEXT SESSION — START HERE
 
-METHOD: going feature-by-feature, each gets LAUNCH + FUTURE version, banked in
-"Feature Deep-Dives" section. When all features banked + schema + safety pass +
-AI/privacy decision done → thinking phase closes, cooking begins.
+★ MILESTONE: ALL 9 FEATURE DEEP-DIVES ARE COMPLETE (see FEATURES.md).
+The feature-thinking chapter is closed. What remains before "cooking" (building)
+is CROSS-CUTTING synthesis work — a different kind of thinking:
 
-Feature deep-dive queue (build order):
-1. ✅ Messaging — DONE
-2. ✅ Daily prompts & reveal — DONE (core locked; rhythm/expiry parked for girlfriend)
-3. ✅ Live games — DONE (engine + philosophy locked; per-game live/async parked)
-4. ✅ Memory vault — DONE (timeline + flashbacks launch; capsules cut; chapters future)
-5. ✅ Mood / bond score / BOND flame — DONE (flame never resets; zero-guilt engine)
-6. ✅ Discover — DONE (no standalone page; lives through baby AI; TMDB + caged Google Places)
-7. ✅ Planner — DONE (CUT general planner; kept shared important dates only)
-8. ✅ Monetization — DONE (one tier; 'connection free, depth paid'; creature is the hook)
-9. Notifications system (cadence, caps, triggers)  ← NEXT (last feature deep-dive)
+1. ✅ UNIFIED DATABASE SCHEMA — DONE (first full draft in SCHEMA.md). Scaling model
+   locked (couple=tenant, RLS everywhere, indexes, media in Storage, messages
+   partition-ready). Revisit only as open items resolve (prompt expiry, storage limits).
+2. SAFETY PASS — abuse-resistance (coercive-control-aware design; no location
+   tracking; discreet exit), real age verification, App/Play store content rules
+   (esp. if a future spicy mode). Flagged critical earlier.
+3. AI PROVIDER + PRIVACY PROMISE — decide. Options mapped (Claude/Gemini/Groq/
+   OpenRouter/Llama). Recommendation on file: build provider-agnostic router / use
+   OpenRouter, start on Gemini student discount, apply for Anthropic credits, keep
+   Llama-on-device as future privacy upgrade. Plus decide the actual privacy promise.
+4. DESIGN DIRECTION — pick with girlfriend (warm / elegant / modern mockups exist).
+5. RETENTION PLAN — first-7-days journey, the both-partners-must-engage problem
+   (named as risks, no plan yet).
 
-Cross-cutting (after or alongside features):
-- Unified database schema (pull all per-feature pieces into one)
-- Safety pass (abuse-resistance, age verification, App/Play store rules — esp. spicy mode)
-- Retention plan (first-7-days journey, both-partners-engaged problem)
-- AI provider + privacy promise — DECIDE
-- Design direction — pick with girlfriend (warm/elegant/modern)
+STANDING GIRLFRIEND-LIST ITEMS to resolve: typing indicators/presence; design
+direction; daily-prompt rhythm & expiry (options a/b/c ready); game ideas +
+live-vs-async per game + which games launch.
 
-Standing open items to ask girlfriend: typing indicators/presence, design direction,
-daily-prompt rhythm & expiry (options a/b/c worked out — just pick), game ideas +
-live-vs-async per game + which games are launch set.
-
----
-
+After cross-cutting work is done → thinking phase truly closes → COOKING BEGINS
+(Layer 1: Supabase + auth + couple linking, per the Layer Build Plan).
 ## SESSION LOG
 
 ### 2026-08-27 — Planning session (part 1)

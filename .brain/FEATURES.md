@@ -420,3 +420,51 @@ death. Protect the connection; charge for enhancement + delight.
 - Calendar link = OAuth tokens per user, stored securely; premium-gated.
 
 ---
+
+### NOTIFICATIONS [deep-dive DONE — last feature deep-dive]
+
+Philosophy: MODERATE. Applies the zero-guilt principle to pushes.
+
+**THE ONE-LINE RULE: notifications INVITE, they never SCOLD — and the best ones come
+from your PARTNER'S actions, not the app pulling you back.**
+
+**TWO CATEGORIES, DIFFERENT RULES:**
+1. PARTNER-ACTION notifications (the good ones — always wanted):
+   - Partner sent a message, answered the prompt (your turn to reveal!), started a
+     game, sent a soft ping, added a memory.
+   - These = "the person you love did something." Genuinely wanted, never annoying.
+     The heart of BOND's notifications.
+2. GENTLE DAILY NUDGES (handle carefully):
+   - "Today's prompt is ready" type. Moderate frequency OK, BUT framed as INVITATION,
+     never OBLIGATION: "A new question is waiting for you two 🤍" (good) — NEVER
+     "You haven't answered today!" (guilt = banned).
+   - Creature's "missed you" stays as locked: warm ON RETURN, NEVER a guilt-ping
+     while you're away.
+3. EVERYTHING TOGGLE-ABLE: sensible defaults on; couples can turn any category off
+   (e.g. silence daily nudges, keep partner-action ones).
+
+**QUIET HOURS: rely on the PHONE'S OWN Do Not Disturb — do NOT build our own.**
+- "Don't reinvent the wheel" applied: every phone already has excellent, user-
+  controlled DND + notification scheduling. Couples know how to use it. Building our
+  own quiet-hours system would be reinventing something the OS does better.
+
+**DATA/SCHEMA IMPLICATIONS:**
+- All notifications fired from Edge Functions → FCM (existing pattern/ground rule).
+- Per-user notification preferences (which categories on/off) stored + respected.
+- No custom quiet-hours logic; no notification sent while app is foregrounded
+  (Realtime handles it) — matches messaging spec.
+
+---
+
+## ✅ ALL FEATURE DEEP-DIVES COMPLETE
+
+Done: Messaging · Daily Prompts & Reveal · Live Games · Memory Vault ·
+Mood/Bond Score/Flame · Discover · Planner (mostly cut) · Monetization · Notifications.
+
+Remaining before cooking (cross-cutting, in BOND_MASTER "next session" list):
+- Unified database schema (pull all per-feature schema bits into one)
+- Safety pass (abuse-resistance, age verification, App/Play store rules — esp. any
+  future spicy mode)
+- AI provider + privacy promise decision
+- Design direction pick (with girlfriend)
+- Resolve the standing girlfriend-list items
