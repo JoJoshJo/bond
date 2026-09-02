@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (safety pass — launch defaults locked)
+**Last updated:** 2026-09-02 (AI provider decided + proven; v2 backlog added)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -397,6 +397,71 @@ are locked at design time, not "added later."
 - Full App Store / Play Store compliance review before submission (privacy policy,
   terms, data-handling disclosures, content rating).
 
+## AI PROVIDER + STRATEGY [decision LOCKED]
+
+**DECISION: provider-agnostic from day one. Start on Gemini, be Claude-ready, switch
+when Anthropic credits land — as a ONE-LINE config change.**
+
+- Build the AI ROUTER from day one (see reference impl: `.brain/reference/ai_router_demo.js`,
+  a working proof that swapping providers = 1 config line, 0 app changes).
+- START on GEMINI (J has a student discount → effectively free while proving the app).
+- APPLY for Anthropic startup credits in parallel.
+- SWITCH the assistant to Claude if/when credits land — one config line, no app update.
+
+**ARCHITECTURE (build it this way — proven by the reference demo):**
+1. ONE entry point: all AI calls go through `getAI(job, input)`. Never call a
+   provider SDK directly anywhere else.
+2. STANDARD request/response shape (BOND's neutral format). Adapters translate to/from
+   each provider's quirks. App only ever sees BOND's shape.
+3. Provider chosen by CONFIG, PER JOB (assistant/personality/content). Switch = change
+   one config line.
+4. Keys in Supabase secrets (GEMINI_API_KEY, CLAUDE_API_KEY), never in code.
+5. Adapters are ADDITIVE — adding a provider = one new small adapter file; nothing
+   existing changes.
+6. Router + adapters live in Edge Functions (never Flutter). Keys never reach client;
+   switching never needs an app update.
+
+**THE 4 JOBS (recap) — route each independently:**
+assistant (smart tier — the tool-use "find us dinner" job), personality (cheap —
+short warm lines), content (mid — prompts/date ideas), state/mood/growth (NOT AI —
+plain code, free).
+
+**PROVEN:** ran a live test — same app code, switched gemini→claude via one config
+line, identical clean result, provider actually swapped. Engineering pain of switching
+is eliminated. (Caveat: still write each real adapter once, and re-test prompt QUALITY
+on a new model — but the structural switch is trivial.)
+
+**STILL OPEN:** the PRIVACY PROMISE (what we actually tell couples about their data) —
+parked for its own decision. Options discussed earlier (never-train-on-data is easy via
+APIs; "data only touches our servers" needs self-host; "never leaves your phone" needs
+on-device). Not yet decided.
+
+## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
+
+One place for everything we deliberately pushed past launch, so nothing quietly
+disappears. These are DECIDED "laters," not open questions.
+
+- **Spicy mode** (18+ games/prompts) — after real Apple/Google store-compliance
+  research. Triggers the need for real age verification.
+- **Opt-in location sharing** (WhatsApp-style, user-initiated) — as a SECURITY
+  feature; must be built abuse-aware. Never always-on tracking.
+- **Relationship Chapters** (monthly AI story recap) — needs months of data + the
+  AI layer; natural post-launch feature.
+- **Swipe-to-match** (both partners converge on a choice) — creature could set up a
+  round; it's an interaction, not a question.
+- **Full planner / calendar depth** — beyond the day-one premium calendar link;
+  only if couples actually ask for it.
+- **Deeper abuse-resistance pass** — quiet/emergency exit for dangerous situations
+  (the 48h-countdown-notifies-partner problem), safety resources, coercion edges.
+- **Higher premium tier** — therapist-style content, deeper insights, priority AI,
+  the 3-year breakup preservation as a named perk — only if demand appears.
+- **Messages table partitioning** — time-based, only once it hits tens of millions
+  of rows (schema is already designed partition-ready).
+- **True end-to-end encryption** for messaging — as a premium/privacy upgrade.
+- **Message search**, centralized media hub, more gesture types.
+- **Custom albums / milestone auto-tagging / voice notes on memories** (memory vault).
+- **Apple Watch / Wear OS**, home-screen widgets — engagement surfaces.
+
 ## GROUND RULES (never break)
 
 - NEVER call Claude API directly from Flutter — Edge Functions only.
@@ -438,10 +503,9 @@ is CROSS-CUTTING synthesis work — a different kind of thinking:
 2. ◐ SAFETY PASS — launch defaults LOCKED (no spicy mode, no location, no presence,
    breakup=exit). See SAFETY PASS section. Still open: real age verification, full
    store-compliance review. Deeper abuse-resistance work deferred to next version.
-3. AI PROVIDER + PRIVACY PROMISE — decide. Options mapped (Claude/Gemini/Groq/
-   OpenRouter/Llama). Recommendation on file: build provider-agnostic router / use
-   OpenRouter, start on Gemini student discount, apply for Anthropic credits, keep
-   Llama-on-device as future privacy upgrade. Plus decide the actual privacy promise.
+3. ◐ AI PROVIDER — DECIDED & PROVEN (provider-agnostic router, start Gemini, Claude-
+   ready, switch via 1 config line; reference impl in .brain/reference/). STILL OPEN:
+   the PRIVACY PROMISE (what we tell couples about their data) — own decision, not made.
 4. DESIGN DIRECTION — pick with girlfriend (warm / elegant / modern mockups exist).
 5. RETENTION PLAN — first-7-days journey, the both-partners-must-engage problem
    (named as risks, no plan yet).
