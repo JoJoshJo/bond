@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (unified schema built → SCHEMA.md)
+**Last updated:** 2026-09-02 (safety pass — launch defaults locked)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -359,6 +359,44 @@ apps are downloaded by women). Revisit big design calls with her before locking.
 
 ---
 
+## SAFETY PASS [partial — launch defaults locked; deeper work deferred]
+
+BOND holds the most intimate data a person has. Safety = protecting users AND not
+getting rejected by the app stores. Most abuse-resistance here is the ABSENCE of
+risky features (cheap to honor now, expensive to retrofit) — so the safe defaults
+are locked at design time, not "added later."
+
+**LOCKED — launch safety defaults:**
+- SPICY MODE (18+ content): NOT at launch. Real app-store-rejection risk (Apple/
+  Google adult-content rules; could force 17+ or rejection) and not core. Added in a
+  FUTURE version, deliberately, after proper store-compliance research. Idea kept, not
+  near launch.
+- LOCATION: NO location tracking at launch, EVER (as a default). Location-sharing is
+  the #1 way controlling partners weaponize couple apps. FUTURE version may add
+  OPT-IN, user-controlled location sharing (WhatsApp-style — "I'm sharing right now
+  because I choose to") as a SECURITY feature. The distinction is everything:
+  user-initiated opt-in = empowering; always-on background tracking = dangerous.
+  Never the latter.
+- PRESENCE: NO "online now" / "active" / "last seen", EVER. It's two people, not a
+  contact list — presence indicators are pointless here AND remove an anxiety/control
+  vector for free. (Also settles a girlfriend-list item; can still confirm with her.)
+- DISCREET EXIT: the existing BREAKUP flow IS the exit (48h countdown, either can
+  cancel once each, then everything destroyed — accounts, couple, baby AI; premium
+  couples' data preserved 3 years for reconciliation). Stands as-is for launch.
+
+**DEFERRED — deeper abuse-resistance pass (next version, needs real thought):**
+- Is a 48h countdown that NOTIFIES the other partner safe in a genuinely abusive
+  situation? (It could alert a controlling partner that someone is leaving.) May need
+  a faster/quieter emergency exit. Think through before it matters.
+- Safety resources, coercion edge cases, a genuinely dangerous-situation flow.
+- Opt-in location sharing design (when added) must be built abuse-aware.
+
+**STILL OPEN in the safety pass (not yet done this session):**
+- Real age verification (not just a checkbox) — becomes critical when spicy mode
+  arrives; basic 18+ gate at signup for launch.
+- Full App Store / Play Store compliance review before submission (privacy policy,
+  terms, data-handling disclosures, content rating).
+
 ## GROUND RULES (never break)
 
 - NEVER call Claude API directly from Flutter — Edge Functions only.
@@ -397,9 +435,9 @@ is CROSS-CUTTING synthesis work — a different kind of thinking:
 1. ✅ UNIFIED DATABASE SCHEMA — DONE (first full draft in SCHEMA.md). Scaling model
    locked (couple=tenant, RLS everywhere, indexes, media in Storage, messages
    partition-ready). Revisit only as open items resolve (prompt expiry, storage limits).
-2. SAFETY PASS — abuse-resistance (coercive-control-aware design; no location
-   tracking; discreet exit), real age verification, App/Play store content rules
-   (esp. if a future spicy mode). Flagged critical earlier.
+2. ◐ SAFETY PASS — launch defaults LOCKED (no spicy mode, no location, no presence,
+   breakup=exit). See SAFETY PASS section. Still open: real age verification, full
+   store-compliance review. Deeper abuse-resistance work deferred to next version.
 3. AI PROVIDER + PRIVACY PROMISE — decide. Options mapped (Claude/Gemini/Groq/
    OpenRouter/Llama). Recommendation on file: build provider-agnostic router / use
    OpenRouter, start on Gemini student discount, apply for Anthropic credits, keep
