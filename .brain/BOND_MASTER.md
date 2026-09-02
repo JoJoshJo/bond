@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (competitive intel + 3 adjustments banked)
+**Last updated:** 2026-09-02 (analytics plan locked — PostHog)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -578,6 +578,40 @@ couple (LDR/non-mono/no-kids).
 **Bottom line:** vision needs NO change; it answers the complaints better than rivals.
 The gap is EXECUTION, not strategy. Build it and BOND is straightforwardly better —
 by fixing what everyone complains about, wrapped around a creature no one else has.
+
+## ANALYTICS [decision LOCKED]
+
+How we'll know if BOND is actually working. NOT vanity metrics — a small focused
+dashboard where each number drives a real decision.
+
+**NORTH STAR: "Both partners active"** — % of couples where BOTH people used the app
+this week. The truest heartbeat for BOND: everything depends on two people showing up;
+a couple where only one engages is a dying couple regardless of that one's activity.
+Directly measures the #1 killer of couples apps (asymmetric engagement).
+
+**FOUR SUPPORTING METRICS (the whole dashboard = north star + these 4):**
+1. ACTIVATION — % of couples who link BOTH partners and finish onboarding (does the
+   top of the funnel work / do they get in the door?).
+2. RETENTION — Day-7 & Day-30: are couples still here after a week / month (the
+   novelty-fade problem the whole category has).
+3. FEATURE ENGAGEMENT — which features get used (prompts vs games vs creature vs
+   memories) → tells a solo dev what to build more of and what to cut.
+4. FREE → PAID CONVERSION — % of couples upgrading to BOND+ (is the money model working?).
+
+**HOW (locked):**
+- DESIGN THE APP TO FIRE THESE EVENTS FROM DAY ONE. The trap is building everything
+  then realizing you never logged when a couple links / both go active → can't measure
+  your own north star. Every one of the 5 metrics needs its underlying event in the
+  code from the start.
+- TOOL: PostHog. Free tier = 1M events/month, NO credit card, stable pricing (~33k
+  events/day, covers 10k-50k MAU → effectively free through all early growth; 97% of
+  companies never leave free). Set a hard spending cap when eventually on paid.
+- SAFE / fits privacy promise: open-source, US/EU data residency, GDPR-friendly,
+  self-hostable if ever wanted.
+- KEEP TRACKING LEAN: only track events tied to the 5 metrics, NOT every tap. This
+  keeps the dashboard focused AND keeps you inside the free tier basically forever
+  (consumer apps can rack up events fast — the 5-metric discipline protects against it).
+- "Don't reinvent the wheel": integrate PostHog, don't build analytics.
 
 ## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
 
