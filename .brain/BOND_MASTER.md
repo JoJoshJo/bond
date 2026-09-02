@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-08-30 (Planner deep-dive — mostly cut)
+**Last updated:** 2026-08-30 (Monetization deep-dive done)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -235,7 +235,8 @@ pending (A waiting, can accept B) → active (2 linked, unlocked) → sealed (2 
 > - ✅ Mood / Bond Score / BOND Flame
 > - ✅ Discover
 > - ✅ Planner (mostly CUT — kept only shared important dates)
-> - ⏳ Monetization, Notifications — not yet done
+> - ✅ Monetization (one tier; paywall = creature depth/management)
+> - ⏳ Notifications — not yet done
 > The build order, ground rules, and open decisions stay in THIS file.
 
 ## BREAKUP / UNLINK FLOW (locked)
@@ -337,7 +338,7 @@ apps are downloaded by women). Revisit big design calls with her before locking.
 - bond-prod (owner access only)
 - bond-dev (team/development work)
 
-### Monetization
+### Monetization  [UPDATED — see Monetization deep-dive in FEATURES.md: now ONE tier]
 - Free forever tier (messaging, limited prompts/games, basic vault).
 - BOND+ ~$7.99/mo per couple (unlimited, both partners on one sub).
 - BOND Premium ~$14.99/mo (+ therapist programs, AI insights).
@@ -362,6 +363,9 @@ apps are downloaded by women). Revisit big design calls with her before locking.
 - ALWAYS test on physical devices (Realtime, FCM, RevenueCat, haptics differ from simulator).
 - ALWAYS generate a session handoff and update this file at session end.
 - Bond score NEVER decreases.
+- DON'T REINVENT THE WHEEL: integrate proven tech for solved problems (calendar,
+  auth, payments, maps, movies, places, realtime); build custom ONLY for BOND's
+  unique magic (creature, prompts, couple-entity model). Integrate commodity, build magic.
 
 ### Lessons carried from Turf & Ardor (do not repeat)
 - Verify every RLS policy + trigger (SECURITY INVOKER, not DEFINER) before moving on —
@@ -387,8 +391,8 @@ Feature deep-dive queue (build order):
 5. ✅ Mood / bond score / BOND flame — DONE (flame never resets; zero-guilt engine)
 6. ✅ Discover — DONE (no standalone page; lives through baby AI; TMDB + caged Google Places)
 7. ✅ Planner — DONE (CUT general planner; kept shared important dates only)
-8. Monetization (paywall moments, gating, gift flow)  ← NEXT
-9. Notifications system (cadence, caps, triggers)
+8. ✅ Monetization — DONE (one tier; 'connection free, depth paid'; creature is the hook)
+9. Notifications system (cadence, caps, triggers)  ← NEXT (last feature deep-dive)
 
 Cross-cutting (after or alongside features):
 - Unified database schema (pull all per-feature pieces into one)

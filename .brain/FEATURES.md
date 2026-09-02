@@ -359,3 +359,64 @@ door to the same room = duplication. This also makes the creature genuinely usef
   evolution triggers. No calendar/event/todo tables at launch.
 
 ---
+
+### MONETIZATION [deep-dive DONE]
+
+**GUIDING PRINCIPLE (applies to the whole build, not just money):**
+"Don't reinvent the wheel." Use proven, engineered technologies for SOLVED problems
+(calendar, auth, payments, maps, movies, places, video, realtime). Build CUSTOM only
+where the personalization is genuinely BOND's magic (the creature, prompts, couple-
+entity model, the creature's VOICE around everything). Integrate the commodity, build
+the magic. Every hour rebuilding a solved thing is stolen from what makes BOND special.
+
+**CORE MONETIZATION PRINCIPLE: "Connection is free. Depth is paid."**
+Never paywall the emotional connection between two people. If messaging or the daily
+prompt/reveal ever hit a paywall, the relationship itself feels transactional →
+resentment → deletion → "cash grab" reputation. For a relationship app, resentment is
+death. Protect the connection; charge for enhancement + delight.
+
+**STRUCTURE: ONE paid tier (+ Free). No second tier for now.**
+- Simpler to build, explain, and decide than two tiers. Can add a higher tier later
+  if demand appears. (Supersedes the earlier two-tier $7.99/$14.99 sketch.)
+- BOND+ = $7.99/month per couple; one sub covers BOTH partners (unchanged).
+
+**THE PAYWALL LINE = WHAT THE CREATURE CAN DO + HOW CUSTOMIZABLE IT IS:**
+- FREE (generous — get couples genuinely attached first):
+  * All emotional core, always free + unlimited: messaging, daily prompt + reveal,
+    the creature (grows, reacts, is genuinely theirs), games, mood/flame, basic
+    memory vault.
+  * BASIC creature: basic look; BASIC assistant — "find us a restaurant," basic
+    pulls/answers. Genuinely useful.
+- BOND+ ($7.99) — the creature's DEPTH and MANAGEMENT powers:
+  * Fully CUSTOMIZABLE creature (outfits, looks, personality depth, evolutions).
+  * MANAGEMENT powers: connects to the couple's PERSONAL calendar (Google/Apple —
+    via proven integration, NOT a calendar we build), manages shared dates, richer
+    "do things for us" assistant tasks.
+  * (Also the natural home for: unlimited memory storage, premium/personalized AI,
+    unlimited games if we ever cap them — all "depth," never "connection.")
+- The line in one sentence: FREE creature HELPS you; PREMIUM creature MANAGES for you
+  and is fully YOURS to shape.
+- WHY the assistant/depth is the paid hook: the smart-tier AI + calendar management
+  cost US real money per use, so charging for them ALIGNS cost with revenue. And the
+  creature has natural depth that's clearly "enhancement," not "core connection."
+
+**CALENDAR INTEGRATION: DAY-ONE premium capability.**
+- Use a PROVEN calendar API (Google Calendar / Apple), do NOT build a calendar.
+- Build only the BOND magic: how the creature SPEAKS about the dates and weaves them
+  into the relationship ("your anniversary's in 3 days 🤍").
+- This is the smarter reframe of the planner we cut: not a page we build, but the
+  premium creature CONNECTING TO the calendar the couple already uses.
+
+**FUTURE VERSION:**
+- Possible higher tier later (therapist-style content, deeper insights, priority AI,
+  the 3-year breakup data preservation) — only if demand appears.
+- Gift subscriptions, one-time packs — future.
+
+**DATA/SCHEMA IMPLICATIONS:**
+- subscriptions table: written ONLY by the RevenueCat webhook Edge Function (existing
+  ground rule). Entitlement = free | bond_plus, per couple_id (one sub unlocks both).
+- RLS / feature-gating checks entitlement before serving premium creature abilities
+  (customization, calendar management, richer assistant).
+- Calendar link = OAuth tokens per user, stored securely; premium-gated.
+
+---
