@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (AI provider decided + proven; v2 backlog added)
+**Last updated:** 2026-09-02 (privacy promise locked; AI decision fully closed)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -431,10 +431,15 @@ line, identical clean result, provider actually swapped. Engineering pain of swi
 is eliminated. (Caveat: still write each real adapter once, and re-test prompt QUALITY
 on a new model — but the structural switch is trivial.)
 
-**STILL OPEN:** the PRIVACY PROMISE (what we actually tell couples about their data) —
-parked for its own decision. Options discussed earlier (never-train-on-data is easy via
-APIs; "data only touches our servers" needs self-host; "never leaves your phone" needs
-on-device). Not yet decided.
+**PRIVACY PROMISE [LOCKED]:** "We never sell your data, we never train AI on it, and
+only the two of you can see your stuff." Made VISIBLE to couples (a clear privacy
+explainer — what we do and don't do) so it's a trust feature, not just fine print.
+100% honest — we promise exactly what we deliver (the messaging rule applied). This is
+achievable today: messaging is row-level-secured + encrypted in transit/at rest; API
+data (Gemini/Claude) is NOT used to train models; we send the AI the MINIMUM per
+request, never the couple's whole history; no location/presence/surveillance.
+True end-to-end encryption stays on the V2 backlog (can't be promised honestly at
+launch, so we don't claim it yet).
 
 ## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
 
@@ -503,9 +508,9 @@ is CROSS-CUTTING synthesis work — a different kind of thinking:
 2. ◐ SAFETY PASS — launch defaults LOCKED (no spicy mode, no location, no presence,
    breakup=exit). See SAFETY PASS section. Still open: real age verification, full
    store-compliance review. Deeper abuse-resistance work deferred to next version.
-3. ◐ AI PROVIDER — DECIDED & PROVEN (provider-agnostic router, start Gemini, Claude-
-   ready, switch via 1 config line; reference impl in .brain/reference/). STILL OPEN:
-   the PRIVACY PROMISE (what we tell couples about their data) — own decision, not made.
+3. ✅ AI PROVIDER + PRIVACY — DONE. Provider-agnostic router (start Gemini, Claude-
+   ready, 1-config-line switch; reference impl in .brain/reference/). Privacy promise
+   LOCKED: never sell, never train AI on data, only the two of them see it — made visible.
 4. DESIGN DIRECTION — pick with girlfriend (warm / elegant / modern mockups exist).
 5. RETENTION PLAN — first-7-days journey, the both-partners-must-engage problem
    (named as risks, no plan yet).
