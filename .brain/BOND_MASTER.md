@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (analytics plan locked — PostHog)
+**Last updated:** 2026-09-02 (creature art explored + consistency proven via Gemini)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -612,6 +612,45 @@ Directly measures the #1 killer of couples apps (asymmetric engagement).
   keeps the dashboard focused AND keeps you inside the free tier basically forever
   (consumer apps can rack up events fast — the 5-metric discipline protects against it).
 - "Don't reinvent the wheel": integrate PostHog, don't build analytics.
+
+## CREATURE VISUAL DESIGN [direction + art path PROVEN]
+
+The signature feature's LOOK — explored and de-risked via Gemini image generation.
+
+**DIRECTION (locked as leaning):**
+- Style: Tamagotchi-style, SOFT MODERN BLOB (chosen over retro-pixel and animal-ish).
+  A simple round blob with big friendly eyes, rosy cheeks, tiny stubby feet, gentle
+  glow + gold sparkles. Gender-NEUTRAL (no eyelashes; friendly not "pretty").
+- Fits BOND's cream-glass aesthetic; simple = easy to animate + ownable.
+- Signature traits to keep consistent: round body, big dark eyes, rosy cheeks, cream
+  belly, soft glow, gold sparkles, optional floating heart.
+
+**COLOR (default not final — couples CUSTOMIZE their creature, so this is just the
+starting/default look):**
+- Tested mint, lavender, blue, peach. Peach + lavender read most "couples/romantic";
+  mint/blue read more "wellness." Peach used in the consistency test.
+- Idea worth keeping: creature could START neutral cream and GAIN color as the couple
+  bonds (color as a reward for connection). Not decided.
+- DEFAULT COLOR still open — a creature-layer decision, far off.
+
+**ART PATH (proven — this was the big de-risk):**
+- Path = AI GENERATION via GEMINI (J has Gemini access). NOT hand-drawn by J.
+  Alternatives if ever wanted: commission an artist (Fiverr/Upwork ~$50-few hundred),
+  girlfriend if she's creative, or licensed game assets. Start scrappy (AI), polish
+  later (commission) if BOND grows.
+- CONSISTENCY PROVEN: generated the SAME creature across states — egg form, sleeping/
+  resting (curled, content, "z" — matches zero-guilt "rests never suffers"), and
+  thriving (beaming, hearts, sparkles = high-connection joy). Gemini held the
+  character across all three. So the full egg→hatched→resting→thriving→evolved
+  pipeline is generatable, consistently, ~free.
+- METHOD that worked: nail the hero creature first, then in the SAME chat say "the
+  same creature, now [state]" referencing the original. Keep it simple = stays consistent.
+- Ready-to-use prompts saved (see the creature-prompts doc from this session).
+
+**STATUS:** art is NOT a Layer-1 problem — creature comes late in the build order.
+This exploration just DE-RISKED the signature feature (proved the art is achievable
+and cheap) and gave a strong starting design. Final creature + default color decided
+at the creature layer, likely with girlfriend.
 
 ## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
 
