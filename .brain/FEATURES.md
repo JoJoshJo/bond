@@ -118,14 +118,17 @@ MOST technically complex feature. Strategy: build the shared ENGINE once, each
 game plugs into it.
 
 **LOCKED — engine & philosophy:**
-- The 5 games (all intended, but see launch-scope note): Would You Rather, Truth
-  or Dare, Hot Take Battle, Who Said It? (past messages as trivia), Couple Quiz.
-- LIVE vs ASYNC is a PER-GAME property, not one global rule. Some games are
-  "live-preferred" (Truth or Dare, Hot Take Battle — the fun is being together),
-  some are "async-friendly" (Who Said It?, Couple Quiz). Would You Rather works
-  both ways. THE ENGINE SUPPORTS BOTH MODES FROM THE START — each game just picks
-  which mode(s) it allows. Build the flexible foundation once, flip a setting per
-  game. (So "decide live/async per game later with girlfriend" costs nothing技术.)
+- The 6 games (all intended, but see launch-scope note): Would You Rather, Truth
+  or Dare, Hot Take Battle, Who Said It? (past messages as trivia), Couple Quiz, and
+  PREDICTION/NEWLYWED (answer about yourself, then GUESS your partner's answer, scored —
+  higher score wins). Prediction added 2026-09-02 from J's research: it's the TOP game
+  variant in the category (proven), a scored twist distinct from Couple Quiz.
+- ASYNC-FIRST (locked 2026-09-02, from J's research): EVERY game MUST have an async
+  fallback. Couples are rarely online at the same time — every top couples app is
+  async for exactly this reason. So ASYNC is the DEFAULT/required mode; LIVE is a BONUS
+  layered on when both happen to be online, NOT a requirement. The engine supports both
+  from the start; each game can ADD live, but none may be live-ONLY. (Which games also
+  get a live mode can still be tuned with girlfriend — but async is guaranteed for all.)
 - DISCONNECT/QUIT mid-game → PAUSES & can be resumed later, nothing lost.
   (Zero-guilt principle applied to games. No freezing, no penalty.)
 - Games FEED the baby AI's mood AND the bond score/XP. Playing together = the kind
@@ -139,9 +142,9 @@ follows. Same games, all still happening — just not 5 fighting for attention i
 the first build. Fewer bugs, faster launch. J's call; not yet finalized.
 
 **PARKED — ask girlfriend:**
-- Add more game ideas.
-- Decide live vs async PER GAME (she has good instincts on which need to be together).
-- (If accepted) which 2-3 games are the launch set vs fast-follow.
+- Any more game ideas of her own.
+- Which games ALSO get a live mode (async is guaranteed for all regardless).
+- Which games are the launch set vs fast-follow (J leaning all; see launch-scope note).
 
 **FUTURE VERSION:**
 - More games / game packs.

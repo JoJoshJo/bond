@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (spicy kept in v2 + Apple compliance research banked)
+**Last updated:** 2026-09-02 (games: async-first + prediction game added)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
