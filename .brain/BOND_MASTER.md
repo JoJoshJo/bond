@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (AI fallback behavior locked)
+**Last updated:** 2026-09-02 (moderation/reporting locked)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -706,6 +706,26 @@ screen. Protects the magic/illusion.
 
 **STATUS:** principle locked now; implemented at the AI layer (~Layer 4). Exact foggy
 copy = near-launch, following the warm/in-character voice.
+
+## MODERATION / REPORTING [decision LOCKED for launch]
+
+Even for two private people: a way to report problems + flag bad AI. Also a store
+requirement.
+
+**LOCKED (launch):**
+- SUPPORT / REPORT: a simple "report a problem / contact support" option in settings.
+  Non-negotiable — app stores REQUIRE a way for users to report/contact you.
+- AI FEEDBACK: a thumbs-down (or similar) to flag a bad AI/creature response. Cheap,
+  and valuable BECAUSE the creature is AI-generated — gives a feedback loop to improve
+  it AND a safety net if it ever says something off/weird.
+
+**DEFERRED (to the abuse-resistance pass, NOT half-done now):**
+- A quiet "get help" safety resource for someone in a genuinely bad/abusive situation.
+  Important, but belongs with the deeper abuse-resistance work already deferred to a
+  proper future session (see Safety Pass), so it's done thoughtfully, not partially.
+
+**STATUS:** launch scope locked. Full store-compliance review (privacy policy, terms,
+content rating, data disclosures) still happens right before submission.
 
 ## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
 
