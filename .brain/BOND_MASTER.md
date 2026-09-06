@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (creature art explored + consistency proven via Gemini)
+**Last updated:** 2026-09-02 (onboarding content structure locked)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -651,6 +651,39 @@ starting/default look):**
 This exploration just DE-RISKED the signature feature (proved the art is achievable
 and cheap) and gave a strong starting design. Final creature + default color decided
 at the creature layer, likely with girlfriend.
+
+## ONBOARDING CONTENT / FIRST-RUN [structure LOCKED; final copy = near launch]
+
+How a couple's first minutes + first week actually feel. Structure decided now (it
+shapes the build); the polished WORDS come near launch.
+
+**THE FIRST SHARED MOMENT (order locked): MEET THE CREATURE → THEN SET UP YOUR WORLD.**
+1. The instant both partners link + app unlocks → the EGG HATCHES, the creature
+   appears, they NAME IT TOGETHER, it greets them. Lead with the signature magic in
+   the first ~60 seconds — the "oh wow," screenshot-worthy moment. It's the thing no
+   other app has, so it goes FIRST.
+2. THEN "set up your world" — name the couple, add the important date. Now it feels
+   warm/meaningful (they just met the creature they're doing it for) instead of a
+   boring setup form.
+- WHY this order: EARN the setup by leading with delight (opposite of apps that
+  front-load forms/permissions). Payoff first → couple is emotionally in → they
+  happily do setup. Also narratively: meet creature → build the world around it →
+  reinforces "creature is the heart of BOND" from minute one. Directly attacks the
+  "downloaded, poked around, left" problem.
+
+**TEACHING / DISCOVERY (locked): the CREATURE guides, gently, over the FIRST WEEK.**
+- No formal tutorial / no tooltips-and-arrows. The creature — as its natural ASSISTANT
+  self — introduces ONE thing at a time across the first 7 days ("today, want to try
+  your first game together? 🎮").
+- WHY: reuses the creature (no separate tutorial system to build); spreads "aha"
+  moments across the 7-day RETENTION window (a reason to return tomorrow); never feels
+  like homework (it's your warm creature inviting, not a robotic walkthrough). Unifies
+  ONBOARDING + RETENTION + creature-as-assistant into one thing.
+
+**STILL FOR NEAR-LAUNCH:** the actual COPY — creature's greeting words, the naming
+flow wording, each day's gentle invitation, first-prompt selection. Write when
+building the onboarding/creature layers. Must follow the locked content principles:
+INCLUSIVE by default, warm/invite-never-scold, "never gets stale."
 
 ## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
 
