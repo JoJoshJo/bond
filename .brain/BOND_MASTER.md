@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (moderation/reporting locked)
+**Last updated:** 2026-09-02 (spicy kept in v2 + Apple compliance research banked)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -732,8 +732,26 @@ content rating, data disclosures) still happens right before submission.
 One place for everything we deliberately pushed past launch, so nothing quietly
 disappears. These are DECIDED "laters," not open questions.
 
-- **Spicy mode** (18+ games/prompts) — after real Apple/Google store-compliance
-  research. Triggers the need for real age verification.
+- **Spicy mode** (18+ games/prompts) — THE #1 V2 MONETIZATION PRIORITY (research
+  shows intimacy content is the biggest money lever in the category; tiered escalation
+  Soft→Hot→Hard→Extreme behind Premium is the winning pattern). Reconsidered for launch
+  2026-09-02, kept in V2 — reason below.
+  COMPLIANCE RESEARCH DONE (Apple, ready for when we build it):
+  * Apple's BRIGHT LINE: bans "overtly sexual/pornographic" = explicit
+    descriptions/displays of sex organs or acts meant to arouse. Instant rejection.
+    Also bans hook-up apps facilitating that.
+  * ALLOWED lane: "suggestive/mature" content IS permitted at higher ratings (16+ =
+    "frequent mature or suggestive"; 18+ = "sexual content or nudity"). Coral etc. live
+    here: SUGGESTIVE/ROMANTIC, NOT explicit. That's the winning pattern.
+  * HARD REQUIREMENTS (Apple guideline 1.2.1(a), added Feb 2026): (1) a REAL age gate —
+    verified or declared age — to keep minors out; (2) clearly MARK mature content;
+    (3) complete Apple's age-rating questionnaire honestly + rate app 17+/18+.
+  * TRADE-OFF (why kept in v2, not launch): rating the WHOLE app 17+/18+ from day one
+    shrinks audience + hurts discoverability. Better as a big PAID UPDATE post-launch,
+    after a clean easy-to-discover approval, when there's an audience to convert.
+    France note: 17+ shows as 18+ there.
+  * OPEN for v2: research whether spicy can be a SEPARATE age-gated section so the main
+    app keeps a lower rating (vs rating the whole app up).
 - **Opt-in location sharing** (WhatsApp-style, user-initiated) — as a SECURITY
   feature; must be built abuse-aware. Never always-on tracking.
 - **Relationship Chapters** (monthly AI story recap) — needs months of data + the
