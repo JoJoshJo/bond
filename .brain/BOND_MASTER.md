@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (onboarding content structure locked)
+**Last updated:** 2026-09-02 (AI fallback behavior locked)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -684,6 +684,28 @@ shapes the build); the polished WORDS come near launch.
 flow wording, each day's gentle invitation, first-prompt selection. Write when
 building the onboarding/creature layers. Must follow the locked content principles:
 INCLUSIVE by default, warm/invite-never-scold, "never gets stale."
+
+## AI FALLBACK BEHAVIOR [decision LOCKED]
+
+What happens when the AI (Gemini/Claude via the router) is down, slow, or returns junk.
+
+**LOCKED: the creature STAYS IN CHARACTER — it never feels broken, just momentarily
+"foggy."** e.g. "Hmm, my brain's a little foggy right now — try me again in a bit? 🌫️"
+Even a failure becomes a moment of personality (a sleepy creature), NEVER a cold error
+screen. Protects the magic/illusion.
+- NEVER show a raw/technical error to the couple — it shatters the creature illusion.
+
+**Thoughtful additions (free, make it better):**
+- DAILY PROMPT specifically: silently pull from the curated backup prompt BANK (which
+  exists anyway per the "never gets stale" plan) if the AI is down — no foggy message
+  needed there, since a real fallback exists.
+- LIVE ASSISTANT ("find us dinner") where there's no pre-written answer → the
+  in-character "foggy" response.
+- ROUTER can try an alternate provider before falling back (ties to the provider-
+  agnostic router; a failure on one provider isn't necessarily a user-visible failure).
+
+**STATUS:** principle locked now; implemented at the AI layer (~Layer 4). Exact foggy
+copy = near-launch, following the warm/in-character voice.
 
 ## V2 BACKLOG (intentionally deferred to a future version — NOT cut)
 
