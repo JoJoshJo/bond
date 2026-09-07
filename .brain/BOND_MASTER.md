@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (★ LAYER 1 CODE COMPLETE — scaffold+auth+linking committed fbebf85)
+**Last updated:** 2026-09-07 (couple-linking bug FIXED on device; paste-code for now, deep-links near launch)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -859,6 +859,31 @@ disappears. These are DECIDED "laters," not open questions.
   deep-links + password-reset completion). Could be done as part of finishing L1 or
   early L2 — decide later.
 
+**DEVICE-TEST FINDINGS (2026-09-03/07, J on real phone — app looks great, white+mint):**
+- ✅ FIXED: the "Something went wrong" couple-creation bug. Root cause: the 3 SECURITY
+  DEFINER functions had `set search_path = public`, which stripped the `auth` schema →
+  auth.uid() returned NULL inside them → not_authenticated. Proven via a SECURITY
+  INVOKER debug_whoami() probe that DID see the uid while the DEFINER funcs didn't. FIX:
+  `set search_path = public, auth, extensions` on create_couple/regenerate_invite/
+  join_couple (SQL re-run in Supabase). Create-a-couple VERIFIED working clean on device
+  (couple "Velvet Puffins", QR/invite/waiting screen). Diagnostics reverted; debug_whoami
+  dropped. (Great evidence-based debugging session — never guessed, measured each step.)
+- LINK/QR & DEEP-LINKS (decided): the QR/invite link pointed at https://bond.app —
+  a domain J does NOT own (parked on GoDaddy) → opens junk page in a normal browser.
+  DECISION: use PASTE-CODE ("Enter code instead") for now — zero setup, works today,
+  both partners have the app installed anyway. Skip the bond:// scheme (throwaway).
+  LATER (near launch): build full DEFERRED DEEP-LINKING (app installed → opens app to
+  join screen; not installed → App Store/Play Store, then opens after install — J
+  described this correctly). REQUIRES: a real owned domain + being published on the
+  stores + Universal Links/App Links config — so it CAN'T be fully built until on the
+  stores. Also fixes the email-confirm link (same deep-link work). Ties to NAME decision.
+- ⚠️ TERMS & PRIVACY checkbox still PLACEHOLDER text — must become a real clickable
+  link to a Terms/Privacy page before launch (pre-submission). DON'T FORGET.
+- NOTE: J has ONE phone, so can test Partner A (create/invite) fully, but the JOIN side
+  + simultaneous unlock need a 2nd account/device. Can test join logic via a 2nd account
+  on the same phone (paste-code); the 2-screen simultaneous unlock needs a borrowed 2nd
+  device (e.g. girlfriend's phone) — do later.
+
 **TESTING RULE (J's preference, locked):** Do NOT use the Flutter emulator/simulator
 unless truly necessary. Claude Code should BUILD THE APK for J to install + test on his
 own real device. (Real-device testing is the real test anyway, per ground rules — and
@@ -880,6 +905,17 @@ writes prompts + holds plan. Build layer-by-layer, verify each step (don't trust
 check), test on two physical devices before advancing a layer.
 
 ## SESSION LOG
+
+### 2026-09-07 — BUILD SESSION (part 31): fixed couple-linking bug (search_path) + deep-link plan
+- Debugged the couple-creation "Something went wrong" bug the RIGHT way (evidence, not
+  guessing): made the real error visible → ruled out client/token → SECURITY INVOKER
+  whoami probe proved auth.uid() worked on normal RPC but was NULL inside the DEFINER
+  funcs → root cause = `set search_path = public` stripping the auth schema. FIX:
+  search_path = public, auth, extensions on all 3 funcs. VERIFIED create-a-couple on
+  device. Reverted diagnostics, dropped debug_whoami.
+- DECIDED: paste-code for invites now (bond.app isn't owned; deep links need domain +
+  store presence). Full deferred deep-linking = near launch. Terms/Privacy link still TODO.
+- Couple-linking now WORKS on device (Partner A side). Join side needs 2nd account/device.
 
 ### 2026-09-02 — BUILD SESSION (part 30): couple-linking built — ★ LAYER 1 CODE COMPLETE
 - Ran the couple-linking SQL (3 SECURITY DEFINER fns + enforce_two_members trigger +

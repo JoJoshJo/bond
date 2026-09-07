@@ -27,7 +27,9 @@ class _CreateOrJoinScreenState extends ConsumerState<CreateOrJoinScreen> {
       await ref.read(coupleRepositoryProvider).createCouple(name);
       // Re-resolve membership → CoupleGate routes to the waiting screen.
       ref.invalidate(myMembershipProvider);
-    } catch (error) {
+    } catch (error, stack) {
+      // Keep the real error in logs for debugging; show the user a friendly one.
+      debugPrint('create_couple failed: $error\n$stack');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(authErrorMessage(error))),
