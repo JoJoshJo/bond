@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (app color scheme locked: white + mint; design section rewritten)
+**Last updated:** 2026-09-02 (LAYER 1 database built + verified — 16 tables live)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -800,32 +800,50 @@ disappears. These are DECIDED "laters," not open questions.
 
 ## NEXT SESSION — START HERE
 
-★★ THINKING PHASE ESSENTIALLY COMPLETE ★★
-All 9 feature deep-dives done (FEATURES.md). Cross-cutting done: unified SCHEMA ✅,
-safety launch-defaults ✅, AI provider + privacy ✅, retention plan ✅.
+★★★ BUILD HAS STARTED — LAYER 1 IN PROGRESS ★★★
 
-THE ONLY REMAINING PRE-BUILD ITEM:
-1. DESIGN DIRECTION — pick with girlfriend (warm / elegant / modern mockups exist).
-   This is a conversation with her, not more solo thinking. Once chosen, lock the
-   theme (colors, fonts, roundness) and the thinking phase is fully closed.
+**BOND Supabase project (free org):** https://hzvxqafbcxpncuuukrpd.supabase.co
+(Single DB for now; prod split happens near launch — don't need it yet.)
 
-STANDING GIRLFRIEND-LIST (resolve with her, mostly small): design direction (above);
-daily-prompt rhythm & expiry (options a/b/c ready); game ideas + which games launch.
-(Typing/presence + spicy already decided: presence NO ever; spicy = v2.)
+**LAYER 1 PROGRESS:**
+- ✅ DATABASE BUILT & VERIFIED — all 16 tables live in Supabase, created via 4 SQL
+  migration parts run in the SQL Editor:
+  Part 1 core identity (users + auto-profile trigger, couples, couple_members,
+  couple_invites); Part 2 core RLS (current_couple_id() helper + vault-rule policies);
+  Part 3 feature tables (messages, message_reactions, prompts, prompt_responses,
+  game_sessions, game_moves, memories, important_dates, mood_checkins, subscriptions,
+  calendar_links, notification_prefs); Part 4 feature RLS (incl. DB-level mutual prompt
+  lock, subscriptions read-only for RevenueCat webhook). Verified: 16 tables present.
+- ⏭️ NEXT: Flutter project setup + connect to this Supabase project (Claude Code starts
+  writing app code). Then auth + couple-linking flow (signup → create couple → invite
+  QR/link → partner joins → simultaneous unlock). Then test on two devices → Layer 1 done.
+- NOTE for the linking flow: the join step needs a controlled path for Partner B to
+  read an invite/couple they're not yet a member of (RLS baseline is strict on purpose).
+  Handle via a SECURITY DEFINER function (join_couple(token)) — flagged during Part 2.
 
-OPEN (not blocking build, decide before launch): THE NAME — "Bond" is taken by 4+
-couples apps (see Competitive Landscape). Brainstorm a distinct name. Known, not yet done.
+**STILL OPEN (none block the build):**
+- THE NAME — "Bond" taken by 4+ apps; brainstorm a distinct one before launch.
+- GIRLFRIEND-LIST (mostly settled by J as his calls, changeable): daily-prompt rhythm
+  & expiry (chose generous window), which games launch (J leaning all 6). Design +
+  colors now LOCKED (Modern & Fresh, white+mint, Space Grotesk, mint creature).
+- First-users strategy (own session, nearer launch). Anthropic credits (apply anytime).
+- Storage limits per tier (numbers at build time). Store-compliance + age gate (pre-submission).
 
-THEN → COOKING BEGINS. Build order = the Layer Build Plan:
-- LAYER 1 first: Supabase (bond-dev + bond-prod) + auth + couple creation & linking,
-  built from SCHEMA.md. Claude Code turns SCHEMA.md into migrations. Repo-check first,
-  RLS verified on every table, test on two physical devices before Layer 2.
+WORKFLOW: J runs Supabase SQL in browser + Claude Code does repo/app code; Claude(brain)
+writes prompts + holds plan. Build layer-by-layer, verify each step (don't trust —
+check), test on two physical devices before advancing a layer.
 
-Remaining pre-build judgment calls to make as you start (not blockers):
-- Launch game set (2-3 vs all 5) — Claude's rec: engine + 2-3, rest fast-follow.
-- Storage limits per tier (free vs BOND+).
-- Full store-compliance review + real age gate (right before submission).
 ## SESSION LOG
+
+### 2026-09-02 — BUILD SESSION (part 27): LAYER 1 database built + verified
+- COOKING STARTED. Created BOND Supabase project (free org, after an accidental Pro
+  upgrade J is downgrading + emailing support for refund):
+  https://hzvxqafbcxpncuuukrpd.supabase.co
+- Built the ENTIRE Layer 1 database via 4 SQL migrations in the Supabase SQL Editor:
+  core identity + auto-profile trigger, core RLS (current_couple_id helper + vault
+  rule), all feature tables, all feature RLS (incl. DB-level mutual prompt lock,
+  read-only subscriptions). VERIFIED 16 tables present (checked, not assumed — Turf lesson).
+- Next: Flutter init + connect to Supabase, then auth + couple-linking flow.
 
 ### 2026-08-27 — Planning session (part 1)
 - Locked the whole product vision, feature universe (23 features), and Layer 1 spec.
