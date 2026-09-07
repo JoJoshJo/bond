@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (games: async-first + prediction game added)
+**Last updated:** 2026-09-02 (app color scheme locked: white + mint; design section rewritten)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -280,47 +280,45 @@ couples table needs: a `winding_down` status, `breakup_initiated_by`,
 
 ---
 
-## DESIGN DIRECTION (locked)
+## DESIGN DIRECTION [LOCKED 2026-09-02]
 
-Modern, transparent, fun + elegant. Light-first glassmorphism.
+**Overall vibe: MODERN & FRESH** — clean, a little bold, current and alive (chosen
+over "warm & playful" and "elegant & calm"). NOTE: this SUPERSEDES the earlier
+cream-glass / rose+gold / Cormorant direction. Modern & Fresh doesn't mean cold —
+keep it warm and alive via the creature, soft rounded cards, gentle shadows, and
+little moments of life.
 
-### Aesthetic
-- Cream-white warm base (NOT pure white). ~#FEF9F5 / #FAF7F2.
-- Real frosted glass cards: rgba(255,255,255,0.60) + backdrop-filter blur(28px).
-  Strong enough that ambient background bleeds through.
-- Photography bleeds to card edges (image IS the background, text floats over
-  soft scrim) — not image-in-a-box.
-- Never dark, never clinical, never cold.
+### Color scheme: WHITE + MINT [LOCKED]
+- Base: bright, minimal WHITE / off-white (~#FCFDFC / #F0F6F3). (NOT the old cream.)
+- Signature accent: MINT (~#4CAF8E, with soft #A8D8C4) — matches the mint creature,
+  so app + creature feel unified and intentional.
+- Text primary: dark near-black (~#22302B).
+- WATCH-OUT (build lens): white+mint done SOFT = fresh & lovely; done HARD = clinical/
+  medical. Keep it warm — rounded cards, gentle shadows (no hard edges), creature glow,
+  soft animations. It's a LOVE app; warmth matters more than in most apps.
 
-### Reference images (J provided 6)
-- Primary refs: plant app (glass system) + floral cards (photo-forward, minimal chrome).
-- Also: Daylog fashion (editorial serif typography, gold CTA), food app (bottom-sheet detail pattern).
+### Creature color: MINT (default) [LOCKED]
+Soft glowing blob, mint default. Couples can customize; mint is just the default.
+(See Creature Visual Design section.)
 
-### DESIGN IS CO-DECIDED WITH J'S GIRLFRIEND
-Major visual decisions get her input (she's a real target user — most couples
-apps are downloaded by women). Revisit big design calls with her before locking.
-
-### Open design decisions (in progress)
-- Light vs dark: leaning "adaptive theme that shifts with mood/baby AI" — but
-  REVISIT with girlfriend before locking.
-- Roundness: chose "cleaner + tighter (less round, modern-minimal)."
-- Fun vs elegant lead: THREE directions mocked up for J + girlfriend to pick:
-  (01) Warm+Playful — rosy, Cormorant, most romantic;
-  (02) Elegant+Calm — Fraunces, gold, premium/keepsake;
-  (03) Modern+Fresh — Space Grotesk, coral pop, clean/current.
-  Not yet chosen. Mix-and-match allowed (e.g. "01 warmth + 03 cleaner cards").
-
-### Color palette
-- Background: warm cream (#FEF9F5 / #FAF7F2)
-- Rose accent (fun/loving): #F4839A
-- Gold accent (elegant/premium): #C9964A
-- Mint: #6CC5A8
-- Text primary: #1C1C1E
+### Roundness: cleaner + tighter [LOCKED]
+Less round / modern-minimal (but still soft enough to feel friendly, per watch-out above).
 
 ### Typography
-- Display/headings: Cormorant Garamond, light weight (300), editorial, breathing room.
+- Display/headings: SPACE GROTESK (the Modern & Fresh font — crisp, geometric).
+  (Supersedes the earlier Cormorant Garamond.)
 - Body/UI: DM Sans.
 - Code/timestamps: JetBrains Mono.
+
+### DESIGN IS CO-DECIDED WITH J'S GIRLFRIEND
+Major visual calls get her input (real target user). She can still adjust the above —
+these are J's locked picks, changeable if she has strong instincts. Colour/warmth is
+squarely her call to weigh in on.
+
+### Reference images (J provided 6, earlier)
+Plant app (glass/clean), floral cards (photo-forward minimal chrome), Daylog fashion
+(editorial type), food app (bottom-sheet pattern). Use for layout/feel inspiration;
+palette + font now locked to white+mint + Space Grotesk above.
 
 ### Motion
 - Breathing animations, satisfying reveal moments, soft haptics.
