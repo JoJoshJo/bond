@@ -2,6 +2,8 @@
     <!-- Required for Supabase (network) in ALL build modes, including release.
          Flutter's default template only adds this to debug/profile manifests. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Camera: scanning a partner's invite QR (mobile_scanner). -->
+    <uses-permission android:name="android.permission.CAMERA"/>
     <application
         android:label="bond"
         android:name="${applicationName}"

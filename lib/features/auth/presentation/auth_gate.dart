@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../home/presentation/home_placeholder_screen.dart';
+import '../../couple/presentation/couple_gate.dart';
 import '../application/auth_providers.dart';
 import 'welcome_screen.dart';
 
@@ -38,7 +38,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
             state.session ?? ref.read(authRepositoryProvider).currentSession;
         _maybeCaptureTimezone(session);
         if (session != null) {
-          return const HomePlaceholderScreen();
+          return const CoupleGate();
         }
         return const WelcomeScreen();
       },

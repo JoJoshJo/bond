@@ -24,7 +24,7 @@ class HomePlaceholderScreen extends ConsumerWidget {
               const Icon(Icons.check_circle_rounded,
                   size: 64, color: AppColors.mint),
               const SizedBox(height: 20),
-              Text('You\'re in',
+              Text('You\'re linked',
                   textAlign: TextAlign.center, style: textTheme.headlineSmall),
               const SizedBox(height: 8),
               Text(
@@ -34,7 +34,7 @@ class HomePlaceholderScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Couple-linking comes next.',
+                'Your space is set up. The app itself comes next.',
                 textAlign: TextAlign.center,
                 style: textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
               ),
