@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (LAYER 1 database built + verified — 16 tables live)
+**Last updated:** 2026-09-02 (Flutter scaffold + Supabase connected, committed 34913c5)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -778,10 +778,15 @@ disappears. These are DECIDED "laters," not open questions.
 - NEVER write to subscriptions table from Flutter — RevenueCat webhook is sole writer.
 - NEVER let the baby AI suffer/guilt — it rests, never punishes.
 - NEVER let the AI confirm money/bookings/sends — human taps to confirm.
-- ALWAYS run a repo check before any Claude Code file/commit action:
-  confirm git repo, confirm remote points to BOND (not Turf/GhostCheck), confirm branch. Stop if anything looks wrong.
+- ALWAYS run a repo check as the FIRST STEP of EVERY Claude Code prompt (not just
+  commits — any prompt, every time, no exceptions): confirm inside a git work tree,
+  confirm remote = BOND (git@github.com:JoJoshJo/bond.git, NOT Turf/GhostCheck),
+  confirm pwd + branch. STOP and report if anything looks wrong before doing anything.
+  Rationale: J runs multiple repos; one command in the wrong repo causes real damage.
 - ALWAYS verify RLS at the start of every data session.
 - ALWAYS test on physical devices (Realtime, FCM, RevenueCat, haptics differ from simulator).
+- TESTING = APK ON J'S REAL DEVICE. Claude Code builds the APK; J installs + tests. Do
+  NOT use the emulator/simulator unless genuinely required (J's locked preference).
 - ALWAYS generate a session handoff and update this file at session end.
 - Bond score NEVER decreases.
 - DON'T REINVENT THE WHEEL: integrate proven tech for solved problems (calendar,
@@ -814,9 +819,24 @@ disappears. These are DECIDED "laters," not open questions.
   game_sessions, game_moves, memories, important_dates, mood_checkins, subscriptions,
   calendar_links, notification_prefs); Part 4 feature RLS (incl. DB-level mutual prompt
   lock, subscriptions read-only for RevenueCat webhook). Verified: 16 tables present.
-- ⏭️ NEXT: Flutter project setup + connect to this Supabase project (Claude Code starts
-  writing app code). Then auth + couple-linking flow (signup → create couple → invite
-  QR/link → partner joins → simultaneous unlock). Then test on two devices → Layer 1 done.
+- ✅ FLUTTER SCAFFOLD + SUPABASE CONNECTION — DONE & COMMITTED (commit 34913c5, 78
+  files). Flutter project (package 'bond', app id com.bond.app WORKING-TITLE — finalize
+  before submission once name locks). supabase_flutter + google_fonts. Feature-first
+  lib/ structure (core/config, core/supabase, shared/theme, shared/widgets, empty
+  features/auth + features/couple placeholders). White+Mint theme scaffold (Space
+  Grotesk/DM Sans). Keys via --dart-define-from-file: env.json GITIGNORED + verified
+  clean (NOT in repo); env.example.json committed as template. Verified: analyze clean
+  (1 info re anonKey deprecation, left as-is), tests pass, RUNS + CONNECTS to Supabase
+  ('Supabase init completed', foundation screen renders).
+- ⏭️ NEXT: AUTH FLOW — signup/login screens (email + Apple + Google), so a person can
+  create an account. First real feature. Then couple-linking (create couple → invite
+  QR/link → partner joins → simultaneous unlock, via a SECURITY DEFINER join_couple()
+  function for the RLS edge case). Then test on device → Layer 1 done.
+
+**TESTING RULE (J's preference, locked):** Do NOT use the Flutter emulator/simulator
+unless truly necessary. Claude Code should BUILD THE APK for J to install + test on his
+own real device. (Real-device testing is the real test anyway, per ground rules — and
+avoids the iOS-sim hassle hit during scaffold.)
 - NOTE for the linking flow: the join step needs a controlled path for Partner B to
   read an invite/couple they're not yet a member of (RLS baseline is strict on purpose).
   Handle via a SECURITY DEFINER function (join_couple(token)) — flagged during Part 2.
@@ -834,6 +854,15 @@ writes prompts + holds plan. Build layer-by-layer, verify each step (don't trust
 check), test on two physical devices before advancing a layer.
 
 ## SESSION LOG
+
+### 2026-09-02 — BUILD SESSION (part 28): Flutter scaffold + Supabase connected (COMMITTED)
+- Flutter app scaffolded into repo + connected to Supabase, VERIFIED running
+  ('Supabase init completed', foundation screen renders white+mint). Committed 34913c5
+  (78 files) + pushed. env.json verified OUT of git (keys stayed local).
+- Claude Code caught + fixed a real .gitignore inline-comment bug that had left env.json
+  UN-ignored (placeholders only, no leak) — verify-don't-assume paid off again.
+- LOCKED testing rule: APK-on-real-device, no emulator unless necessary.
+- NEXT: auth flow (signup/login).
 
 ### 2026-09-02 — BUILD SESSION (part 27): LAYER 1 database built + verified
 - COOKING STARTED. Created BOND Supabase project (free org, after an accidental Pro
