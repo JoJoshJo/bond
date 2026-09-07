@@ -4,7 +4,7 @@
 > session. Update it at the end of every thinking session. This file is how
 > future sessions pick up exactly where we left off.
 
-**Last updated:** 2026-09-02 (Flutter scaffold + Supabase connected, committed 34913c5)
+**Last updated:** 2026-09-02 (★ LAYER 1 CODE COMPLETE — scaffold+auth+linking committed fbebf85)
 **Status:** Thinking / planning phase. Nothing built yet.
 **Owner:** J (solo founder)
 
@@ -828,10 +828,36 @@ disappears. These are DECIDED "laters," not open questions.
   clean (NOT in repo); env.example.json committed as template. Verified: analyze clean
   (1 info re anonKey deprecation, left as-is), tests pass, RUNS + CONNECTS to Supabase
   ('Supabase init completed', foundation screen renders).
-- ⏭️ NEXT: AUTH FLOW — signup/login screens (email + Apple + Google), so a person can
-  create an account. First real feature. Then couple-linking (create couple → invite
-  QR/link → partner joins → simultaneous unlock, via a SECURITY DEFINER join_couple()
-  function for the RLS edge case). Then test on device → Layer 1 done.
+- ✅ AUTH FLOW (email/password) — BUILT & COMMITTED (e0b432c, 16 files), NOT yet
+  device-tested (batched testing before Layer 2). Welcome screen (Sign In/Sign Up
+  toggle, no carousel), signup w/ 18+ gate + terms, check-email/verify + resend,
+  sign-in, forgot-password (send only; set-new-password deferred to OAuth task w/ deep
+  links). Riverpod auth-state stream = source of truth; auth_repository wraps Supabase.
+  Silent home_timezone capture on first sign-in. Placeholder home screen. INTERNET
+  permission fixed in release manifest. Apple/Google sign-in = LATER task (needs OAuth
+  config; will also bring deep-links + password-reset completion).
+- ✅ COUPLE-LINKING — BUILT & COMMITTED (fbebf85). Backend: create_couple /
+  regenerate_invite / join_couple (SECURITY DEFINER, row-locked, race-safe, vault-rule
+  enforced) + enforce_two_members trigger backstop — all live & VERIFIED in Supabase
+  (ran individually after the batch-paste silently didn't run — verify-don't-assume
+  caught it). Realtime enabled on couples table. App: couple_repository (RPCs +
+  realtime watch), CreateOrJoin / InviteWaiting (QR + share link + regenerate +
+  realtime waiting→connected) / JoinScreen (scan QR or paste code + dead-link
+  messages), AuthGate→CoupleGate→Home wiring, cute couple-name generator, CAMERA perm
+  verified. Packages: qr_flutter, mobile_scanner, share_plus. Deep-link auto-open still
+  deferred to OAuth task (paste-code fallback for now).
+
+★ LAYER 1 CODE COMPLETE. Commits: 34913c5 (scaffold+Supabase), e0b432c (auth),
+  fbebf85 (couple-linking). Database 16 tables + full RLS/vault ✅, auth ✅, linking ✅.
+
+- ⏭️ THE GATE BEFORE LAYER 2: BATCH DEVICE TEST of the full Layer 1 flow on real
+  device(s) — sign up → verify → sign in → create couple → (2nd account/device) join
+  via QR or paste-code → watch SIMULTANEOUS unlock → dead-link cases. Needs TWO accounts
+  (couple = 2 people). APK is 69.5MB (grab via local-wifi/adb/cloud). NOT device-tested
+  yet. Do NOT build Layer 2 until this passes.
+- STILL DEFERRED within Layer 1 scope: Apple/Google sign-in (OAuth task — also brings
+  deep-links + password-reset completion). Could be done as part of finishing L1 or
+  early L2 — decide later.
 
 **TESTING RULE (J's preference, locked):** Do NOT use the Flutter emulator/simulator
 unless truly necessary. Claude Code should BUILD THE APK for J to install + test on his
@@ -854,6 +880,26 @@ writes prompts + holds plan. Build layer-by-layer, verify each step (don't trust
 check), test on two physical devices before advancing a layer.
 
 ## SESSION LOG
+
+### 2026-09-02 — BUILD SESSION (part 30): couple-linking built — ★ LAYER 1 CODE COMPLETE
+- Ran the couple-linking SQL (3 SECURITY DEFINER fns + enforce_two_members trigger +
+  Realtime on couples). NOTE: the batch paste silently didn't run (SQL Editor quirk) —
+  the verification query caught only current_couple_id existed, so ran each function
+  INDIVIDUALLY and verified all 4 present. Classic verify-don't-assume save.
+- Built the couple-linking app side (create/join/invite, QR scan+generate, share link
+  w/ paste-code fallback, realtime simultaneous unlock, dead-link messages). Committed
+  fbebf85. CAMERA perm verified in release manifest.
+- ★ LAYER 1 CODE COMPLETE (scaffold+Supabase, auth, linking). NOT device-tested yet —
+  the batch device test (needs 2 accounts) is THE GATE before Layer 2.
+- APK 69.5MB; J grabbing it himself to test later.
+
+### 2026-09-02 — BUILD SESSION (part 29): email/password auth built + committed
+- Built full email/password auth (welcome/toggle, signup+18+/terms, verify+resend,
+  signin, forgot-password send). Riverpod stream state, auth_repository over Supabase,
+  silent timezone capture, placeholder home. Fixed release-manifest INTERNET perm.
+  Committed e0b432c. NOT device-tested yet — J batching auth+linking test before L2.
+- APK built (49.7MB) but J will copy it to his phone himself + test later.
+- NEXT: couple-linking (join_couple SECURITY DEFINER fn + Realtime unlock).
 
 ### 2026-09-02 — BUILD SESSION (part 28): Flutter scaffold + Supabase connected (COMMITTED)
 - Flutter app scaffolded into repo + connected to Supabase, VERIFIED running
