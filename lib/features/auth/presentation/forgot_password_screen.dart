@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/auth_providers.dart';
-import 'widgets/auth_widgets.dart';
+import '../../../shared/theme/app_colors.dart';
+import '../../../shared/utils/error_messages.dart';
+import '../../../shared/widgets/widgets.dart';
 
 /// Sends a Supabase password-reset email. Completing the reset (entering a new
 /// password in-app) needs deep-link recovery, which lands with the OAuth task —
@@ -39,7 +41,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authErrorMessage(error))),
+          SnackBar(content: Text(friendlyError(error))),
         );
       }
     } finally {
@@ -61,7 +63,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   children: [
                     const SizedBox(height: 12),
                     const Icon(Icons.mark_email_read_outlined,
-                        size: 64, color: Color(0xFF3FD6A8)),
+                        size: 64, color: AppColors.mint),
                     const SizedBox(height: 24),
                     Text('Check your email', style: textTheme.headlineSmall),
                     const SizedBox(height: 12),
@@ -71,7 +73,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       style: textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 32),
-                    AuthPrimaryButton(
+                    BondButton(
                       label: 'Back to sign in',
                       onPressed: () => Navigator.of(context).pop(),
                     ),
@@ -91,7 +93,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         style: textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 24),
-                      AuthTextField(
+                      BondTextField(
                         controller: _email,
                         label: 'Email',
                         keyboardType: TextInputType.emailAddress,
@@ -104,7 +106,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         onFieldSubmitted: (_) => _send(),
                       ),
                       const SizedBox(height: 24),
-                      AuthPrimaryButton(
+                      BondButton(
                         label: 'Send reset link',
                         loading: _sending,
                         onPressed: _send,

@@ -33,7 +33,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   height: 96,
                   width: 96,
                   decoration: BoxDecoration(
-                    color: AppColors.mintSoft,
+                    color: AppColors.mintWash,
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: const Icon(Icons.favorite_rounded,

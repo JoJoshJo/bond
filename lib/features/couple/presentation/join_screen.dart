@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../auth/presentation/widgets/auth_widgets.dart';
+import '../../../shared/utils/error_messages.dart';
+import '../../../shared/widgets/widgets.dart';
 import '../application/couple_providers.dart';
 
 /// Partner B joins here: scan A's QR (zero-typing, in person) or paste the code
@@ -64,7 +65,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       await _showDeadLink(_messageFor(result.reason));
     } catch (error) {
       if (mounted) {
-        await _showDeadLink(authErrorMessage(error));
+        await _showDeadLink(friendlyError(error));
       }
     } finally {
       if (mounted) {
@@ -125,7 +126,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
             Text('Enter invite code',
                 style: Theme.of(ctx).textTheme.titleLarge),
             const SizedBox(height: 12),
-            AuthTextField(
+            BondTextField(
               controller: _codeController,
               label: 'Invite code',
               textInputAction: TextInputAction.done,
@@ -135,7 +136,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               },
             ),
             const SizedBox(height: 16),
-            AuthPrimaryButton(
+            BondButton(
               label: 'Join',
               onPressed: () {
                 Navigator.of(ctx).pop();

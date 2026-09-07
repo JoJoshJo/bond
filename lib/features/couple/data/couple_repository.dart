@@ -102,6 +102,23 @@ class CoupleRepository {
     );
   }
 
+  /// Rename the couple (auto-generated name is editable). RLS allows a member
+  /// to update their own couple, so this is a plain table update.
+  Future<void> updateCoupleName(String coupleId, String name) async {
+    await _client.from('couples').update({'name': name}).eq('id', coupleId);
+  }
+
+  /// Set the couple's relationship start date (stored as a date, yyyy-MM-dd).
+  Future<void> updateRelationshipStartDate(
+      String coupleId, DateTime date) async {
+    final ymd = '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
+    await _client
+        .from('couples')
+        .update({'relationship_start_date': ymd}).eq('id', coupleId);
+  }
+
   /// Revoke the active token and mint a fresh one.
   Future<CoupleInvite> regenerateInvite() async {
     final rows = await _client.rpc('regenerate_invite') as List<dynamic>;

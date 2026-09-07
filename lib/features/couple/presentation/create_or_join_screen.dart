@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../auth/application/auth_providers.dart';
-import '../../auth/presentation/widgets/auth_widgets.dart';
+import '../../../shared/utils/error_messages.dart';
+import '../../../shared/widgets/widgets.dart';
 import '../application/couple_providers.dart';
 import '../data/couple_name_generator.dart';
 import 'join_screen.dart';
@@ -32,7 +33,7 @@ class _CreateOrJoinScreenState extends ConsumerState<CreateOrJoinScreen> {
       debugPrint('create_couple failed: $error\n$stack');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authErrorMessage(error))),
+          SnackBar(content: Text(friendlyError(error))),
         );
       }
     } finally {
@@ -56,7 +57,7 @@ class _CreateOrJoinScreenState extends ConsumerState<CreateOrJoinScreen> {
                   height: 88,
                   width: 88,
                   decoration: BoxDecoration(
-                    color: AppColors.mintSoft,
+                    color: AppColors.mintWash,
                     borderRadius: BorderRadius.circular(26),
                   ),
                   child: const Icon(Icons.link_rounded,
@@ -74,7 +75,7 @@ class _CreateOrJoinScreenState extends ConsumerState<CreateOrJoinScreen> {
                 style: textTheme.bodyMedium?.copyWith(color: AppColors.inkMuted),
               ),
               const Spacer(),
-              AuthPrimaryButton(
+              BondButton(
                 label: 'Create our space',
                 loading: _creating,
                 onPressed: _create,

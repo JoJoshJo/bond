@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../shared/dev/style_gallery_screen.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../auth/application/auth_providers.dart';
 
@@ -39,6 +40,16 @@ class HomePlaceholderScreen extends ConsumerWidget {
                 style: textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
               ),
               const SizedBox(height: 32),
+              // TEMPORARY: on-device review of the design system.
+              OutlinedButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const StyleGalleryScreen(),
+                  ),
+                ),
+                child: const Text('View design system'),
+              ),
+              const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => ref.read(authRepositoryProvider).signOut(),
                 child: const Text('Sign out'),

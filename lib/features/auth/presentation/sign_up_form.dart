@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../application/auth_providers.dart';
 import 'check_email_screen.dart';
-import 'widgets/auth_widgets.dart';
+import '../../../shared/utils/error_messages.dart';
+import '../../../shared/widgets/widgets.dart';
 
 /// Email + password sign-up with an 18+ age gate and terms agreement.
 /// With "Confirm email" ON, signup creates the user but no session; we route to
@@ -56,7 +57,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authErrorMessage(error))),
+          SnackBar(content: Text(friendlyError(error))),
         );
       }
     } finally {
@@ -71,7 +72,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AuthTextField(
+          BondTextField(
             controller: _email,
             label: 'Email',
             keyboardType: TextInputType.emailAddress,
@@ -83,7 +84,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                     : null,
           ),
           const SizedBox(height: 14),
-          AuthTextField(
+          BondTextField(
             controller: _password,
             label: 'Password',
             obscureText: _obscure,
@@ -98,7 +99,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             ),
           ),
           const SizedBox(height: 14),
-          AuthTextField(
+          BondTextField(
             controller: _confirm,
             label: 'Confirm password',
             obscureText: _obscure,
@@ -120,7 +121,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             child: const Text('I agree to the Terms of Service & Privacy Policy'),
           ),
           const SizedBox(height: 8),
-          AuthPrimaryButton(
+          BondButton(
             label: 'Create account',
             loading: _loading,
             onPressed: _canSubmit ? _submit : null,

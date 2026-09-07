@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/auth_providers.dart';
 import 'forgot_password_screen.dart';
-import 'widgets/auth_widgets.dart';
+import '../../../shared/utils/error_messages.dart';
+import '../../../shared/widgets/widgets.dart';
 
 /// Email + password sign-in. On success the auth stream fires and the AuthGate
 /// re-routes to the home placeholder — no manual navigation here.
@@ -41,7 +42,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authErrorMessage(error))),
+          SnackBar(content: Text(friendlyError(error))),
         );
       }
     } finally {
@@ -56,7 +57,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AuthTextField(
+          BondTextField(
             controller: _email,
             label: 'Email',
             keyboardType: TextInputType.emailAddress,
@@ -68,7 +69,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                     : null,
           ),
           const SizedBox(height: 14),
-          AuthTextField(
+          BondTextField(
             controller: _password,
             label: 'Password',
             obscureText: _obscure,
@@ -95,7 +96,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
             ),
           ),
           const SizedBox(height: 8),
-          AuthPrimaryButton(
+          BondButton(
             label: 'Sign in',
             loading: _loading,
             onPressed: _submit,

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/auth_providers.dart';
-import 'widgets/auth_widgets.dart';
+import '../../../shared/theme/app_colors.dart';
+import '../../../shared/utils/error_messages.dart';
+import '../../../shared/widgets/widgets.dart';
 
 /// Shown right after signup. With "Confirm email" ON, the user must click the
 /// link in their inbox before a session exists. They then return and sign in
@@ -31,7 +33,7 @@ class _CheckEmailScreenState extends ConsumerState<CheckEmailScreen> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authErrorMessage(error))),
+          SnackBar(content: Text(friendlyError(error))),
         );
       }
     } finally {
@@ -52,7 +54,7 @@ class _CheckEmailScreenState extends ConsumerState<CheckEmailScreen> {
             children: [
               const SizedBox(height: 12),
               const Icon(Icons.mark_email_unread_outlined,
-                  size: 64, color: Color(0xFF3FD6A8)),
+                  size: 64, color: AppColors.mint),
               const SizedBox(height: 24),
               Text('Check your email', style: textTheme.headlineSmall),
               const SizedBox(height: 12),
@@ -62,7 +64,7 @@ class _CheckEmailScreenState extends ConsumerState<CheckEmailScreen> {
                 style: textTheme.bodyMedium,
               ),
               const SizedBox(height: 32),
-              AuthPrimaryButton(
+              BondButton(
                 label: 'Resend email',
                 loading: _resending,
                 onPressed: _resend,
