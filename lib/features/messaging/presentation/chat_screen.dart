@@ -3,14 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/storage_providers.dart';
-import '../../../shared/dev/style_gallery_screen.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
-import '../../auth/application/auth_providers.dart';
-import '../../games/presentation/games_hub_screen.dart';
-import '../../memories/presentation/memory_vault_screen.dart';
-import '../../prompts/presentation/widgets/prompt_banner.dart';
 import '../application/chat_controller.dart';
 import '../data/chat_message.dart';
 import 'widgets/message_bubble.dart';
@@ -45,38 +40,10 @@ class ChatScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        title: Text(coupleName, style: AppText.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.photo_library_outlined),
-            tooltip: 'Memories',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => MemoryVaultScreen(coupleId: coupleId),
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.sports_esports_outlined),
-            tooltip: 'Games',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const GamesHubScreen()),
-            ),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (v) => _onMenu(context, ref, v),
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'design', child: Text('View design system')),
-              PopupMenuItem(value: 'signout', child: Text('Sign out')),
-            ],
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(coupleName, style: AppText.title)),
       body: SafeArea(
         child: Column(
           children: [
-            PromptBanner(coupleId: coupleId),
             Expanded(
               child: state.loading
                   ? const Center(child: CircularProgressIndicator())
@@ -143,17 +110,6 @@ class ChatScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  void _onMenu(BuildContext context, WidgetRef ref, String value) {
-    switch (value) {
-      case 'design':
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const StyleGalleryScreen()),
-        );
-      case 'signout':
-        ref.read(authRepositoryProvider).signOut();
-    }
   }
 
   void _showActions(

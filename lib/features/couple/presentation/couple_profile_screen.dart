@@ -1,0 +1,216 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../shared/dev/ai_test_screen.dart';
+import '../../../shared/dev/style_gallery_screen.dart';
+import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_typography.dart';
+import '../../../shared/utils/error_messages.dart';
+import '../../../shared/widgets/widgets.dart';
+import '../../auth/application/auth_providers.dart';
+import '../../creature/presentation/assistant_stub.dart';
+import '../application/couple_providers.dart';
+
+/// The "Us" tab: couple identity + settings. Rename the space, set the start
+/// date, the privacy promise, the floating-assistant toggle, dev tools, sign out.
+class CoupleProfileScreen extends ConsumerStatefulWidget {
+  const CoupleProfileScreen({
+    super.key,
+    required this.coupleId,
+    required this.coupleName,
+  });
+
+  final String coupleId;
+  final String coupleName;
+
+  @override
+  ConsumerState<CoupleProfileScreen> createState() =>
+      _CoupleProfileScreenState();
+}
+
+class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
+  late String _name = widget.coupleName;
+
+  Future<void> _rename() async {
+    final controller = TextEditingController(text: _name);
+    final newName = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: AppSpacing.screenPad,
+          right: AppSpacing.screenPad,
+          top: AppSpacing.xxl,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + AppSpacing.xxl,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Name your space', style: AppText.title),
+            const SizedBox(height: AppSpacing.md),
+            BondTextField(controller: controller, label: 'Couple name'),
+            const SizedBox(height: AppSpacing.lg),
+            BondButton(
+              label: 'Save',
+              onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (newName == null || newName.isEmpty || newName == _name) return;
+    setState(() => _name = newName);
+    try {
+      await ref
+          .read(coupleRepositoryProvider)
+          .updateCoupleName(widget.coupleId, newName);
+      ref.invalidate(myMembershipProvider);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      }
+    }
+  }
+
+  Future<void> _pickStartDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(1990),
+      lastDate: now,
+    );
+    if (picked == null) return;
+    try {
+      await ref
+          .read(coupleRepositoryProvider)
+          .updateRelationshipStartDate(widget.coupleId, picked);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Start date saved.')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final floating = ref.watch(assistantFloatingEnabledProvider);
+
+    return Scaffold(
+      backgroundColor: AppColors.bg,
+      appBar: AppBar(title: Text('Us', style: AppText.title)),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.screenPad),
+          children: [
+            BondCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Our space', style: AppText.bodySmall),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(_name, style: AppText.headline),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _section('Settings'),
+            BondCard(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Column(
+                children: [
+                  BondListTile(
+                    leadingIcon: Icons.favorite_border_rounded,
+                    title: 'Rename our space',
+                    onTap: _rename,
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.inkFaint),
+                  ),
+                  const Divider(),
+                  BondListTile(
+                    leadingIcon: Icons.calendar_today_rounded,
+                    title: 'Relationship start date',
+                    onTap: _pickStartDate,
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.inkFaint),
+                  ),
+                  const Divider(),
+                  SwitchListTile(
+                    value: floating,
+                    title: Text('Floating assistant', style: AppText.bodyLarge),
+                    subtitle: Text('Quick-access creature button',
+                        style: AppText.bodySmall),
+                    onChanged: (v) => ref
+                        .read(assistantFloatingEnabledProvider.notifier)
+                        .state = v,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _section('Privacy'),
+            BondCard(
+              color: AppColors.mintWash,
+              elevated: false,
+              child: Text(
+                'We never sell your data, never train AI on it, and only the two '
+                'of you can ever see your stuff. 🤍',
+                style: AppText.bodyMedium,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _section('Developer'),
+            BondCard(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Column(
+                children: [
+                  BondListTile(
+                    leadingIcon: Icons.palette_outlined,
+                    title: 'Design system',
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const StyleGalleryScreen())),
+                  ),
+                  const Divider(),
+                  BondListTile(
+                    leadingIcon: Icons.smart_toy_outlined,
+                    title: 'AI router test',
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const AiTestScreen())),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            BondButton(
+              label: 'Sign out',
+              variant: BondButtonVariant.secondary,
+              onPressed: () => ref.read(authRepositoryProvider).signOut(),
+            ),
+            const SizedBox(height: AppSpacing.huge),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _section(String label) => Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm, left: AppSpacing.xs),
+        child: Text(label.toUpperCase(),
+            style: AppText.bodySmall.copyWith(
+                color: AppColors.mintDeep,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2)),
+      );
+}

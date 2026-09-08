@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../auth/application/auth_providers.dart';
+import '../../creature/application/creature_controller.dart';
 import '../data/game_definitions.dart';
 import '../data/game_models.dart';
 import '../data/game_repository.dart';
@@ -76,12 +78,14 @@ class GameState {
 }
 
 class GameController extends StateNotifier<GameState> {
-  GameController(this._repo, this._sessionId) : super(const GameState()) {
+  GameController(this._repo, this._sessionId, {this.onCompleted})
+      : super(const GameState()) {
     _init();
   }
 
   final GameRepository _repo;
   final String _sessionId;
+  final VoidCallback? onCompleted;
   RealtimeChannel? _channel;
   bool _completing = false;
 
@@ -136,7 +140,9 @@ class GameController extends StateNotifier<GameState> {
       final newScore = await _repo.complete(_sessionId, def.xp);
       if (!mounted) return;
       state = state.copyWith(newScore: newScore);
-      // TODO(creature): trigger baby-AI reaction to a completed game here.
+      // Creature reaction hook: bond_score changed → nudge the creature state so
+      // Home reflects the new connection (and can celebrate).
+      onCompleted?.call();
     } finally {
       _completing = false;
     }
@@ -152,5 +158,10 @@ class GameController extends StateNotifier<GameState> {
 
 final gameControllerProvider = StateNotifierProvider.autoDispose
     .family<GameController, GameState, String>((ref, sessionId) {
-  return GameController(ref.watch(gameRepositoryProvider), sessionId);
+  return GameController(
+    ref.watch(gameRepositoryProvider),
+    sessionId,
+    onCompleted: () =>
+        ref.read(creatureReactionProvider.notifier).state++,
+  );
 });
