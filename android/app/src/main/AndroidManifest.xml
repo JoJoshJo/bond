@@ -4,8 +4,11 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Camera: scanning a partner's invite QR (mobile_scanner) + photo capture. -->
     <uses-permission android:name="android.permission.CAMERA"/>
-    <!-- Microphone: recording voice notes (record). -->
+    <!-- Microphone: recording voice notes (record) + talking to the creature. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Location: only requested when the creature searches nearby places. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="bond"
         android:name="${applicationName}"

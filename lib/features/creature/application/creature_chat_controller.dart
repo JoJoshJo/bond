@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../ai/application/ai_providers.dart';
+import '../../ai/data/ai_models.dart';
 import '../../couple/application/couple_providers.dart';
 import '../data/creature_chat_models.dart';
 import '../data/creature_persona.dart';
+import '../data/location_service.dart';
 import 'creature_controller.dart';
 
 const _foggy =
@@ -23,6 +25,11 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
   final String _coupleId;
   bool _sending = false;
 
+  // Session-only location cache (memory; cleared when the chat closes). Never
+  // stored server-side; only sent to our function per-request.
+  double? _lat;
+  double? _lng;
+
   bool get sending => _sending;
 
   Future<void> send(String input) async {
@@ -37,34 +44,61 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
     ];
 
     try {
-      final reply = await _ref
-          .read(aiRepositoryProvider)
-          .getAI('creature', CreaturePersona.prompt(text), context: _context())
-          .timeout(const Duration(seconds: 25));
-      _replaceThinking(reply.text.trim().isEmpty ? _foggy : reply.text.trim());
+      var reply = await _ask(text);
+
+      // Location handshake: creature wants a place search but we have no coords.
+      if (reply.needsLocation && _lat == null) {
+        final loc = await const LocationService().current();
+        if (loc != null) {
+          _lat = loc.lat;
+          _lng = loc.lng;
+          reply = await _ask(text); // resend, now with coordinates
+        } else {
+          _replaceThinking(
+              'I\'d love to find spots near you two — turn on location for BOND and ask me again 🤍');
+          return;
+        }
+      }
+
+      _replaceThinking(
+        reply.text.trim().isEmpty ? _foggy : reply.text.trim(),
+        movies: reply.movies,
+        places: reply.places,
+      );
     } catch (_) {
-      // Router already retried transient failures; stay in character.
       _replaceThinking(_foggy);
     } finally {
       _sending = false;
     }
   }
 
-  /// Minimal context only — couple name + mood label. No messages/personal data.
+  Future<AiResponse> _ask(String text) => _ref
+      .read(aiRepositoryProvider)
+      .getAI('creature', CreaturePersona.prompt(text), context: _context())
+      .timeout(const Duration(seconds: 30));
+
+  /// Minimal context: couple name + mood; plus lat/lng ONLY when we already have
+  /// it (opt-in, per-request). No messages/personal data.
   Map<String, dynamic> _context() {
     final membership = _ref.read(myMembershipProvider).asData?.value;
     final mood = _ref.read(creatureStateProvider(_coupleId)).asData?.value.mood;
     final ctx = <String, dynamic>{'coupleName': membership?.coupleName ?? 'you two'};
     if (mood != null) ctx['mood'] = mood.name;
+    if (_lat != null && _lng != null) {
+      ctx['lat'] = _lat;
+      ctx['lng'] = _lng;
+    }
     return ctx;
   }
 
-  void _replaceThinking(String text) {
+  void _replaceThinking(String text,
+      {List<MovieCard> movies = const [], List<PlaceCard> places = const []}) {
     if (!mounted) return;
     final list = [...state];
     final i = list.lastIndexWhere((m) => m.thinking);
     if (i >= 0) {
-      list[i] = CreatureChatMessage(fromCreature: true, text: text);
+      list[i] = CreatureChatMessage(
+          fromCreature: true, text: text, movies: movies, places: places);
       state = list;
     }
   }

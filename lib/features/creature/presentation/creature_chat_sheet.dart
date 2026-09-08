@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
+import '../../../shared/widgets/widgets.dart';
 import '../application/creature_chat_controller.dart';
 import '../application/creature_controller.dart';
+import '../../ai/data/ai_models.dart';
 import '../data/creature_chat_models.dart';
 import '../data/creature_models.dart';
 import 'creature_view.dart';
@@ -151,24 +154,256 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
 
   Widget _bubble(CreatureChatMessage m) {
     final mine = !m.fromCreature;
-    return Align(
-      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-        constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.72),
-        decoration: BoxDecoration(
-          color: mine ? AppColors.mint : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: mine ? null : Border.all(color: AppColors.border),
+    return Column(
+      crossAxisAlignment:
+          mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.72),
+            decoration: BoxDecoration(
+              color: mine ? AppColors.mint : AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: mine ? null : Border.all(color: AppColors.border),
+            ),
+            child: m.thinking
+                ? const Text('…', style: TextStyle(fontSize: 20))
+                : Text(m.text,
+                    style: AppText.bodyMedium.copyWith(
+                        color: mine ? AppColors.onMint : AppColors.ink)),
+          ),
         ),
-        child: m.thinking
-            ? const Text('…', style: TextStyle(fontSize: 20))
-            : Text(m.text,
-                style: AppText.bodyMedium
-                    .copyWith(color: mine ? AppColors.onMint : AppColors.ink)),
+        if (m.movies.isNotEmpty) _movieRow(m.movies),
+        if (m.places.isNotEmpty) _placeRow(m.places),
+      ],
+    );
+  }
+
+  Widget _placeRow(List<PlaceCard> places) {
+    return SizedBox(
+      height: 190,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        itemCount: places.length,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+        itemBuilder: (context, i) => _placeCard(places[i]),
+      ),
+    );
+  }
+
+  Widget _placeCard(PlaceCard p) {
+    return GestureDetector(
+      onTap: () => _openPlace(p),
+      child: SizedBox(
+        width: 170,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: SizedBox(
+                height: 110,
+                width: 170,
+                child: p.photoUrl == null
+                    ? Container(
+                        color: AppColors.surfaceAlt,
+                        child: const Icon(Icons.place_outlined,
+                            color: AppColors.inkFaint),
+                      )
+                    : Image.network(p.photoUrl!, fit: BoxFit.cover,
+                        errorBuilder: (c, e, s) => Container(
+                            color: AppColors.surfaceAlt,
+                            child: const Icon(Icons.place_outlined,
+                                color: AppColors.inkFaint))),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(p.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              [
+                if (p.category.isNotEmpty) p.category,
+                if (p.distance != null) _dist(p.distance!),
+              ].join('  ·  '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _dist(int m) => m >= 1000
+      ? '${(m / 1000).toStringAsFixed(1)} km'
+      : '$m m';
+
+  void _openPlace(PlaceCard p) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (p.photoUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: Image.network(p.photoUrl!,
+                    height: 160, fit: BoxFit.cover,
+                    errorBuilder: (c, e, s) => const SizedBox.shrink()),
+              ),
+            const SizedBox(height: AppSpacing.md),
+            Text(p.name, style: AppText.title),
+            const SizedBox(height: 4),
+            Text(
+              [
+                if (p.category.isNotEmpty) p.category,
+                if (p.rating != null) '⭐ ${p.rating}',
+                if (p.distance != null) _dist(p.distance!),
+              ].join('  ·  '),
+              style: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
+            ),
+            if (p.address.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(p.address, style: AppText.bodyMedium),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            BondButton(
+              label: 'Open in Maps',
+              icon: Icons.map_outlined,
+              onPressed: () => _openInMaps(p),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openInMaps(PlaceCard p) async {
+    final q = (p.lat != null && p.lng != null)
+        ? '${p.lat},${p.lng}'
+        : Uri.encodeComponent(p.name);
+    final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$q');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Widget _movieRow(List<MovieCard> movies) {
+    return SizedBox(
+      height: 216,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        itemCount: movies.length,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+        itemBuilder: (context, i) => _movieCard(movies[i]),
+      ),
+    );
+  }
+
+  Widget _movieCard(MovieCard m) {
+    return GestureDetector(
+      onTap: () => _openMovie(m),
+      child: SizedBox(
+        width: 120,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: AspectRatio(
+                aspectRatio: 2 / 3,
+                child: m.posterUrl == null
+                    ? Container(
+                        color: AppColors.surfaceAlt,
+                        child: const Icon(Icons.movie_outlined,
+                            color: AppColors.inkFaint),
+                      )
+                    : Image.network(m.posterUrl!, fit: BoxFit.cover),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(m.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              [
+                if (m.year.isNotEmpty) m.year,
+                if (m.rating > 0) '⭐ ${m.rating}',
+              ].join('  ·  '),
+              style: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openMovie(MovieCard m) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (m.posterUrl != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    child: Image.network(m.posterUrl!, width: 100),
+                  ),
+                const SizedBox(width: AppSpacing.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(m.title, style: AppText.title),
+                      const SizedBox(height: 4),
+                      Text(
+                        [
+                          if (m.year.isNotEmpty) m.year,
+                          if (m.rating > 0) '⭐ ${m.rating}',
+                        ].join('  ·  '),
+                        style: AppText.bodySmall
+                            .copyWith(color: AppColors.inkMuted),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (m.overview.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.lg),
+              Text(m.overview, style: AppText.bodyMedium),
+            ],
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
       ),
     );
   }
