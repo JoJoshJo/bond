@@ -7,6 +7,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../games/presentation/games_hub_screen.dart';
 import '../../prompts/presentation/widgets/prompt_banner.dart';
 import '../application/chat_controller.dart';
 import '../data/chat_message.dart';
@@ -45,6 +46,13 @@ class ChatScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(coupleName, style: AppText.title),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.sports_esports_outlined),
+            tooltip: 'Games',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const GamesHubScreen()),
+            ),
+          ),
           PopupMenuButton<String>(
             onSelected: (v) => _onMenu(context, ref, v),
             itemBuilder: (_) => const [
