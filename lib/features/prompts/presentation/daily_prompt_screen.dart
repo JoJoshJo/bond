@@ -24,10 +24,13 @@ class DailyPromptScreen extends ConsumerStatefulWidget {
 
 class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
   final _answer = TextEditingController();
+  final _edit = TextEditingController();
+  bool _editing = false;
 
   @override
   void dispose() {
     _answer.dispose();
+    _edit.dispose();
     super.dispose();
   }
 
@@ -49,7 +52,7 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
             child: BondLoader(),
           ),
         PromptPhase.answer => _answerView(state, controller),
-        PromptPhase.waiting => _waitingView(state),
+        PromptPhase.waiting => _waitingView(state, controller),
         PromptPhase.revealed => _revealView(state, controller),
       },
     );
@@ -133,7 +136,7 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
     );
   }
 
-  Widget _waitingView(PromptState state) {
+  Widget _waitingView(PromptState state, PromptController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -154,15 +157,69 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
         const SizedBox(height: AppSpacing.xl),
         BondCard(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('YOUR ANSWER',
-                  style: AppText.bodySmall.copyWith(
-                      color: AppColors.mintDeep,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2)),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text('YOUR ANSWER',
+                        style: AppText.bodySmall.copyWith(
+                            color: AppColors.mintDeep,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2)),
+                  ),
+                  if (!_editing)
+                    TextButton(
+                      onPressed: () {
+                        _edit.text = state.myResponse?.response ?? '';
+                        setState(() => _editing = true);
+                      },
+                      child: const Text('Edit answer'),
+                    ),
+                ],
+              ),
               const SizedBox(height: AppSpacing.sm),
-              Text(state.myResponse?.response ?? '', style: AppText.bodyLarge),
+              if (_editing) ...[
+                TextField(
+                  controller: _edit,
+                  minLines: 3,
+                  maxLines: 8,
+                  autofocus: true,
+                  style: AppText.bodyMedium,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: AppColors.surfaceAlt,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    Expanded(
+                      child: BondButton(
+                        label: 'Save',
+                        loading: state.submitting,
+                        onPressed: () async {
+                          await controller.editAnswer(_edit.text);
+                          if (mounted) setState(() => _editing = false);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: BondButton(
+                        label: 'Cancel',
+                        variant: BondButtonVariant.ghost,
+                        onPressed: () => setState(() => _editing = false),
+                      ),
+                    ),
+                  ],
+                ),
+              ] else
+                Text(state.myResponse?.response ?? '', style: AppText.bodyLarge),
             ],
           ),
         ),

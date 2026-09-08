@@ -34,8 +34,7 @@ class ChatScreen extends ConsumerWidget {
 
     String? replyingText;
     if (state.replyingToId != null) {
-      final t = _findById(state.messages, state.replyingToId!);
-      replyingText = t?.unsent == true ? 'Unsent message' : t?.content;
+      replyingText = _findById(state.messages, state.replyingToId!)?.snippet;
     }
 
     return Scaffold(

@@ -44,6 +44,8 @@ class MemoryTile extends StatelessWidget {
   }
 
   Widget _videoTile() {
+    // Play-icon placeholder. Real first-frame thumbnails are on the punch-list
+    // (deferred: needs a native thumbnail package + generate-on-upload).
     return Container(
       color: const Color(0xFF1E2A25),
       child: const Center(

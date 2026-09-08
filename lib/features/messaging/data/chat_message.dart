@@ -60,6 +60,16 @@ class ChatMessage {
   bool get isVoice => type == 'voice';
   bool get isImage => type == 'image';
 
+  /// A friendly one-line label for quotes/reply previews — never the raw storage
+  /// path. Null when there's nothing to preview (e.g. soft_ping).
+  String? get snippet {
+    if (unsent) return 'Unsent message';
+    if (isText) return content;
+    if (isImage) return '📷 Photo';
+    if (isVoice) return '🎤 Voice note';
+    return null;
+  }
+
   bool isMine(String uid) => senderId == uid;
   bool isDeletedForMe(String uid) => deletedFor.contains(uid);
 

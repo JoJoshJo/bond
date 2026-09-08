@@ -113,7 +113,7 @@ class MessageBubble extends StatelessWidget {
         border: Border(left: BorderSide(color: fg.withValues(alpha: 0.4), width: 2)),
       ),
       child: Text(
-        repliedTo!.unsent ? 'Unsent message' : (repliedTo!.content ?? ''),
+        repliedTo!.snippet ?? '',
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: AppText.bodySmall.copyWith(color: fg.withValues(alpha: 0.85)),

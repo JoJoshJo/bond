@@ -50,6 +50,20 @@ class PromptRepository {
     });
   }
 
+  /// Update my own answer (allowed only pre-reveal, gated in the controller).
+  /// RLS lets a user update only their own row.
+  Future<void> updateResponse({
+    required String promptId,
+    required String userId,
+    required String response,
+  }) async {
+    await _client
+        .from('prompt_responses')
+        .update({'response': response})
+        .eq('prompt_id', promptId)
+        .eq('user_id', userId);
+  }
+
   /// Responses visible to me under the mutual-lock: always my own; the
   /// partner's only once both exist. So `length == 2` ⇒ reveal.
   Future<List<PromptResponse>> fetchResponses(String promptId) async {

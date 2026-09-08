@@ -27,10 +27,11 @@ class CreatureView extends StatelessWidget {
 
     Widget creature = _body(glow, eyesClosed);
 
-    // Gentle, slow breathing loop.
+    // Gentle, slow breathing + a soft float bob.
     creature = creature
         .animate(onPlay: (c) => c.repeat(reverse: true))
-        .scaleXY(begin: 0.97, end: breatheTo, duration: 2600.ms, curve: Curves.easeInOut);
+        .scaleXY(begin: 0.98, end: breatheTo, duration: 3000.ms, curve: Curves.easeInOut)
+        .moveY(begin: 4, end: -6, duration: 3000.ms, curve: Curves.easeInOut);
 
     if (sparkles) {
       creature = Stack(
@@ -45,7 +46,28 @@ class CreatureView extends StatelessWidget {
       );
     }
 
-    return SizedBox(width: size * 1.4, height: size * 1.4, child: Center(child: creature));
+    return SizedBox(
+      width: size * 1.5,
+      height: size * 1.5,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // soft grounding shadow
+          Align(
+            alignment: const Alignment(0, 0.72),
+            child: Container(
+              height: size * 0.09,
+              width: size * 0.62,
+              decoration: BoxDecoration(
+                color: AppColors.mint.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(size),
+              ),
+            ),
+          ),
+          creature,
+        ],
+      ),
+    );
   }
 
   Widget _body(double glowOpacity, bool eyesClosed) {
@@ -56,20 +78,45 @@ class CreatureView extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const RadialGradient(
-          colors: [AppColors.mintSoft, AppColors.mint],
-          stops: [0.2, 1.0],
+          center: Alignment(-0.3, -0.4), // light from upper-left
+          radius: 1.05,
+          colors: [Color(0xFFCDEFE0), AppColors.mintSoft, AppColors.mint],
+          stops: [0.0, 0.45, 1.0],
         ),
         boxShadow: [
+          // wide ambient glow
           BoxShadow(
             color: AppColors.mint.withValues(alpha: glowOpacity),
-            blurRadius: size * 0.4,
-            spreadRadius: size * 0.05,
+            blurRadius: size * 0.55,
+            spreadRadius: size * 0.06,
+          ),
+          // tighter inner glow for depth
+          BoxShadow(
+            color: AppColors.mint.withValues(alpha: glowOpacity * 0.6),
+            blurRadius: size * 0.18,
           ),
         ],
       ),
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // top sheen highlight
+          Align(
+            alignment: const Alignment(-0.35, -0.55),
+            child: Container(
+              height: size * 0.34,
+              width: size * 0.42,
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.5),
+                    Colors.white.withValues(alpha: 0.0),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(size),
+              ),
+            ),
+          ),
           // cream belly
           Align(
             alignment: const Alignment(0, 0.35),

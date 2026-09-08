@@ -138,6 +138,28 @@ class PromptController extends StateNotifier<PromptState> {
     }
   }
 
+  /// Edit my answer — allowed ONLY while waiting (I've answered, partner hasn't).
+  /// Once revealed it's locked (the partner has seen it). Mutual-lock preserved:
+  /// this only updates my own row, pre-reveal.
+  Future<void> editAnswer(String text) async {
+    final prompt = state.prompt;
+    final answer = text.trim();
+    if (prompt == null ||
+        answer.isEmpty ||
+        state.phase != PromptPhase.waiting ||
+        state.submitting) {
+      return;
+    }
+    state = state.copyWith(submitting: true);
+    try {
+      await _repo.updateResponse(
+          promptId: prompt.id, userId: _me, response: answer);
+      await _refreshResponses();
+    } finally {
+      if (mounted) state = state.copyWith(submitting: false);
+    }
+  }
+
   Future<void> requestNew() async {
     final prompt = state.prompt;
     if (prompt == null || state.requesting) return;
