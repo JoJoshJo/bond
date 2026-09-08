@@ -3,12 +3,19 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import 'dart:io';
+
 import '../../auth/application/auth_providers.dart';
 import '../data/chat_message.dart';
 import '../data/message_repository.dart';
+import '../data/storage_repository.dart';
 
 final messageRepositoryProvider = Provider<MessageRepository>(
   (ref) => MessageRepository(ref.watch(supabaseClientProvider)),
+);
+
+final storageRepositoryProvider = Provider<StorageRepository>(
+  (ref) => StorageRepository(ref.watch(supabaseClientProvider)),
 );
 
 /// Immutable chat state.
@@ -43,12 +50,13 @@ class ChatState {
 /// Chat controller for one couple. Owns the realtime channel and disposes it
 /// when the provider is torn down (autoDispose → leaving the screen).
 class ChatController extends StateNotifier<ChatState> {
-  ChatController(this._repo, this._coupleId, this._uuid)
+  ChatController(this._repo, this._storage, this._coupleId, this._uuid)
       : super(const ChatState()) {
     _init();
   }
 
   final MessageRepository _repo;
+  final StorageRepository _storage;
   final String _coupleId;
   final Uuid _uuid;
   RealtimeChannel? _channel;
@@ -149,23 +157,138 @@ class ChatController extends StateNotifier<ChatState> {
     }
   }
 
+  /// Optimistic voice send: show a local bubble, upload the file, then insert.
+  Future<void> sendVoice(String localFilePath) async {
+    final id = _uuid.v4();
+    final path = _storage.voicePath(_coupleId, id);
+    _appendOptimisticMedia(id: id, type: 'voice', localPath: localFilePath);
+    await _uploadAndInsert(
+      id: id,
+      type: 'voice',
+      objectPath: path,
+      file: File(localFilePath),
+      contentType: 'audio/mp4',
+    );
+  }
+
+  /// Optimistic photo send: compress, show local bubble, upload, then insert.
+  Future<void> sendImage(String localFilePath) async {
+    final id = _uuid.v4();
+    _appendOptimisticMedia(id: id, type: 'image', localPath: localFilePath);
+    final compressed = await _storage.compressImage(localFilePath, id);
+    // Swap preview to the compressed file so bubble matches what we upload.
+    _setLocalPath(id, compressed.path);
+    final path = _storage.photoPath(_coupleId, id);
+    await _uploadAndInsert(
+      id: id,
+      type: 'image',
+      objectPath: path,
+      file: compressed,
+      contentType: 'image/jpeg',
+    );
+  }
+
+  void _appendOptimisticMedia({
+    required String id,
+    required String type,
+    required String localPath,
+  }) {
+    final optimistic = ChatMessage(
+      id: id,
+      senderId: _me,
+      type: type,
+      content: null,
+      createdAt: DateTime.now(),
+      replyToId: state.replyingToId,
+      deliveryState: DeliveryState.sending,
+      localPath: localPath,
+    );
+    state = state.copyWith(
+      messages: [...state.messages, optimistic],
+      replyingToId: null,
+    );
+  }
+
+  Future<void> _uploadAndInsert({
+    required String id,
+    required String type,
+    required String objectPath,
+    required File file,
+    required String contentType,
+  }) async {
+    final idx = state.messages.indexWhere((m) => m.id == id);
+    final replyToId = idx >= 0 ? state.messages[idx].replyToId : null;
+    try {
+      await _storage.upload(objectPath, file, contentType);
+      await _repo.sendMedia(
+        id: id,
+        coupleId: _coupleId,
+        senderId: _me,
+        type: type,
+        path: objectPath,
+        replyToId: replyToId,
+      );
+      // Set content to the object path so the bubble can sign-on-view.
+      final at = state.messages.indexWhere((m) => m.id == id);
+      if (at >= 0) {
+        state = state.copyWith(
+          messages: _replaceAt(
+            at,
+            state.messages[at]
+                .copyWith(content: objectPath, deliveryState: DeliveryState.sent),
+          ),
+        );
+      }
+    } catch (_) {
+      _setDeliveryState(id, DeliveryState.failed);
+    }
+  }
+
+  void _setLocalPath(String id, String localPath) {
+    final idx = state.messages.indexWhere((m) => m.id == id);
+    if (idx < 0) return;
+    state = state.copyWith(
+        messages: _replaceAt(idx, state.messages[idx].copyWith(localPath: localPath)));
+  }
+
   Future<void> retry(String messageId) async {
     final idx = state.messages.indexWhere((m) => m.id == messageId);
     if (idx < 0) return;
     final m = state.messages[idx];
     _setDeliveryState(messageId, DeliveryState.sending);
-    try {
-      await _repo.sendText(
-        id: m.id,
-        coupleId: _coupleId,
-        senderId: _me,
-        content: m.content ?? '',
-        replyToId: m.replyToId,
-      );
-      _setDeliveryState(messageId, DeliveryState.sent);
-    } catch (_) {
-      _setDeliveryState(messageId, DeliveryState.failed);
+
+    if (m.isText) {
+      try {
+        await _repo.sendText(
+          id: m.id,
+          coupleId: _coupleId,
+          senderId: _me,
+          content: m.content ?? '',
+          replyToId: m.replyToId,
+        );
+        _setDeliveryState(messageId, DeliveryState.sent);
+      } catch (_) {
+        _setDeliveryState(messageId, DeliveryState.failed);
+      }
+      return;
     }
+
+    // Media retry: re-upload the local file (if still present) and re-insert.
+    final localPath = m.localPath;
+    if (localPath == null) {
+      _setDeliveryState(messageId, DeliveryState.failed);
+      return;
+    }
+    final objectPath = m.isVoice
+        ? _storage.voicePath(_coupleId, m.id)
+        : _storage.photoPath(_coupleId, m.id);
+    await _uploadAndInsert(
+      id: m.id,
+      type: m.type,
+      objectPath: objectPath,
+      file: File(localPath),
+      contentType: m.isVoice ? 'audio/mp4' : 'image/jpeg',
+    );
   }
 
   void setReplyingTo(String? messageId) =>
@@ -259,6 +382,7 @@ final chatControllerProvider = StateNotifierProvider.autoDispose
     .family<ChatController, ChatState, String>((ref, coupleId) {
   return ChatController(
     ref.watch(messageRepositoryProvider),
+    ref.watch(storageRepositoryProvider),
     coupleId,
     const Uuid(),
   );

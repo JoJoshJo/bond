@@ -4,6 +4,9 @@ import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_spacing.dart';
 import '../../../../shared/theme/app_typography.dart';
 import '../../data/chat_message.dart';
+import '../../data/storage_repository.dart';
+import 'image_bubble.dart';
+import 'voice_bubble.dart';
 
 /// A single chat bubble: mine (mint, right) vs partner (surface, left), with an
 /// optional quoted reply, reaction cluster, and delivery ticks for my messages.
@@ -13,6 +16,7 @@ class MessageBubble extends StatelessWidget {
     required this.message,
     required this.isMine,
     required this.currentUserId,
+    required this.storage,
     this.repliedTo,
     this.onLongPress,
     this.onRetry,
@@ -21,6 +25,7 @@ class MessageBubble extends StatelessWidget {
   final ChatMessage message;
   final bool isMine;
   final String currentUserId;
+  final StorageRepository storage;
   final ChatMessage? repliedTo;
   final VoidCallback? onLongPress;
   final VoidCallback? onRetry;
@@ -29,7 +34,6 @@ class MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     if (message.unsent) return _tombstone();
 
-    final bg = isMine ? AppColors.mint : AppColors.surface;
     final fg = isMine ? AppColors.onMint : AppColors.ink;
     final align = isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start;
 
@@ -40,38 +44,62 @@ class MessageBubble extends StatelessWidget {
         children: [
           GestureDetector(
             onLongPress: onLongPress,
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.76,
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.md,
-              ),
-              decoration: BoxDecoration(
-                color: bg,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(AppRadius.lg),
-                  topRight: const Radius.circular(AppRadius.lg),
-                  bottomLeft: Radius.circular(isMine ? AppRadius.lg : AppRadius.xs),
-                  bottomRight: Radius.circular(isMine ? AppRadius.xs : AppRadius.lg),
-                ),
-                border: isMine ? null : Border.all(color: AppColors.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (repliedTo != null) _replyPreview(fg),
-                  Text(message.content ?? '',
-                      style: AppText.bodyMedium.copyWith(color: fg)),
-                ],
-              ),
-            ),
+            child: message.isImage ? _imageContent() : _framedContent(context, fg),
           ),
           if (message.reactions.isNotEmpty) _reactions(),
           if (isMine) _statusRow(),
         ],
       ),
+    );
+  }
+
+  /// Text/voice sit inside the colored, rounded bubble.
+  Widget _framedContent(BuildContext context, Color fg) {
+    final bg = isMine ? AppColors.mint : AppColors.surface;
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.76,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(AppRadius.lg),
+          topRight: const Radius.circular(AppRadius.lg),
+          bottomLeft: Radius.circular(isMine ? AppRadius.lg : AppRadius.xs),
+          bottomRight: Radius.circular(isMine ? AppRadius.xs : AppRadius.lg),
+        ),
+        border: isMine ? null : Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (repliedTo != null) _replyPreview(fg),
+          if (message.isVoice)
+            VoiceBubble(message: message, isMine: isMine, storage: storage)
+          else
+            Text(message.content ?? '',
+                style: AppText.bodyMedium.copyWith(color: fg)),
+        ],
+      ),
+    );
+  }
+
+  /// Images render edge-to-edge (no colored frame).
+  Widget _imageContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (repliedTo != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+            child: _replyPreview(AppColors.ink),
+          ),
+        ImageBubble(message: message, storage: storage),
+      ],
     );
   }
 

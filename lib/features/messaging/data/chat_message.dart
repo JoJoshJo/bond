@@ -38,18 +38,27 @@ class ChatMessage {
     this.unsent = false,
     this.deliveryState = DeliveryState.sent,
     this.reactions = const [],
+    this.localPath,
   });
 
   final String id;
   final String senderId;
-  final String type; // 'text' for now
-  final String? content;
+  final String type; // 'text' | 'voice' | 'image'
+  final String? content; // text body, or Storage object PATH for media
   final DateTime createdAt;
   final String? replyToId;
   final List<String> deletedFor;
   final bool unsent;
   final DeliveryState deliveryState;
   final List<MessageReaction> reactions;
+
+  /// Local-only: a device file path for optimistic media preview before the
+  /// upload finishes. Never comes from the DB.
+  final String? localPath;
+
+  bool get isText => type == 'text';
+  bool get isVoice => type == 'voice';
+  bool get isImage => type == 'image';
 
   bool isMine(String uid) => senderId == uid;
   bool isDeletedForMe(String uid) => deletedFor.contains(uid);
@@ -86,22 +95,25 @@ class ChatMessage {
   }
 
   ChatMessage copyWith({
+    String? content,
     List<String>? deletedFor,
     bool? unsent,
     DeliveryState? deliveryState,
     List<MessageReaction>? reactions,
+    String? localPath,
   }) {
     return ChatMessage(
       id: id,
       senderId: senderId,
       type: type,
-      content: content,
+      content: content ?? this.content,
       createdAt: createdAt,
       replyToId: replyToId,
       deletedFor: deletedFor ?? this.deletedFor,
       unsent: unsent ?? this.unsent,
       deliveryState: deliveryState ?? this.deliveryState,
       reactions: reactions ?? this.reactions,
+      localPath: localPath ?? this.localPath,
     );
   }
 }

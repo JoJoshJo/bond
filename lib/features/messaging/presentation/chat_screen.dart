@@ -26,6 +26,7 @@ class ChatScreen extends ConsumerWidget {
     final state = ref.watch(chatControllerProvider(coupleId));
     final controller = ref.read(chatControllerProvider(coupleId).notifier);
     final me = ref.read(messageRepositoryProvider).currentUserId ?? '';
+    final storage = ref.read(storageRepositoryProvider);
 
     // Visible = not "deleted for me", oldest→newest.
     final visible =
@@ -71,6 +72,7 @@ class ChatScreen extends ConsumerWidget {
                               message: m,
                               isMine: m.isMine(me),
                               currentUserId: me,
+                              storage: storage,
                               repliedTo: m.replyToId == null
                                   ? null
                                   : _findById(state.messages, m.replyToId!),
@@ -82,7 +84,9 @@ class ChatScreen extends ConsumerWidget {
                         ),
             ),
             MessageInput(
-              onSend: controller.sendText,
+              onSendText: controller.sendText,
+              onSendVoice: controller.sendVoice,
+              onSendImage: controller.sendImage,
               replyingToText: replyingText,
               onCancelReply: () => controller.setReplyingTo(null),
             ),
@@ -168,7 +172,7 @@ class ChatScreen extends ConsumerWidget {
               controller.setReplyingTo(m.id);
               Navigator.of(ctx).pop();
             }),
-            if (m.content != null)
+            if (m.isText && m.content != null)
               _action(ctx, Icons.copy, 'Copy', () {
                 Clipboard.setData(ClipboardData(text: m.content!));
                 Navigator.of(ctx).pop();

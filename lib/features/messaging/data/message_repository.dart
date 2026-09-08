@@ -56,6 +56,27 @@ class MessageRepository {
     });
   }
 
+  /// Insert a media message (voice/image). `content` is the Storage object path;
+  /// the client signs it on view. Same caller-supplied id for optimistic dedup.
+  Future<void> sendMedia({
+    required String id,
+    required String coupleId,
+    required String senderId,
+    required String type, // 'voice' | 'image'
+    required String path,
+    String? replyToId,
+  }) async {
+    await _client.from('messages').insert({
+      'id': id,
+      'couple_id': coupleId,
+      'sender_id': senderId,
+      'type': type,
+      'content': path,
+      'reply_to_id': replyToId,
+      'delivery_state': 'sent',
+    });
+  }
+
   /// Toggle a reaction: remove if this user already has this emoji, else add.
   Future<void> toggleReaction({
     required String messageId,
