@@ -5,17 +5,14 @@ import 'package:uuid/uuid.dart';
 
 import 'dart:io';
 
+import '../../../core/storage/storage_providers.dart';
+import '../../../core/storage/storage_repository.dart';
 import '../../auth/application/auth_providers.dart';
 import '../data/chat_message.dart';
 import '../data/message_repository.dart';
-import '../data/storage_repository.dart';
 
 final messageRepositoryProvider = Provider<MessageRepository>(
   (ref) => MessageRepository(ref.watch(supabaseClientProvider)),
-);
-
-final storageRepositoryProvider = Provider<StorageRepository>(
-  (ref) => StorageRepository(ref.watch(supabaseClientProvider)),
 );
 
 /// Immutable chat state.

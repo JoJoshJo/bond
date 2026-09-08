@@ -4,7 +4,7 @@ import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_spacing.dart';
 import '../../../../shared/theme/app_typography.dart';
 import '../../data/chat_message.dart';
-import '../../data/storage_repository.dart';
+import '../../../../core/storage/storage_repository.dart';
 import 'image_bubble.dart';
 import 'voice_bubble.dart';
 

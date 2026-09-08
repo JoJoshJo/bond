@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/storage/storage_providers.dart';
 import '../../../shared/dev/style_gallery_screen.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../games/presentation/games_hub_screen.dart';
+import '../../memories/presentation/memory_vault_screen.dart';
 import '../../prompts/presentation/widgets/prompt_banner.dart';
 import '../application/chat_controller.dart';
 import '../data/chat_message.dart';
@@ -46,6 +48,15 @@ class ChatScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(coupleName, style: AppText.title),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.photo_library_outlined),
+            tooltip: 'Memories',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => MemoryVaultScreen(coupleId: coupleId),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.sports_esports_outlined),
             tooltip: 'Games',

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_spacing.dart';
 import '../../data/chat_message.dart';
-import '../../data/storage_repository.dart';
+import '../../../../core/storage/storage_repository.dart';
 
 /// Image bubble: shows the local file while uploading, else a signed-URL
 /// network image. Tap → full-screen viewer.
