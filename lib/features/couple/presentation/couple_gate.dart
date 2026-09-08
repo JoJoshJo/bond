@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../home/presentation/home_placeholder_screen.dart';
+import '../../messaging/presentation/chat_screen.dart';
 import '../application/couple_providers.dart';
 import 'create_or_join_screen.dart';
 import 'invite_waiting_screen.dart';
 
 /// Routes a signed-in user by couple status:
 /// no couple → CreateOrJoin; pending (waiting for B) → InviteWaiting;
-/// active/sealed → Home.
+/// active/sealed → Chat (the linked landing for now).
 class CoupleGate extends ConsumerWidget {
   const CoupleGate({super.key});
 
@@ -28,7 +28,7 @@ class CoupleGate extends ConsumerWidget {
             coupleName: m.coupleName,
           );
         }
-        return const HomePlaceholderScreen();
+        return ChatScreen(coupleId: m.coupleId, coupleName: m.coupleName);
       },
     );
   }

@@ -7,7 +7,7 @@ import '../application/auth_providers.dart';
 import 'welcome_screen.dart';
 
 /// Root router. Watches the auth stream and shows the right screen:
-/// signed out → [WelcomeScreen], signed in → [HomePlaceholderScreen].
+/// signed out → [WelcomeScreen], signed in → [CoupleGate].
 /// Also silently captures the device timezone on the first signed-in event.
 class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({super.key});
