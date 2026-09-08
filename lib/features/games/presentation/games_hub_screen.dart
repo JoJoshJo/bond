@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
-import '../../../shared/utils/error_messages.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../application/game_controller.dart';
+import '../../../shared/utils/error_messages.dart';
 import '../data/game_definitions.dart';
 import 'game_play_screen.dart';
 
@@ -31,7 +31,9 @@ class _GamesHubScreenState extends ConsumerState<GamesHubScreen> {
       Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => GamePlayScreen(sessionId: session.id),
       ));
-    } catch (error) {
+    } catch (error, stack) {
+      // Keep the real error in logs; show the user a clean message.
+      debugPrint('start_or_resume_game failed: $error\n$stack');
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(friendlyError(error))));

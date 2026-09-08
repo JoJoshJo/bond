@@ -41,7 +41,9 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
       title: 'Today\'s question',
       showBack: true,
       scrollable: true,
-      child: switch (state.phase) {
+      child: state.error != null
+          ? _errorView(state.error!)
+          : switch (state.phase) {
         PromptPhase.loading => const Padding(
             padding: EdgeInsets.only(top: AppSpacing.huge),
             child: BondLoader(),
@@ -50,6 +52,26 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
         PromptPhase.waiting => _waitingView(state),
         PromptPhase.revealed => _revealView(state, controller),
       },
+    );
+  }
+
+  Widget _errorView(String error) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.xl),
+      child: BondCard(
+        child: Column(
+          children: [
+            const Icon(Icons.cloud_off_rounded,
+                size: 40, color: AppColors.inkFaint),
+            const SizedBox(height: AppSpacing.md),
+            Text(error,
+                textAlign: TextAlign.center, style: AppText.bodyMedium),
+            const SizedBox(height: AppSpacing.xs),
+            Text('Pull down to try again.',
+                textAlign: TextAlign.center, style: AppText.bodySmall),
+          ],
+        ),
+      ),
     );
   }
 

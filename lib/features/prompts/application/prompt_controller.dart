@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -20,6 +21,7 @@ class PromptState {
     this.partnerResponse,
     this.submitting = false,
     this.requesting = false,
+    this.error,
   });
 
   final PromptPhase phase;
@@ -28,6 +30,7 @@ class PromptState {
   final PromptResponse? partnerResponse;
   final bool submitting;
   final bool requesting;
+  final String? error;
 
   PromptState copyWith({
     PromptPhase? phase,
@@ -36,6 +39,7 @@ class PromptState {
     Object? partnerResponse = _s,
     bool? submitting,
     bool? requesting,
+    Object? error = _s,
   }) {
     return PromptState(
       phase: phase ?? this.phase,
@@ -47,6 +51,7 @@ class PromptState {
           : partnerResponse as PromptResponse?,
       submitting: submitting ?? this.submitting,
       requesting: requesting ?? this.requesting,
+      error: error == _s ? this.error : error as String?,
     );
   }
 
@@ -65,13 +70,22 @@ class PromptController extends StateNotifier<PromptState> {
   String get _me => _repo.currentUserId ?? '';
 
   Future<void> _init() async {
-    final recent = await _repo.recentContents(_coupleId);
-    final pick = PromptBank.pick(recent);
-    final prompt = await _repo.getOrCreateDaily(pick.content, pick.category);
-    if (!mounted) return;
-    state = state.copyWith(prompt: prompt);
-    await _refreshResponses();
-    _openChannel(prompt.id);
+    try {
+      final recent = await _repo.recentContents(_coupleId);
+      final pick = PromptBank.pick(recent);
+      final prompt = await _repo.getOrCreateDaily(pick.content, pick.category);
+      if (!mounted) return;
+      state = state.copyWith(prompt: prompt);
+      await _refreshResponses();
+      _openChannel(prompt.id);
+    } catch (e, st) {
+      // Keep the real error in logs; show the user a clean message (and don't
+      // spin forever).
+      debugPrint('daily prompt init failed: $e\n$st');
+      if (mounted) {
+        state = state.copyWith(error: 'Couldn\'t load today\'s question.');
+      }
+    }
   }
 
   void _openChannel(String promptId) {
