@@ -8,6 +8,7 @@ import '../../../shared/widgets/widgets.dart';
 import '../../creature/application/creature_controller.dart';
 import '../../creature/data/creature_models.dart';
 import '../../creature/presentation/assistant_stub.dart';
+import '../../creature/presentation/creature_chat_sheet.dart';
 import '../../creature/presentation/creature_view.dart';
 import '../../prompts/presentation/widgets/prompt_banner.dart';
 
@@ -27,7 +28,8 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.bg,
-      floatingActionButton: showAssistant ? const AssistantButton() : null,
+      floatingActionButton:
+          showAssistant ? AssistantButton(coupleId: coupleId) : null,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async => ref.invalidate(creatureStateProvider(coupleId)),
@@ -45,7 +47,11 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               Center(
-                child: CreatureView(mood: creature?.mood ?? CreatureMood.content),
+                child: GestureDetector(
+                  onTap: () => CreatureChatSheet.open(context, coupleId),
+                  child: CreatureView(
+                      mood: creature?.mood ?? CreatureMood.content),
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               _flameRow(creature),

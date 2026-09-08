@@ -14,7 +14,7 @@
 // ============================================================
 
 // ---------- Neutral shapes ----------
-type AIJob = "assistant" | "personality" | "content";
+type AIJob = "assistant" | "personality" | "content" | "creature";
 
 interface AIRequest {
   job: AIJob;
@@ -37,6 +37,7 @@ const CONFIG: Record<AIJob, string> = {
   assistant: "gemini",
   personality: "gemini",
   content: "gemini",
+  creature: "gemini", // the conversational companion; Claude-swappable later
 };
 
 // gemini-flash-latest = floating alias tracking Google's current stable flash

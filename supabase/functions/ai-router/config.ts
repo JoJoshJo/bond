@@ -9,6 +9,7 @@ export const CONFIG: Record<AIJob, string> = {
   assistant: "gemini",
   personality: "gemini",
   content: "gemini",
+  creature: "gemini", // the conversational companion; Claude-swappable later
 };
 
 // Per-provider model. Change here if a model is deprecated/renamed.

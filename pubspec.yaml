@@ -49,6 +49,7 @@ dependencies:
   flutter_image_compress: ^2.5.1
   path_provider: ^2.1.6
   video_player: ^2.14.0
+  speech_to_text: ^7.4.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

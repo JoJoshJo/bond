@@ -1,7 +1,7 @@
 // BOND's neutral, provider-agnostic shapes. The app and router only ever see
 // these; each provider's quirks are hidden inside its adapter.
 
-export type AIJob = "assistant" | "personality" | "content";
+export type AIJob = "assistant" | "personality" | "content" | "creature";
 
 export interface AIRequest {
   job: AIJob;
