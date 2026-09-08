@@ -7,6 +7,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../prompts/presentation/widgets/prompt_banner.dart';
 import '../application/chat_controller.dart';
 import '../data/chat_message.dart';
 import 'widgets/message_bubble.dart';
@@ -56,6 +57,7 @@ class ChatScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
+            PromptBanner(coupleId: coupleId),
             Expanded(
               child: state.loading
                   ? const Center(child: CircularProgressIndicator())
