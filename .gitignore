@@ -10,6 +10,11 @@ Thumbs.db
 # real Supabase URL + anon key live here (use env.example.json as the template)
 env.json
 
+# ---- Supabase CLI (local state; never commit secrets) ----
+supabase/.temp/
+supabase/.branches/
+**/supabase/.env
+
 # ---- Flutter / Dart ----
 .dart_tool/
 .flutter-plugins
