@@ -13,6 +13,7 @@ import '../../creature/presentation/assistant_stub.dart';
 import '../../legal/presentation/credits_screen.dart';
 import '../../legal/presentation/legal_screen.dart';
 import '../../calendar/presentation/calendar_screen.dart';
+import '../../insights/presentation/insights_screen.dart';
 import '../../premium/application/entitlement_providers.dart';
 import '../../premium/presentation/paywall_screen.dart';
 import '../../spicy/presentation/spicy_section.dart';
@@ -196,16 +197,34 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             _section('Planning'),
             BondCard(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              child: BondListTile(
-                leadingIcon: Icons.calendar_month_rounded,
-                title: 'Shared calendar',
-                subtitle: isPremium
-                    ? 'Your dates, anniversaries & plans'
-                    : 'Plan your dates together · BOND+',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) =>
-                        CalendarScreen(coupleId: widget.coupleId))),
-                trailing: Icon(Icons.chevron_right, color: AppColors.inkFaint),
+              child: Column(
+                children: [
+                  BondListTile(
+                    leadingIcon: Icons.calendar_month_rounded,
+                    title: 'Shared calendar',
+                    subtitle: isPremium
+                        ? 'Your dates, anniversaries & plans'
+                        : 'Plan your dates together · BOND+',
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) =>
+                            CalendarScreen(coupleId: widget.coupleId))),
+                    trailing:
+                        Icon(Icons.chevron_right, color: AppColors.inkFaint),
+                  ),
+                  const Divider(),
+                  BondListTile(
+                    leadingIcon: Icons.insights_rounded,
+                    title: 'Relationship insights',
+                    subtitle: isPremium
+                        ? 'Your bond over time'
+                        : 'See your bond over time · BOND+',
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) =>
+                            InsightsScreen(coupleId: widget.coupleId))),
+                    trailing:
+                        Icon(Icons.chevron_right, color: AppColors.inkFaint),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
