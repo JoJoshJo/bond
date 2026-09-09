@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:video_thumbnail_plus/video_thumbnail_plus.dart';
 
 import '../../../core/storage/storage_repository.dart';
 import 'memory_models.dart';
@@ -65,6 +67,10 @@ class MemoryRepository {
     final objectPath = '$coupleId/memories/$id.$safeExt';
     final contentType = safeExt == 'mov' ? 'video/quicktime' : 'video/mp4';
     await _storage.upload(objectPath, File(localPath), contentType);
+    // Best-effort first-frame thumbnail at {coupleId}/memories/{id}_thumb.jpg.
+    // Never blocks the video upload — a failure just falls back to the tile
+    // placeholder at view time.
+    await _uploadThumbnail(coupleId: coupleId, id: id, localVideoPath: localPath);
     await _insertRow(
       coupleId: coupleId,
       path: objectPath,
@@ -72,6 +78,36 @@ class MemoryRepository {
       takenAt: takenAt,
       caption: caption,
     );
+  }
+
+  /// Generate a JPEG thumbnail from the local video's first frame and upload it
+  /// alongside the video. Swallows all errors — thumbnails are a nicety, not a
+  /// requirement for the memory to exist.
+  Future<void> _uploadThumbnail({
+    required String coupleId,
+    required String id,
+    required String localVideoPath,
+  }) async {
+    try {
+      final dir = await getTemporaryDirectory();
+      final thumbFile = await VideoThumbnailPlus.thumbnailFile(
+        video: localVideoPath,
+        thumbnailPath: dir.path,
+        imageFormat: ImageFormat.JPEG,
+        maxWidth: 600,
+        quality: 75,
+      );
+      if (thumbFile == null) return;
+      final file = File(thumbFile);
+      if (!await file.exists()) return;
+      await _storage.upload(
+        '$coupleId/memories/${id}_thumb.jpg',
+        file,
+        'image/jpeg',
+      );
+    } catch (_) {
+      // Non-fatal: the tile falls back to the play-icon placeholder.
+    }
   }
 
   Future<void> _insertRow({
