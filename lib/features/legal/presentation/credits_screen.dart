@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
@@ -26,10 +27,10 @@ class CreditsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // TODO(assets): drop the TMDB logo into assets and show it here
-                // (TMDB terms require the logo alongside this text).
                 Text('Movies & shows', style: AppText.title),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.md),
+                SvgPicture.asset('assets/images/tmdb_logo.svg', height: 26),
+                const SizedBox(height: AppSpacing.md),
                 Text(
                   'This product uses the TMDB API but is not endorsed or '
                   'certified by TMDB.',

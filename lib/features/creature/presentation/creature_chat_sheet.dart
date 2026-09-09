@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -324,10 +325,19 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
             itemBuilder: (context, i) => _movieCard(movies[i]),
           ),
         ),
-        // Required by TMDB terms of use.
-        Text(
-          'Uses the TMDB API but is not endorsed or certified by TMDB.',
-          style: AppText.bodySmall.copyWith(color: AppColors.inkFaint),
+        // Required by TMDB terms of use: logo + disclaimer.
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset('assets/images/tmdb_logo.svg', height: 14),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                'Uses the TMDB API but is not endorsed or certified by TMDB.',
+                style: AppText.bodySmall.copyWith(color: AppColors.inkFaint),
+              ),
+            ),
+          ],
         ),
       ],
     );
