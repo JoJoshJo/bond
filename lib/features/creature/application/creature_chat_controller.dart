@@ -87,7 +87,15 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
   Map<String, dynamic> _context() {
     final membership = _ref.read(myMembershipProvider).asData?.value;
     final mood = _ref.read(creatureStateProvider(_coupleId)).asData?.value.mood;
-    final ctx = <String, dynamic>{'coupleName': membership?.coupleName ?? 'you two'};
+    final now = DateTime.now();
+    final today = '${now.year.toString().padLeft(4, '0')}-'
+        '${now.month.toString().padLeft(2, '0')}-'
+        '${now.day.toString().padLeft(2, '0')}';
+    final ctx = <String, dynamic>{
+      'coupleName': membership?.coupleName ?? 'you two',
+      // For resolving relative dates ("Friday", "next week") in calendar tools.
+      'today': today,
+    };
     if (mood != null) ctx['mood'] = mood.name;
     if (_ref.read(spicyActiveProvider)) ctx['spicy'] = true;
     if (_lat != null && _lng != null) {
