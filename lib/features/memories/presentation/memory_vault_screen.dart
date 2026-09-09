@@ -6,6 +6,8 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/widgets/widgets.dart';
+import '../../premium/application/entitlement_providers.dart';
+import '../../premium/presentation/paywall_screen.dart';
 import '../application/memory_controller.dart';
 import '../data/memory_models.dart';
 import 'add_memory_screen.dart';
@@ -33,7 +35,7 @@ class MemoryVaultScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.add_a_photo_outlined),
             tooltip: 'Add memory',
-            onPressed: () => _addSheet(context),
+            onPressed: () => _addSheet(context, ref),
           ),
         ],
       ),
@@ -41,7 +43,7 @@ class MemoryVaultScreen extends ConsumerWidget {
         child: state.loading
             ? const BondLoader()
             : state.isEmpty
-                ? _empty(context)
+                ? _empty(context, ref)
                 : ListView(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     children: [
@@ -81,7 +83,7 @@ class MemoryVaultScreen extends ConsumerWidget {
     );
   }
 
-  Widget _empty(BuildContext context) {
+  Widget _empty(BuildContext context, WidgetRef ref) {
     return BondEmptyState(
       icon: Icons.photo_library_outlined,
       title: 'No memories yet',
@@ -89,7 +91,55 @@ class MemoryVaultScreen extends ConsumerWidget {
       action: BondButton(
         label: 'Add your first',
         fullWidth: false,
-        onPressed: () => _addSheet(context),
+        onPressed: () => _addSheet(context, ref),
+      ),
+    );
+  }
+
+  /// Friendly "you've filled your free vault" prompt → the paywall.
+  void _showVaultFull(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(Icons.workspace_premium_rounded,
+                  color: AppColors.mintDeep, size: 40),
+              const SizedBox(height: AppSpacing.md),
+              Text('Your free vault is full',
+                  textAlign: TextAlign.center, style: AppText.headline),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'You\'ve saved $kFreeMemoryCap memories together. Upgrade to '
+                'BOND+ for unlimited memories 🤍',
+                textAlign: TextAlign.center,
+                style: AppText.bodyMedium.copyWith(color: AppColors.inkMuted),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              BondButton(
+                label: 'See BOND+',
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  PaywallScreen.open(context);
+                },
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              BondButton(
+                label: 'Not now',
+                variant: BondButtonVariant.ghost,
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -102,7 +152,16 @@ class MemoryVaultScreen extends ConsumerWidget {
     ));
   }
 
-  Future<void> _addSheet(BuildContext context) async {
+  Future<void> _addSheet(BuildContext context, WidgetRef ref) async {
+    // Free-tier cap (client-side for now — NOT server-enforced yet; real
+    // enforcement is a count check in RLS / an Edge Function later).
+    final premium = ref.read(isPremiumProvider);
+    final count = ref.read(memoryVaultProvider(coupleId)).totalCount;
+    if (!premium && count >= kFreeMemoryCap) {
+      _showVaultFull(context);
+      return;
+    }
+
     final picker = ImagePicker();
 
     Future<void> pick(bool isVideo, ImageSource source) async {

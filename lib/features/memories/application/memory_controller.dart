@@ -37,6 +37,10 @@ class MemoryVaultState {
 
   bool get isEmpty => groups.isEmpty;
 
+  /// Total saved memories across all month groups (for the free-tier cap).
+  int get totalCount =>
+      groups.fold(0, (sum, g) => sum + g.memories.length);
+
   MemoryVaultState copyWith({
     bool? loading,
     List<MemoryGroup>? groups,

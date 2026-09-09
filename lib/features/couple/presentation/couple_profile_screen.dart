@@ -12,6 +12,8 @@ import '../../auth/application/auth_providers.dart';
 import '../../creature/presentation/assistant_stub.dart';
 import '../../legal/presentation/credits_screen.dart';
 import '../../legal/presentation/legal_screen.dart';
+import '../../premium/application/entitlement_providers.dart';
+import '../../premium/presentation/paywall_screen.dart';
 import '../application/couple_providers.dart';
 
 /// The "Us" tab: couple identity + settings. Rename the space, set the start
@@ -109,6 +111,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final floating = ref.watch(assistantFloatingEnabledProvider);
+    final isPremium = ref.watch(isPremiumProvider);
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -173,6 +176,21 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
+            _section('Membership'),
+            BondCard(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: BondListTile(
+                leadingIcon: Icons.workspace_premium_rounded,
+                title: isPremium ? 'BOND+ · active' : 'Upgrade to BOND+',
+                subtitle: isPremium
+                    ? 'Thanks for supporting BOND 🤍'
+                    : 'Unlimited memories, a fully custom creature & more',
+                onTap: () => PaywallScreen.open(context),
+                trailing: const Icon(Icons.chevron_right,
+                    color: AppColors.inkFaint),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             _section('Developer'),
             BondCard(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
@@ -190,6 +208,19 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     title: 'AI router test',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const AiTestScreen())),
+                  ),
+                  const Divider(),
+                  // DEV ONLY — forces the premium entitlement so both states are
+                  // testable without a real purchase. Remove with the paywall's
+                  // RevenueCat wiring (see premiumDevOverrideProvider).
+                  SwitchListTile(
+                    value: isPremium,
+                    title: Text('DEV: BOND+ override', style: AppText.bodyLarge),
+                    subtitle: Text('Force premium on/off (dev only)',
+                        style: AppText.bodySmall),
+                    onChanged: (v) => ref
+                        .read(premiumDevOverrideProvider.notifier)
+                        .state = v,
                   ),
                 ],
               ),
