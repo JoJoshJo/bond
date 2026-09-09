@@ -24,11 +24,17 @@ class AuthRepository {
   /// Sign up with email + password. With "Confirm email" ON in Supabase, this
   /// creates the user but NO active session until the emailed link is clicked.
   /// The `on_auth_user_created` DB trigger creates the public.users row.
+  ///
+  /// [data] is written to the auth user's metadata (`raw_user_meta_data`). We
+  /// use it to record the declared date of birth (`birth_date`, YYYY-MM-DD) from
+  /// the 18+ age gate — no public.users column needed, and it persists even when
+  /// signup returns no session (confirm-email flow).
   Future<AuthResponse> signUp({
     required String email,
     required String password,
+    Map<String, dynamic>? data,
   }) {
-    return _auth.signUp(email: email.trim(), password: password);
+    return _auth.signUp(email: email.trim(), password: password, data: data);
   }
 
   /// Sign in with email + password.

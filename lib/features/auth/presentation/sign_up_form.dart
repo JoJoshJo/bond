@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/utils/error_messages.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -25,10 +26,19 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
-  bool _isAdult = false;
+  DateTime? _dob;
   bool _agreedTerms = false;
   bool _loading = false;
   bool _obscure = true;
+
+  /// The latest DOB that still makes someone exactly 18 today.
+  static DateTime _maxDob() {
+    final now = DateTime.now();
+    return DateTime(now.year - 18, now.month, now.day);
+  }
+
+  /// True once a DOB is set and it clears the 18+ bar (exact, month/day aware).
+  bool get _isAdult => _dob != null && !_dob!.isAfter(_maxDob());
 
   final _termsTap = TapGestureRecognizer();
   final _privacyTap = TapGestureRecognizer();
@@ -54,15 +64,40 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
 
   bool get _canSubmit => _isAdult && _agreedTerms && !_loading;
 
+  Future<void> _pickDob() async {
+    final maxDob = _maxDob();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dob ?? maxDob,
+      firstDate: DateTime(1920),
+      lastDate: maxDob, // calendar can't offer an under-18 date
+      helpText: 'Your date of birth',
+    );
+    if (picked != null) setState(() => _dob = picked);
+  }
+
+  String _formatDob(DateTime d) => '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (!_isAdult || !_agreedTerms) return;
+    // Declared-age gate: block anyone under 18 (belt-and-suspenders — the
+    // picker already caps the selectable range).
+    if (!_isAdult) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be 18 or older to use BOND.')),
+      );
+      return;
+    }
+    if (!_agreedTerms) return;
     FocusScope.of(context).unfocus();
     setState(() => _loading = true);
     try {
       await ref.read(authRepositoryProvider).signUp(
             email: _email.text,
             password: _password.text,
+            data: {'birth_date': _formatDob(_dob!)},
           );
       if (mounted) {
         Navigator.of(context).push(
@@ -125,12 +160,13 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                 (v != _password.text) ? 'Passwords don\'t match' : null,
             onFieldSubmitted: (_) => _canSubmit ? _submit() : null,
           ),
-          const SizedBox(height: 8),
-          _CheckRow(
-            value: _isAdult,
-            onChanged: (v) => setState(() => _isAdult = v ?? false),
-            child: const Text('I confirm I am 18 or older'),
+          const SizedBox(height: 14),
+          _DobField(
+            dob: _dob,
+            label: _dob == null ? 'Date of birth' : _formatDob(_dob!),
+            onTap: _pickDob,
           ),
+          const SizedBox(height: 4),
           _CheckRow(
             value: _agreedTerms,
             onChanged: (v) => setState(() => _agreedTerms = v ?? false),
@@ -165,6 +201,52 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             onPressed: _canSubmit ? _submit : null,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A tappable, read-only "Date of birth" field that opens the date picker.
+/// Doubles as the 18+ age gate — the picker itself caps the selectable range.
+class _DobField extends StatelessWidget {
+  const _DobField({
+    required this.dob,
+    required this.label,
+    required this.onTap,
+  });
+
+  final DateTime? dob;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isSet = dob != null;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.cake_outlined, color: AppColors.inkFaint, size: 20),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                label,
+                style: AppText.bodyLarge.copyWith(
+                    color: isSet ? AppColors.ink : AppColors.inkFaint),
+              ),
+            ),
+            const Icon(Icons.expand_more, color: AppColors.inkFaint),
+          ],
+        ),
       ),
     );
   }
