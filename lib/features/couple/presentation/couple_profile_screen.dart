@@ -10,6 +10,7 @@ import '../../../shared/utils/error_messages.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../creature/presentation/assistant_stub.dart';
+import '../../legal/presentation/credits_screen.dart';
 import '../../legal/presentation/legal_screen.dart';
 import '../application/couple_providers.dart';
 
@@ -215,6 +216,15 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                         color: AppColors.inkFaint),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => LegalScreen.privacy())),
+                  ),
+                  const Divider(),
+                  BondListTile(
+                    leadingIcon: Icons.workspace_premium_outlined,
+                    title: 'Credits',
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.inkFaint),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const CreditsScreen())),
                   ),
                 ],
               ),

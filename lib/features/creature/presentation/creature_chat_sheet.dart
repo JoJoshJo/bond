@@ -185,15 +185,22 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
   }
 
   Widget _placeRow(List<PlaceCard> places) {
-    return SizedBox(
-      height: 190,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        itemCount: places.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-        itemBuilder: (context, i) => _placeCard(places[i]),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 190,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            itemCount: places.length,
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+            itemBuilder: (context, i) => _placeCard(places[i]),
+          ),
+        ),
+        Text('Places powered by Foursquare.',
+            style: AppText.bodySmall.copyWith(color: AppColors.inkFaint)),
+      ],
     );
   }
 
@@ -304,15 +311,25 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
   }
 
   Widget _movieRow(List<MovieCard> movies) {
-    return SizedBox(
-      height: 216,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        itemCount: movies.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-        itemBuilder: (context, i) => _movieCard(movies[i]),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 216,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            itemCount: movies.length,
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+            itemBuilder: (context, i) => _movieCard(movies[i]),
+          ),
+        ),
+        // Required by TMDB terms of use.
+        Text(
+          'Uses the TMDB API but is not endorsed or certified by TMDB.',
+          style: AppText.bodySmall.copyWith(color: AppColors.inkFaint),
+        ),
+      ],
     );
   }
 
