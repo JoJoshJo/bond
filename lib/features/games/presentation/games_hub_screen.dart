@@ -10,6 +10,7 @@ import '../application/game_controller.dart';
 import '../data/game_definitions.dart';
 import 'board_game_play_screen.dart';
 import 'game_play_screen.dart';
+import 'skill_game_play_screen.dart';
 
 /// The Games hub: the launch catalog. Tapping a game starts a fresh session or
 /// resumes the couple's unfinished one, then opens play.
@@ -30,9 +31,11 @@ class _GamesHubScreenState extends ConsumerState<GamesHubScreen> {
           await ref.read(gameRepositoryProvider).startOrResume(def.type);
       if (!mounted) return;
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => def.board
-            ? BoardGamePlayScreen(sessionId: session.id)
-            : GamePlayScreen(sessionId: session.id),
+        builder: (_) => def.skill
+            ? SkillGamePlayScreen(sessionId: session.id)
+            : def.board
+                ? BoardGamePlayScreen(sessionId: session.id)
+                : GamePlayScreen(sessionId: session.id),
       ));
     } catch (error, stack) {
       // Keep the real error in logs; show the user a clean message.

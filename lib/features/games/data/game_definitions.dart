@@ -19,6 +19,8 @@ class GameDefinition {
     required this.xp,
     this.rounds = const [],
     this.board = false,
+    this.skill = false,
+    this.shots = 5,
   });
 
   final String type; // matches game_sessions.game_type
@@ -28,6 +30,8 @@ class GameDefinition {
   final List<GameRound> rounds;
   final int xp; // awarded on completion
   final bool board; // true = a turn-based board game (not round-based)
+  final bool skill; // true = a solo-scored skill/timing game (compare scores)
+  final int shots; // skill games: attempts per player
 
   int get roundCount => rounds.length;
 }
@@ -113,9 +117,30 @@ class GameCatalog {
     board: true,
   );
 
+  // ---- Skill games (solo-scored, compare when both have played) ----
+  static const targetShot = GameDefinition(
+    type: 'target_shot',
+    title: 'Target Shot',
+    tagline: 'Steady your aim — hit the bullseye',
+    icon: Icons.gps_fixed_rounded,
+    xp: 20,
+    skill: true,
+    shots: 5,
+  );
+  static const freeThrows = GameDefinition(
+    type: 'free_throws',
+    title: 'Free Throws',
+    tagline: 'Time it right — swish it',
+    icon: Icons.sports_basketball_rounded,
+    xp: 20,
+    skill: true,
+    shots: 5,
+  );
+
   static const round = [wouldYouRather, thisOrThat, coupleQuiz];
   static const boards = [fourInARow, ticTacToe, dotsAndBoxes];
-  static const all = [...round, ...boards];
+  static const skills = [targetShot, freeThrows];
+  static const all = [...round, ...boards, ...skills];
 
   static GameDefinition byType(String type) =>
       all.firstWhere((g) => g.type == type, orElse: () => wouldYouRather);
