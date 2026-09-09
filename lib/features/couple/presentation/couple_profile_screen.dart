@@ -12,6 +12,7 @@ import '../../auth/application/auth_providers.dart';
 import '../../creature/presentation/assistant_stub.dart';
 import '../../legal/presentation/credits_screen.dart';
 import '../../legal/presentation/legal_screen.dart';
+import '../../appearance/presentation/appearance_screen.dart';
 import '../../calendar/presentation/calendar_screen.dart';
 import '../../insights/presentation/insights_screen.dart';
 import '../../premium/application/entitlement_providers.dart';
@@ -225,6 +226,21 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                         Icon(Icons.chevron_right, color: AppColors.inkFaint),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _section('Personalize'),
+            BondCard(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: BondListTile(
+                leadingIcon: Icons.palette_rounded,
+                title: 'Appearance',
+                subtitle: isPremium
+                    ? 'Pick your theme'
+                    : 'Premium color themes · BOND+',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const AppearanceScreen())),
+                trailing: Icon(Icons.chevron_right, color: AppColors.inkFaint),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
