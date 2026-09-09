@@ -20,7 +20,7 @@ class CreaturePlaceholder extends StatelessWidget {
       width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: const RadialGradient(
+        gradient: RadialGradient(
           colors: [AppColors.mintSoft, AppColors.mint],
           stops: [0.15, 1.0],
         ),

@@ -20,6 +20,7 @@ class GameDefinition {
     this.rounds = const [],
     this.board = false,
     this.skill = false,
+    this.spicy = false,
     this.shots = 5,
   });
 
@@ -31,6 +32,7 @@ class GameDefinition {
   final int xp; // awarded on completion
   final bool board; // true = a turn-based board game (not round-based)
   final bool skill; // true = a solo-scored skill/timing game (compare scores)
+  final bool spicy; // true = only shown while spicy mode is active
   final int shots; // skill games: attempts per player
 
   int get roundCount => rounds.length;
@@ -137,10 +139,77 @@ class GameCatalog {
     shots: 5,
   );
 
+  // ---- Spicy games (only shown while spicy mode is active; suggestive, not
+  // explicit — tasteful heat). All reuse the round engine (content-only). ----
+  static const spicyWouldYouRather = GameDefinition(
+    type: 'spicy_would_you_rather',
+    title: 'Spicy Would You Rather',
+    tagline: 'Turn up the heat 🌶️',
+    icon: Icons.local_fire_department_rounded,
+    xp: 20,
+    spicy: true,
+    rounds: [
+      GameRound('Would you rather…',
+          ['A slow dance in the dark', 'A long kiss in the rain']),
+      GameRound('Would you rather…',
+          ['Breakfast in bed together', 'A midnight rendezvous']),
+      GameRound('Would you rather…',
+          ['A candlelit bath', 'A massage by firelight']),
+      GameRound('Would you rather…',
+          ['Whisper a secret', 'Steal a bold kiss']),
+      GameRound('Would you rather…',
+          ['A weekend never leaving the room', 'A night out that ends close']),
+    ],
+  );
+
+  static const spicyThisOrThat = GameDefinition(
+    type: 'spicy_this_or_that',
+    title: 'Spicy This or That',
+    tagline: 'Quick-fire, a little flirty',
+    icon: Icons.whatshot_rounded,
+    xp: 15,
+    spicy: true,
+    rounds: [
+      GameRound('Pick your vibe', ['Lights on', 'Lights off']),
+      GameRound('Pick your vibe', ['Tease', 'Please']),
+      GameRound('Pick your vibe', ['Slow', 'Fast']),
+      GameRound('Pick your vibe', ['Silk', 'Lace']),
+      GameRound('Pick your vibe', ['Give', 'Receive']),
+      GameRound('Pick your vibe', ['Morning', 'Midnight']),
+    ],
+  );
+
+  static const heatCheck = GameDefinition(
+    type: 'heat_check',
+    title: 'Heat Check',
+    tagline: 'How well do you match tonight?',
+    icon: Icons.favorite_rounded,
+    xp: 25,
+    spicy: true,
+    rounds: [
+      GameRound('Tonight, you\'re craving…',
+          ['Romance', 'Playfulness', 'Passion', 'Closeness']),
+      GameRound('Set the scene',
+          ['Candles & wine', 'Music & dancing', 'Just us, no plan', 'A getaway']),
+      GameRound('Your move is…',
+          ['Make the first move', 'Be pursued', 'Meet in the middle', 'Tease first']),
+      GameRound('The mood is…',
+          ['Slow & tender', 'Bold & fiery', 'Fun & giggly', 'Deep & intense']),
+      GameRound('End the night…',
+          ['Tangled up together', 'Talking till late', 'Already planning round two', 'Fast asleep close']),
+    ],
+  );
+
   static const round = [wouldYouRather, thisOrThat, coupleQuiz];
   static const boards = [fourInARow, ticTacToe, dotsAndBoxes];
   static const skills = [targetShot, freeThrows];
-  static const all = [...round, ...boards, ...skills];
+  static const spicyGames = [spicyWouldYouRather, spicyThisOrThat, heatCheck];
+  static const all = [...round, ...boards, ...skills, ...spicyGames];
+
+  /// The games to show in the hub given spicy mode. Spicy games appear only
+  /// while spicy is active (alongside the normal catalog).
+  static List<GameDefinition> forHub({required bool spicy}) =>
+      spicy ? all : all.where((g) => !g.spicy).toList();
 
   static GameDefinition byType(String type) =>
       all.firstWhere((g) => g.type == type, orElse: () => wouldYouRather);

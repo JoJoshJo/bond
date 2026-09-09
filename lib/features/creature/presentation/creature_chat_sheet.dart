@@ -220,13 +220,13 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
                 child: p.photoUrl == null
                     ? Container(
                         color: AppColors.surfaceAlt,
-                        child: const Icon(Icons.place_outlined,
+                        child: Icon(Icons.place_outlined,
                             color: AppColors.inkFaint),
                       )
                     : Image.network(p.photoUrl!, fit: BoxFit.cover,
                         errorBuilder: (c, e, s) => Container(
                             color: AppColors.surfaceAlt,
-                            child: const Icon(Icons.place_outlined,
+                            child: Icon(Icons.place_outlined,
                                 color: AppColors.inkFaint))),
               ),
             ),
@@ -348,7 +348,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
                 child: m.posterUrl == null
                     ? Container(
                         color: AppColors.surfaceAlt,
-                        child: const Icon(Icons.movie_outlined,
+                        child: Icon(Icons.movie_outlined,
                             color: AppColors.inkFaint),
                       )
                     : Image.network(m.posterUrl!, fit: BoxFit.cover),
@@ -427,7 +427,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
 
   Widget _inputBar() {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.bg,
         border: Border(top: BorderSide(color: AppColors.borderSoft)),
       ),
@@ -478,7 +478,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
             child: InkWell(
               customBorder: const CircleBorder(),
               onTap: _send,
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(AppSpacing.md),
                 child: Icon(Icons.arrow_upward_rounded, color: AppColors.onMint),
               ),

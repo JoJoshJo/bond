@@ -60,7 +60,7 @@ class _CreateOrJoinScreenState extends ConsumerState<CreateOrJoinScreen> {
                     color: AppColors.mintWash,
                     borderRadius: BorderRadius.circular(26),
                   ),
-                  child: const Icon(Icons.link_rounded,
+                  child: Icon(Icons.link_rounded,
                       size: 44, color: AppColors.mint),
                 ),
               ),

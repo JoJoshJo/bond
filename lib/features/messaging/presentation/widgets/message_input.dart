@@ -118,7 +118,7 @@ class _MessageInputState extends State<MessageInput> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_camera_outlined,
+              leading: Icon(Icons.photo_camera_outlined,
                   color: AppColors.mint),
               title: Text('Take a photo', style: AppText.bodyLarge),
               onTap: () {
@@ -127,7 +127,7 @@ class _MessageInputState extends State<MessageInput> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined,
+              leading: Icon(Icons.photo_library_outlined,
                   color: AppColors.mint),
               title: Text('Choose from gallery', style: AppText.bodyLarge),
               onTap: () {
@@ -151,7 +151,7 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.bg,
         border: Border(top: BorderSide(color: AppColors.borderSoft)),
       ),
@@ -179,7 +179,7 @@ class _MessageInputState extends State<MessageInput> {
       children: [
         IconButton(
           onPressed: _attachSheet,
-          icon: const Icon(Icons.add_circle_outline, color: AppColors.mint),
+          icon: Icon(Icons.add_circle_outline, color: AppColors.mint),
         ),
         Expanded(
           child: TextField(
@@ -231,9 +231,9 @@ class _MessageInputState extends State<MessageInput> {
       children: [
         IconButton(
           onPressed: _cancelRecording,
-          icon: const Icon(Icons.delete_outline, color: AppColors.error),
+          icon: Icon(Icons.delete_outline, color: AppColors.error),
         ),
-        const Icon(Icons.fiber_manual_record, color: AppColors.error, size: 14),
+        Icon(Icons.fiber_manual_record, color: AppColors.error, size: 14),
         const SizedBox(width: AppSpacing.sm),
         Text('Recording  ${_fmt(_seconds)}', style: AppText.bodyMedium),
         const Spacer(),
@@ -243,7 +243,7 @@ class _MessageInputState extends State<MessageInput> {
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: _stopAndSend,
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.all(AppSpacing.md),
               child: Icon(Icons.arrow_upward_rounded, color: AppColors.onMint),
             ),
@@ -274,7 +274,7 @@ class _MessageInputState extends State<MessageInput> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: 18, color: AppColors.inkMuted),
+            icon: Icon(Icons.close, size: 18, color: AppColors.inkMuted),
             onPressed: widget.onCancelReply,
           ),
         ],

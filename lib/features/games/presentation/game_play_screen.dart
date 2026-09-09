@@ -209,7 +209,7 @@ class GamePlayScreen extends ConsumerWidget {
           elevated: false,
           child: Column(
             children: [
-              const Icon(Icons.celebration_rounded,
+              Icon(Icons.celebration_rounded,
                   size: 40, color: AppColors.mint),
               const SizedBox(height: AppSpacing.md),
               Text('You matched ${state.matches} of ${def.roundCount}',

@@ -15,7 +15,7 @@ class BondLoader extends StatelessWidget {
       child: SizedBox(
         height: size,
         width: size,
-        child: const CircularProgressIndicator(
+        child: CircularProgressIndicator(
           strokeWidth: 2.6,
           color: AppColors.mint,
         ),
@@ -67,7 +67,7 @@ class _BondShimmerState extends State<BondShimmer>
             gradient: LinearGradient(
               begin: Alignment(-1 - 2 * _c.value, 0),
               end: Alignment(1 - 2 * _c.value, 0),
-              colors: const [
+              colors: [
                 AppColors.surfaceAlt,
                 AppColors.mintWash,
                 AppColors.surfaceAlt,

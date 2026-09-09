@@ -55,11 +55,11 @@ class _LockCard extends StatelessWidget {
           Container(
             height: 44,
             width: 44,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.surface,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.lock_rounded, color: AppColors.mintDeep),
+            child: Icon(Icons.lock_rounded, color: AppColors.mintDeep),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -75,7 +75,7 @@ class _LockCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.mintDeep),
+          Icon(Icons.chevron_right, color: AppColors.mintDeep),
         ],
       ),
     );

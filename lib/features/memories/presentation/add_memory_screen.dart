@@ -111,7 +111,7 @@ class _AddMemoryScreenState extends ConsumerState<AddMemoryScreen> {
               title: 'Date',
               subtitle: _fmtDate(_takenAt),
               trailing:
-                  const Icon(Icons.chevron_right, color: AppColors.inkFaint),
+                  Icon(Icons.chevron_right, color: AppColors.inkFaint),
               onTap: _pickDate,
             ),
           ),

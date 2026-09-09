@@ -235,7 +235,7 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              const Icon(Icons.edit_outlined,
+              Icon(Icons.edit_outlined,
                   size: 20, color: AppColors.inkFaint),
             ],
           ),
@@ -354,7 +354,7 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
                 leadingIcon: Icons.favorite_border_rounded,
                 title: 'Name your space',
                 subtitle: _coupleName,
-                trailing: const Icon(Icons.chevron_right,
+                trailing: Icon(Icons.chevron_right,
                     color: AppColors.inkFaint),
                 onTap: _renameCouple,
               ),
@@ -365,7 +365,7 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
                 subtitle: _startDate == null
                     ? 'Optional — add when you began'
                     : _formatDate(_startDate!),
-                trailing: const Icon(Icons.chevron_right,
+                trailing: Icon(Icons.chevron_right,
                     color: AppColors.inkFaint),
                 onTap: _pickStartDate,
               ),
@@ -410,7 +410,7 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
                   Container(
                     height: 40,
                     width: 40,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.surfaceAlt,
                       shape: BoxShape.circle,
                     ),
@@ -427,7 +427,7 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
                       ],
                     ),
                   ),
-                  const Icon(Icons.lock_outline_rounded,
+                  Icon(Icons.lock_outline_rounded,
                       size: 18, color: AppColors.inkFaint),
                 ],
               ),

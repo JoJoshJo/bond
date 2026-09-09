@@ -76,11 +76,11 @@ class PaywallScreen extends ConsumerWidget {
         Container(
           height: 84,
           width: 84,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.mintWash,
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.workspace_premium_rounded,
+          child: Icon(Icons.workspace_premium_rounded,
               color: AppColors.mintDeep, size: 44),
         ).animate().scaleXY(
             begin: 0.7, end: 1, duration: 420.ms, curve: Curves.easeOutBack),
@@ -104,7 +104,7 @@ class PaywallScreen extends ConsumerWidget {
         Container(
           height: 40,
           width: 40,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.mintWash,
             shape: BoxShape.circle,
           ),

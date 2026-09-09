@@ -64,7 +64,7 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
       child: BondCard(
         child: Column(
           children: [
-            const Icon(Icons.cloud_off_rounded,
+            Icon(Icons.cloud_off_rounded,
                 size: 40, color: AppColors.inkFaint),
             const SizedBox(height: AppSpacing.md),
             Text(error,
@@ -238,7 +238,7 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.auto_awesome, color: AppColors.mint, size: 18),
+            Icon(Icons.auto_awesome, color: AppColors.mint, size: 18),
             const SizedBox(width: AppSpacing.sm),
             Text('You both answered', style: AppText.title),
           ],

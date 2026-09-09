@@ -11,14 +11,21 @@ import 'app_typography.dart';
 class AppTheme {
   const AppTheme._();
 
-  static ThemeData get light {
+  /// Backwards-compatible alias — builds from whatever palette is active.
+  static ThemeData get light => build();
+
+  /// Builds the theme from the currently active palette ([AppColors.active]),
+  /// so a spicy-mode palette swap re-themes everything, dark brightness included.
+  static ThemeData build() {
+    final brightness =
+        AppColors.active.dark ? Brightness.dark : Brightness.light;
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.mint,
       primary: AppColors.mint,
       onPrimary: AppColors.onMint,
       surface: AppColors.surface,
       error: AppColors.error,
-      brightness: Brightness.light,
+      brightness: brightness,
     );
 
     return ThemeData(
@@ -27,7 +34,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.bg,
       textTheme: AppText.textTheme,
       splashFactory: InkSparkle.splashFactory,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -42,7 +49,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
       ),
-      dividerTheme: const DividerThemeData(
+      dividerTheme: DividerThemeData(
         color: AppColors.borderSoft,
         thickness: 1,
         space: 1,

@@ -30,7 +30,7 @@ class BondEmptyState extends StatelessWidget {
             Container(
               height: 72,
               width: 72,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.mintWash,
                 shape: BoxShape.circle,
               ),

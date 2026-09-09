@@ -36,7 +36,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     color: AppColors.mintWash,
                     borderRadius: BorderRadius.circular(28),
                   ),
-                  child: const Icon(Icons.favorite_rounded,
+                  child: Icon(Icons.favorite_rounded,
                       size: 48, color: AppColors.mint),
                 ),
               ),

@@ -111,7 +111,7 @@ class MemoryVaultScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.workspace_premium_rounded,
+              Icon(Icons.workspace_premium_rounded,
                   color: AppColors.mintDeep, size: 40),
               const SizedBox(height: AppSpacing.md),
               Text('Your free vault is full',

@@ -177,7 +177,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   const TextSpan(text: 'I agree to the '),
                   TextSpan(
                     text: 'Terms of Service',
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.mintDeep,
                         fontWeight: FontWeight.w600),
                     recognizer: _termsTap,
@@ -185,7 +185,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   const TextSpan(text: ' & '),
                   TextSpan(
                     text: 'Privacy Policy',
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.mintDeep,
                         fontWeight: FontWeight.w600),
                     recognizer: _privacyTap,
@@ -235,7 +235,7 @@ class _DobField extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.cake_outlined, color: AppColors.inkFaint, size: 20),
+            Icon(Icons.cake_outlined, color: AppColors.inkFaint, size: 20),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
@@ -244,7 +244,7 @@ class _DobField extends StatelessWidget {
                     color: isSet ? AppColors.ink : AppColors.inkFaint),
               ),
             ),
-            const Icon(Icons.expand_more, color: AppColors.inkFaint),
+            Icon(Icons.expand_more, color: AppColors.inkFaint),
           ],
         ),
       ),

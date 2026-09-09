@@ -26,7 +26,7 @@ class StyleGalleryScreen extends StatelessWidget {
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
-            children: const [
+            children: [
               _Swatch('bg', AppColors.bg),
               _Swatch('bgAlt', AppColors.bgAlt),
               _Swatch('surface', AppColors.surface),
@@ -102,14 +102,14 @@ class StyleGalleryScreen extends StatelessWidget {
                   leadingIcon: Icons.person_outline,
                   title: 'Profile',
                   subtitle: 'Name, photo, timezone',
-                  trailing: const Icon(Icons.chevron_right, color: AppColors.inkFaint),
+                  trailing: Icon(Icons.chevron_right, color: AppColors.inkFaint),
                   onTap: () {},
                 ),
                 const Divider(),
                 BondListTile(
                   leadingIcon: Icons.favorite_border,
                   title: 'Our space',
-                  trailing: const Icon(Icons.chevron_right, color: AppColors.inkFaint),
+                  trailing: Icon(Icons.chevron_right, color: AppColors.inkFaint),
                   onTap: () {},
                 ),
               ],

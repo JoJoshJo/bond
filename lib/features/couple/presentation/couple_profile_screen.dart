@@ -14,6 +14,7 @@ import '../../legal/presentation/credits_screen.dart';
 import '../../legal/presentation/legal_screen.dart';
 import '../../premium/application/entitlement_providers.dart';
 import '../../premium/presentation/paywall_screen.dart';
+import '../../spicy/presentation/spicy_section.dart';
 import '../application/couple_providers.dart';
 
 /// The "Us" tab: couple identity + settings. Rename the space, set the start
@@ -140,7 +141,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     leadingIcon: Icons.favorite_border_rounded,
                     title: 'Rename our space',
                     onTap: _rename,
-                    trailing: const Icon(Icons.chevron_right,
+                    trailing: Icon(Icons.chevron_right,
                         color: AppColors.inkFaint),
                   ),
                   const Divider(),
@@ -148,7 +149,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     leadingIcon: Icons.calendar_today_rounded,
                     title: 'Relationship start date',
                     onTap: _pickStartDate,
-                    trailing: const Icon(Icons.chevron_right,
+                    trailing: Icon(Icons.chevron_right,
                         color: AppColors.inkFaint),
                   ),
                   const Divider(),
@@ -186,10 +187,13 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     ? 'Thanks for supporting BOND 🤍'
                     : 'Unlimited memories, a fully custom creature & more',
                 onTap: () => PaywallScreen.open(context),
-                trailing: const Icon(Icons.chevron_right,
+                trailing: Icon(Icons.chevron_right,
                     color: AppColors.inkFaint),
               ),
             ),
+            const SizedBox(height: AppSpacing.lg),
+            _section('Spicy'),
+            const SpicySection(),
             const SizedBox(height: AppSpacing.lg),
             _section('Developer'),
             BondCard(
@@ -234,7 +238,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                   BondListTile(
                     leadingIcon: Icons.description_outlined,
                     title: 'Terms of Service',
-                    trailing: const Icon(Icons.chevron_right,
+                    trailing: Icon(Icons.chevron_right,
                         color: AppColors.inkFaint),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => LegalScreen.terms())),
@@ -243,7 +247,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                   BondListTile(
                     leadingIcon: Icons.privacy_tip_outlined,
                     title: 'Privacy Policy',
-                    trailing: const Icon(Icons.chevron_right,
+                    trailing: Icon(Icons.chevron_right,
                         color: AppColors.inkFaint),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => LegalScreen.privacy())),
@@ -252,7 +256,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                   BondListTile(
                     leadingIcon: Icons.workspace_premium_outlined,
                     title: 'Credits',
-                    trailing: const Icon(Icons.chevron_right,
+                    trailing: Icon(Icons.chevron_right,
                         color: AppColors.inkFaint),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const CreditsScreen())),

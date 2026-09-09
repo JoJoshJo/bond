@@ -38,7 +38,7 @@ class PromptBanner extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(bottom: BorderSide(color: AppColors.borderSoft)),
           ),
           child: Row(
@@ -64,7 +64,7 @@ class PromptBanner extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.inkFaint),
+              Icon(Icons.chevron_right, color: AppColors.inkFaint),
             ],
           ),
         ),

@@ -36,7 +36,7 @@ class DotsAndBoxesBoard extends StatelessWidget {
           Widget dot() => Container(
                 width: _dot,
                 height: _dot,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.ink,
                   shape: BoxShape.circle,
                 ),

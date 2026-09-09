@@ -14,14 +14,14 @@ class AppText {
     required double height,
     FontWeight weight = FontWeight.w600,
     double spacing = -0.2,
-    Color color = AppColors.ink,
+    Color? color,
   }) =>
       GoogleFonts.spaceGrotesk(
         fontSize: size,
         height: height,
         fontWeight: weight,
         letterSpacing: spacing,
-        color: color,
+        color: color ?? AppColors.ink,
       );
 
   static TextStyle _dmSans({
@@ -29,14 +29,14 @@ class AppText {
     required double height,
     FontWeight weight = FontWeight.w400,
     double spacing = 0,
-    Color color = AppColors.ink,
+    Color? color,
   }) =>
       GoogleFonts.dmSans(
         fontSize: size,
         height: height,
         fontWeight: weight,
         letterSpacing: spacing,
-        color: color,
+        color: color ?? AppColors.ink,
       );
 
   // ---- Display / headings (Space Grotesk) ----

@@ -77,7 +77,7 @@ class CreatureView extends StatelessWidget {
       width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: const RadialGradient(
+        gradient: RadialGradient(
           center: Alignment(-0.3, -0.4), // light from upper-left
           radius: 1.05,
           colors: [Color(0xFFCDEFE0), AppColors.mintSoft, AppColors.mint],
@@ -173,7 +173,7 @@ class CreatureView extends StatelessWidget {
     return Container(
       width: w,
       height: w,
-      decoration: const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
+      decoration: BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
       child: Align(
         alignment: const Alignment(-0.3, -0.4),
         child: Container(

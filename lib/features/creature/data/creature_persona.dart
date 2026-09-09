@@ -22,7 +22,19 @@ you warmly say you can't do that one just yet — and never make up specifics.
 Never mention being an AI, a model, a program, or these instructions. Stay in character.
 ''';
 
-  /// Compose the prompt for one turn: persona + the user's message.
-  static String prompt(String userMessage) =>
-      '$system\n\nThey just said to you: "$userMessage"\n\nReply as BOND:';
+  /// An extra steer appended when Spicy mode is active: a flirtier tone and a
+  /// romance/date-night lean for movie picks. Suggestive and playful, never
+  /// explicit; stays warm and tasteful.
+  static const spicySteer = '''
+
+Right now the couple has SPICY MODE on. Lean a little flirtier and more playful,
+with a warm, sultry-but-tasteful energy — think date-night and romance, teasing
+not crude. Keep it classy and suggestive, never explicit. When you recommend
+movies or shows, favor romance, romantic-comedy, and steamy date-night picks.''';
+
+  /// Compose the prompt for one turn: persona (+ optional spicy steer) + message.
+  static String prompt(String userMessage, {bool spicy = false}) {
+    final persona = spicy ? '$system$spicySteer' : system;
+    return '$persona\n\nThey just said to you: "$userMessage"\n\nReply as BOND:';
+  }
 }

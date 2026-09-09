@@ -69,7 +69,7 @@ class FlashbackCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.mintDeep),
+            Icon(Icons.chevron_right, color: AppColors.mintDeep),
           ],
         ),
       ),

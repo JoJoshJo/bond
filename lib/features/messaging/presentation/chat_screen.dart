@@ -97,7 +97,7 @@ class ChatScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.favorite_rounded, size: 44, color: AppColors.mint),
+            Icon(Icons.favorite_rounded, size: 44, color: AppColors.mint),
             const SizedBox(height: AppSpacing.md),
             Text('Say hello 💛',
                 textAlign: TextAlign.center, style: AppText.title),

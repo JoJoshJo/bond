@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../ai/application/ai_providers.dart';
 import '../../ai/data/ai_models.dart';
 import '../../couple/application/couple_providers.dart';
+import '../../spicy/application/spicy_providers.dart';
 import '../data/creature_chat_models.dart';
 import '../data/creature_persona.dart';
 import '../data/location_service.dart';
@@ -72,10 +73,14 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
     }
   }
 
-  Future<AiResponse> _ask(String text) => _ref
-      .read(aiRepositoryProvider)
-      .getAI('creature', CreaturePersona.prompt(text), context: _context())
-      .timeout(const Duration(seconds: 30));
+  Future<AiResponse> _ask(String text) {
+    final spicy = _ref.read(spicyActiveProvider);
+    return _ref
+        .read(aiRepositoryProvider)
+        .getAI('creature', CreaturePersona.prompt(text, spicy: spicy),
+            context: _context())
+        .timeout(const Duration(seconds: 30));
+  }
 
   /// Minimal context: couple name + mood; plus lat/lng ONLY when we already have
   /// it (opt-in, per-request). No messages/personal data.
@@ -84,6 +89,7 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
     final mood = _ref.read(creatureStateProvider(_coupleId)).asData?.value.mood;
     final ctx = <String, dynamic>{'coupleName': membership?.coupleName ?? 'you two'};
     if (mood != null) ctx['mood'] = mood.name;
+    if (_ref.read(spicyActiveProvider)) ctx['spicy'] = true;
     if (_lat != null && _lng != null) {
       ctx['lat'] = _lat;
       ctx['lng'] = _lng;

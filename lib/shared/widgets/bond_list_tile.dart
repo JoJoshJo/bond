@@ -41,7 +41,7 @@ class BondListTile extends StatelessWidget {
                 Container(
                   height: 40,
                   width: 40,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.mintWash,
                     shape: BoxShape.circle,
                   ),

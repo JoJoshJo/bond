@@ -6,6 +6,7 @@ import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/utils/error_messages.dart';
 import '../../../shared/widgets/widgets.dart';
+import '../../spicy/application/spicy_providers.dart';
 import '../application/game_controller.dart';
 import '../data/game_definitions.dart';
 import 'board_game_play_screen.dart';
@@ -62,7 +63,8 @@ class _GamesHubScreenState extends ConsumerState<GamesHubScreen> {
           Text('Play together — on your own time.',
               style: AppText.bodyMedium.copyWith(color: AppColors.inkMuted)),
           const SizedBox(height: AppSpacing.lg),
-          for (final def in GameCatalog.all) ...[
+          for (final def in GameCatalog.forHub(
+              spicy: ref.watch(spicyActiveProvider))) ...[
             BondCard(
               onTap: _starting == null ? () => _open(def) : null,
               child: Row(
@@ -70,7 +72,7 @@ class _GamesHubScreenState extends ConsumerState<GamesHubScreen> {
                   Container(
                     height: 48,
                     width: 48,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.mintWash,
                       shape: BoxShape.circle,
                     ),
@@ -87,14 +89,14 @@ class _GamesHubScreenState extends ConsumerState<GamesHubScreen> {
                     ),
                   ),
                   if (_starting == def.type)
-                    const SizedBox(
+                    SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: AppColors.mint),
                     )
                   else
-                    const Icon(Icons.chevron_right, color: AppColors.inkFaint),
+                    Icon(Icons.chevron_right, color: AppColors.inkFaint),
                 ],
               ),
             ),
