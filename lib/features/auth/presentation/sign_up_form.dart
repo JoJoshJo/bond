@@ -1,11 +1,14 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../application/auth_providers.dart';
-import 'check_email_screen.dart';
+import '../../../shared/theme/app_typography.dart';
 import '../../../shared/utils/error_messages.dart';
 import '../../../shared/widgets/widgets.dart';
+import '../../legal/presentation/legal_screen.dart';
+import '../application/auth_providers.dart';
+import 'check_email_screen.dart';
 
 /// Email + password sign-up with an 18+ age gate and terms agreement.
 /// With "Confirm email" ON, signup creates the user but no session; we route to
@@ -27,11 +30,25 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   bool _loading = false;
   bool _obscure = true;
 
+  final _termsTap = TapGestureRecognizer();
+  final _privacyTap = TapGestureRecognizer();
+
+  @override
+  void initState() {
+    super.initState();
+    _termsTap.onTap = () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => LegalScreen.terms()));
+    _privacyTap.onTap = () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => LegalScreen.privacy()));
+  }
+
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
     _confirm.dispose();
+    _termsTap.dispose();
+    _privacyTap.dispose();
     super.dispose();
   }
 
@@ -117,8 +134,29 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           _CheckRow(
             value: _agreedTerms,
             onChanged: (v) => setState(() => _agreedTerms = v ?? false),
-            // Placeholder, non-linked text for now — real URLs pre-submission.
-            child: const Text('I agree to the Terms of Service & Privacy Policy'),
+            child: Text.rich(
+              TextSpan(
+                style: AppText.bodyMedium,
+                children: [
+                  const TextSpan(text: 'I agree to the '),
+                  TextSpan(
+                    text: 'Terms of Service',
+                    style: const TextStyle(
+                        color: AppColors.mintDeep,
+                        fontWeight: FontWeight.w600),
+                    recognizer: _termsTap,
+                  ),
+                  const TextSpan(text: ' & '),
+                  TextSpan(
+                    text: 'Privacy Policy',
+                    style: const TextStyle(
+                        color: AppColors.mintDeep,
+                        fontWeight: FontWeight.w600),
+                    recognizer: _privacyTap,
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 8),
           BondButton(

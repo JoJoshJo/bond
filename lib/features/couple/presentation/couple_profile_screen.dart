@@ -10,6 +10,7 @@ import '../../../shared/utils/error_messages.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../creature/presentation/assistant_stub.dart';
+import '../../legal/presentation/legal_screen.dart';
 import '../application/couple_providers.dart';
 
 /// The "Us" tab: couple identity + settings. Rename the space, set the start
@@ -188,6 +189,32 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     title: 'AI router test',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const AiTestScreen())),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _section('Legal'),
+            BondCard(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Column(
+                children: [
+                  BondListTile(
+                    leadingIcon: Icons.description_outlined,
+                    title: 'Terms of Service',
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.inkFaint),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => LegalScreen.terms())),
+                  ),
+                  const Divider(),
+                  BondListTile(
+                    leadingIcon: Icons.privacy_tip_outlined,
+                    title: 'Privacy Policy',
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.inkFaint),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => LegalScreen.privacy())),
                   ),
                 ],
               ),
