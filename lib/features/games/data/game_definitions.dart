@@ -16,8 +16,9 @@ class GameDefinition {
     required this.title,
     required this.tagline,
     required this.icon,
-    required this.rounds,
     required this.xp,
+    this.rounds = const [],
+    this.board = false,
   });
 
   final String type; // matches game_sessions.game_type
@@ -26,6 +27,7 @@ class GameDefinition {
   final IconData icon;
   final List<GameRound> rounds;
   final int xp; // awarded on completion
+  final bool board; // true = a turn-based board game (not round-based)
 
   int get roundCount => rounds.length;
 }
@@ -85,7 +87,35 @@ class GameCatalog {
     ],
   );
 
-  static const all = [wouldYouRather, thisOrThat, coupleQuiz];
+  // ---- Turn-based board games (live-preferred, async-tolerant) ----
+  static const fourInARow = GameDefinition(
+    type: 'four_in_a_row',
+    title: 'Four in a Row',
+    tagline: 'Drop discs, connect four',
+    icon: Icons.grid_4x4_rounded,
+    xp: 20,
+    board: true,
+  );
+  static const ticTacToe = GameDefinition(
+    type: 'tic_tac_toe',
+    title: 'Tic-Tac-Toe',
+    tagline: 'Three in a row wins',
+    icon: Icons.tag_rounded,
+    xp: 15,
+    board: true,
+  );
+  static const dotsAndBoxes = GameDefinition(
+    type: 'dots_and_boxes',
+    title: 'Dots & Boxes',
+    tagline: 'Claim the most boxes',
+    icon: Icons.border_all_rounded,
+    xp: 20,
+    board: true,
+  );
+
+  static const round = [wouldYouRather, thisOrThat, coupleQuiz];
+  static const boards = [fourInARow, ticTacToe, dotsAndBoxes];
+  static const all = [...round, ...boards];
 
   static GameDefinition byType(String type) =>
       all.firstWhere((g) => g.type == type, orElse: () => wouldYouRather);

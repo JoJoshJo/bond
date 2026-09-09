@@ -8,6 +8,7 @@ import '../../../shared/widgets/widgets.dart';
 import '../application/game_controller.dart';
 import '../../../shared/utils/error_messages.dart';
 import '../data/game_definitions.dart';
+import 'board_game_play_screen.dart';
 import 'game_play_screen.dart';
 
 /// The Games hub: the launch catalog. Tapping a game starts a fresh session or
@@ -29,7 +30,9 @@ class _GamesHubScreenState extends ConsumerState<GamesHubScreen> {
           await ref.read(gameRepositoryProvider).startOrResume(def.type);
       if (!mounted) return;
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => GamePlayScreen(sessionId: session.id),
+        builder: (_) => def.board
+            ? BoardGamePlayScreen(sessionId: session.id)
+            : GamePlayScreen(sessionId: session.id),
       ));
     } catch (error, stack) {
       // Keep the real error in logs; show the user a clean message.

@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'board_models.dart';
 import 'game_models.dart';
 
 /// Data access for the game engine. Session create/complete go through vetted
@@ -49,6 +50,56 @@ class GameRepository {
       'user_id': userId,
       'move_data': {'round': round, 'choice': choice},
     });
+  }
+
+  // ---- Board games: generic move_data, ordered replay, member ids ----
+
+  /// The couple's two member user ids (sorted) — deterministic player order.
+  Future<List<String>> memberIds(String coupleId) async {
+    final rows = await _client
+        .from('couple_members')
+        .select('user_id')
+        .eq('couple_id', coupleId);
+    final ids = (rows as List<dynamic>)
+        .map((r) => (r as Map<String, dynamic>)['user_id'] as String)
+        .toList()
+      ..sort();
+    return ids;
+  }
+
+  /// All moves for a session in play order (created_at), with raw move_data.
+  Future<List<RawMove>> fetchRawMoves(String sessionId) async {
+    final rows = await _client
+        .from('game_moves')
+        .select('user_id, move_data, created_at')
+        .eq('session_id', sessionId)
+        .order('created_at', ascending: true);
+    return (rows as List<dynamic>)
+        .map((r) => RawMove.fromRow(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Insert a board move with arbitrary move_data.
+  Future<void> submitRawMove({
+    required String sessionId,
+    required String userId,
+    required Map<String, dynamic> moveData,
+  }) async {
+    await _client.from('game_moves').insert({
+      'session_id': sessionId,
+      'user_id': userId,
+      'move_data': moveData,
+    });
+  }
+
+  /// The couple that owns a session (to resolve member ids).
+  Future<String?> coupleIdForSession(String sessionId) async {
+    final row = await _client
+        .from('game_sessions')
+        .select('couple_id')
+        .eq('id', sessionId)
+        .maybeSingle();
+    return row?['couple_id'] as String?;
   }
 
   /// Idempotent completion + monotonic XP award. Returns the new bond_score.
