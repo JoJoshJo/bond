@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../auth/application/auth_providers.dart';
+import '../../premium/application/entitlement_providers.dart';
 import '../data/spicy_repository.dart';
 
 final spicyRepositoryProvider = Provider<SpicyRepository>(
@@ -75,31 +76,45 @@ class SpicyState {
 /// and auto-reverting when a free session expires. The server is always the
 /// authority; the local timer is only UX.
 class SpicyController extends StateNotifier<SpicyState> {
-  SpicyController(this._repo) : super(const SpicyState()) {
+  SpicyController(this._repo, this._ref) : super(const SpicyState()) {
     refresh();
   }
 
   final SpicyRepository _repo;
+  final Ref _ref;
   Timer? _expiryTimer;
+
+  /// DEV-ONLY: the client-side premium override forces spicy to unlimited too,
+  /// so the "DEV: Usora+" toggle unlocks spicy for testing. The real gate stays
+  /// the server RPC (below) for production — free users keep the 3h/14-day
+  /// limit and RC-premium gets unlimited server-side; this only short-circuits
+  /// when someone explicitly flips the dev override.
+  bool get _devPremium => _ref.read(premiumDevOverrideProvider) == true;
 
   /// Re-read the server truth (call on app load and when opening the toggle).
   Future<void> refresh() async {
     final s = await _repo.status();
     if (!mounted) return;
+    final unlimited = s.unlimited || _devPremium;
     state = state.copyWith(
       loading: false,
-      unlimited: s.unlimited,
+      unlimited: unlimited,
       // Restore ON if the server says we're inside an active session.
-      on: s.active ? true : state.on && s.unlimited,
+      on: s.active ? true : state.on && unlimited,
       expiresAt: s.sessionExpiresAt,
       cooldownUntil: s.cooldownUntil,
     );
     _armExpiry();
   }
 
-  /// Turn spicy mode ON. Premium flips locally; free asks the server.
+  /// Turn spicy mode ON. Premium (incl. dev override) flips locally; free asks
+  /// the server.
   Future<SpicyActivateOutcome> turnOn() async {
     if (state.busy) return SpicyActivateOutcome.error;
+    if (_devPremium) {
+      state = state.copyWith(on: true, unlimited: true, justEnded: false);
+      return SpicyActivateOutcome.unlimited;
+    }
     if (state.unlimited) {
       state = state.copyWith(on: true, justEnded: false);
       return SpicyActivateOutcome.unlimited;
@@ -176,7 +191,7 @@ class SpicyController extends StateNotifier<SpicyState> {
 
 final spicyControllerProvider =
     StateNotifierProvider<SpicyController, SpicyState>(
-  (ref) => SpicyController(ref.watch(spicyRepositoryProvider)),
+  (ref) => SpicyController(ref.watch(spicyRepositoryProvider), ref),
 );
 
 /// Whether spicy mode is currently ON — the one flag the theme, games, and
