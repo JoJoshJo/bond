@@ -119,13 +119,13 @@ class MemoryVaultScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'You\'ve saved $kFreeMemoryCap memories together. Upgrade to '
-                'BOND+ for unlimited memories 🤍',
+                'Usora+ for unlimited memories 🤍',
                 textAlign: TextAlign.center,
                 style: AppText.bodyMedium.copyWith(color: AppColors.inkMuted),
               ),
               const SizedBox(height: AppSpacing.lg),
               BondButton(
-                label: 'See BOND+',
+                label: 'See Usora+',
                 onPressed: () {
                   Navigator.of(ctx).pop();
                   PaywallScreen.open(context);

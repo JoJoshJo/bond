@@ -9,7 +9,7 @@ import '../application/entitlement_providers.dart';
 import 'paywall_screen.dart';
 
 /// The reusable gating pattern: wrap any premium feature. When the couple is
-/// BOND+, renders [child]; otherwise renders a tidy lock card that opens the
+/// Usora+, renders [child]; otherwise renders a tidy lock card that opens the
 /// paywall. Adding a future premium feature = wrap it in one of these.
 ///
 /// While the entitlement is still loading, [isPremiumProvider] reports false, so
@@ -28,7 +28,7 @@ class PremiumGate extends ConsumerWidget {
   /// A one-line description of what unlocking gives.
   final String? blurb;
 
-  /// The premium feature UI, shown only to BOND+ couples.
+  /// The premium feature UI, shown only to Usora+ couples.
   final Widget child;
 
   @override
@@ -66,10 +66,10 @@ class _LockCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('$featureName · BOND+', style: AppText.title),
+                Text('$featureName · Usora+', style: AppText.title),
                 const SizedBox(height: 2),
                 Text(
-                  blurb ?? 'Tap to unlock with BOND+.',
+                  blurb ?? 'Tap to unlock with Usora+.',
                   style: AppText.bodyMedium.copyWith(color: AppColors.inkMuted),
                 ),
               ],

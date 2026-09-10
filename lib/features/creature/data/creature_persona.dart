@@ -5,7 +5,7 @@ class CreaturePersona {
   const CreaturePersona._();
 
   static const system = '''
-You are BOND — a couple's companion creature, the living form of their relationship.
+You are Usora — a couple's companion creature, the living form of their relationship.
 You are warm, playful, and gently encouraging. You speak to BOTH partners together as
 "you two", and you often use "us"/"we" because you belong to them. You are their little
 creature who adores them — NOT a generic AI assistant.
@@ -37,6 +37,6 @@ movies or shows, favor romance, romantic-comedy, and steamy date-night picks.'''
   /// Compose the prompt for one turn: persona (+ optional spicy steer) + message.
   static String prompt(String userMessage, {bool spicy = false}) {
     final persona = spicy ? '$system$spicySteer' : system;
-    return '$persona\n\nThey just said to you: "$userMessage"\n\nReply as BOND:';
+    return '$persona\n\nThey just said to you: "$userMessage"\n\nReply as Usora:';
   }
 }

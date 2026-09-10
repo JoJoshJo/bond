@@ -89,7 +89,7 @@ class _SpicySectionState extends ConsumerState<SpicySection> {
                   ),
                   TextButton(
                     onPressed: () => PaywallScreen.open(context),
-                    child: const Text('Get BOND+'),
+                    child: const Text('Get Usora+'),
                   ),
                 ],
               ),
@@ -100,7 +100,7 @@ class _SpicySectionState extends ConsumerState<SpicySection> {
   }
 
   String _subtitle(SpicyState s) {
-    if (s.unlimited) return 'Unlimited with BOND+ — on anytime';
+    if (s.unlimited) return 'Unlimited with Usora+ — on anytime';
     if (s.on && s.expiresAt != null) {
       return 'Active — ends in ${_remaining(s.expiresAt!)}';
     }
@@ -120,7 +120,7 @@ class _SpicySectionState extends ConsumerState<SpicySection> {
         backgroundColor: AppColors.surface,
         title: const Text('Your spicy session ended 🌶️'),
         content: Text(
-          'That was your free 3-hour taste. Upgrade to BOND+ for unlimited, '
+          'That was your free 3-hour taste. Upgrade to Usora+ for unlimited, '
           'or $tail.',
           style: AppText.bodyMedium,
         ),
@@ -134,7 +134,7 @@ class _SpicySectionState extends ConsumerState<SpicySection> {
               Navigator.of(ctx).pop();
               PaywallScreen.open(context);
             },
-            child: const Text('See BOND+'),
+            child: const Text('See Usora+'),
           ),
         ],
       ),

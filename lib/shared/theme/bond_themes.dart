@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 /// A selectable app theme (a full [BondPalette] + display metadata). Mint is the
-/// free default; the rest are BOND+. The red-room palette is NOT here — spicy
+/// free default; the rest are Usora+. The red-room palette is NOT here — spicy
 /// mode owns it and overrides any chosen theme while active.
 @immutable
 class BondTheme {
@@ -120,7 +120,7 @@ const _charcoal = BondPalette(
   dark: true,
 );
 
-/// The theme catalog. Mint is free + default; the rest are BOND+.
+/// The theme catalog. Mint is free + default; the rest are Usora+.
 const List<BondTheme> bondThemes = [
   BondTheme(key: 'mint', label: 'Mint', palette: mintPalette, premium: false),
   BondTheme(key: 'sunset', label: 'Sunset', palette: _sunset),

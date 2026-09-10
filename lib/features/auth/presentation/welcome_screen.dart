@@ -41,7 +41,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text('BOND',
+              Text('Usora',
                   textAlign: TextAlign.center,
                   style: textTheme.displaySmall),
               const SizedBox(height: 8),

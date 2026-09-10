@@ -12,7 +12,7 @@ import '../../creature/presentation/creature_chat_sheet.dart';
 import '../../creature/presentation/creature_view.dart';
 import '../../prompts/presentation/widgets/prompt_banner.dart';
 
-/// The emotional home: the creature front-and-center, the couple name, the BOND
+/// The emotional home: the creature front-and-center, the couple name, the Usora
 /// flame + score, and today's question. First thing you see on open.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.coupleId, required this.coupleName});

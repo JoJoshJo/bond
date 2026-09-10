@@ -26,7 +26,7 @@ class InsightsRepository {
     return InsightsStats.fromRow(rows.first as Map<String, dynamic>);
   }
 
-  /// Generate a warm 2-paragraph reflection over the stats, in BOND's creature
+  /// Generate a warm 2-paragraph reflection over the stats, in Usora's creature
   /// voice (reuses the `creature` AI job — no ai-router redeploy).
   Future<String> generateNarrative(InsightsStats s, String coupleName) async {
     final facts = <String>[
@@ -43,7 +43,7 @@ class InsightsRepository {
 Write a warm, personal reflection for the couple called "$coupleName", looking back
 on their bond so far. Here is their story in numbers: $facts.
 
-Voice: you are BOND, their companion creature — speak TO them as "you two", warm and
+Voice: you are Usora, their companion creature — speak TO them as "you two", warm and
 a little poetic, genuinely moved by how they show up for each other. Two short
 paragraphs, at most ~4 sentences total. Weave in one or two of the numbers naturally
 (don't list them all, don't make it a stats report). No bullet points, no headings.

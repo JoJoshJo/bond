@@ -69,7 +69,7 @@ class _CreateOrJoinScreenState extends ConsumerState<CreateOrJoinScreen> {
                   style: textTheme.headlineSmall),
               const SizedBox(height: 8),
               Text(
-                'BOND is for two. Start your space and invite your partner, '
+                'Usora is for two. Start your space and invite your partner, '
                 'or join the invite they sent you.',
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium?.copyWith(color: AppColors.inkMuted),

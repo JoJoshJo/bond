@@ -83,8 +83,8 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
     // Include the raw code too — deep-link auto-open lands with the OAuth task.
     SharePlus.instance.share(
       ShareParams(
-        text: 'Join me on BOND 💛\n${invite.inviteUrl}\n\n'
-            'Or open BOND → Join → enter code: ${invite.token}',
+        text: 'Join me on Usora 💛\n${invite.inviteUrl}\n\n'
+            'Or open Usora → Join → enter code: ${invite.token}',
       ),
     );
   }
@@ -251,7 +251,7 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
             textAlign: TextAlign.center, style: AppText.title),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'The moment your partner joins, BOND comes alive for you both.',
+          'The moment your partner joins, Usora comes alive for you both.',
           textAlign: TextAlign.center,
           style: AppText.bodyMedium.copyWith(color: AppColors.inkMuted),
         ),

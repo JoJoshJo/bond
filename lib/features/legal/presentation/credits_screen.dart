@@ -20,7 +20,7 @@ class CreditsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: AppSpacing.lg),
-          Text('BOND is built with the help of these services 🤍',
+          Text('Usora is built with the help of these services 🤍',
               style: AppText.bodyMedium.copyWith(color: AppColors.inkMuted)),
           const SizedBox(height: AppSpacing.lg),
           BondCard(

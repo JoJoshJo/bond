@@ -142,7 +142,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
             child: FittedBox(child: CreatureView(mood: mood, size: 120)),
           ),
           const SizedBox(width: AppSpacing.md),
-          Text('BOND', style: AppText.title),
+          Text('Usora', style: AppText.title),
           const Spacer(),
           IconButton(
             icon: const Icon(Icons.close),
@@ -454,7 +454,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
               textCapitalization: TextCapitalization.sentences,
               style: AppText.bodyMedium,
               decoration: InputDecoration(
-                hintText: _listening ? 'Listening…' : 'Say something to BOND',
+                hintText: _listening ? 'Listening…' : 'Say something to Usora',
                 hintStyle:
                     AppText.bodyMedium.copyWith(color: AppColors.inkFaint),
                 filled: true,

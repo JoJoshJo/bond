@@ -40,7 +40,7 @@ class BondApp extends ConsumerWidget {
     AppColors.active = spicy ? redRoomPalette : paletteForKey(themeKey);
 
     return MaterialApp(
-      title: 'BOND',
+      title: 'Usora',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.build(),
       home: const AuthGate(),

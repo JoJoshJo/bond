@@ -1,14 +1,14 @@
 // ============================================================
-// BOND AI ROUTER — self-contained Edge Function (paste this whole
+// Usora AI ROUTER — self-contained Edge Function (paste this whole
 // file into the Supabase dashboard function `ai-router`).
 //
-// - Neutral BOND request/response shape; config-per-job.
+// - Neutral Usora request/response shape; config-per-job.
 // - Gemini adapter with retry/backoff (503/429 absorbed).
 // - CREATURE job uses Gemini FUNCTION-CALLING. Tools:
 //     search_movies        → TMDB        (returns `movies`)
 //     search_places        → Foursquare  (returns `places`; needs lat/lng)
-//     add_calendar_event   → important_dates via RPC (BOND+; JWT-scoped)
-//     list_upcoming_events → important_dates via RPC (BOND+; JWT-scoped)
+//     add_calendar_event   → important_dates via RPC (Usora+; JWT-scoped)
+//     list_upcoming_events → important_dates via RPC (Usora+; JWT-scoped)
 //   Tools run server-side; Gemini phrases results in character.
 // - Secrets: GEMINI_API_KEY (required), TMDB_API_KEY (movies),
 //   FOURSQUARE_API_KEY (places). SUPABASE_URL / SUPABASE_ANON_KEY are
@@ -408,7 +408,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         return json({ text: await secondTurn(contents, part, "search_places", places.map((p) => ({ name: p.name, category: p.category })), model, apiKey, tools) ?? "Here are a few spots near you two 🤍", meta, places });
       }
 
-      // ---- calendar: add (BOND+; couple resolved from JWT in the RPC) ----
+      // ---- calendar: add (Usora+; couple resolved from JWT in the RPC) ----
       if (fc?.name === "add_calendar_event") {
         // deno-lint-ignore no-explicit-any
         let result: any;
@@ -424,12 +424,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
         const fallback = ok
           ? "Done — added that to your calendar 🤍"
           : (result?.reason === "not_premium"
-            ? "Ooh, managing your shared calendar is a BOND+ thing 🤍"
+            ? "Ooh, managing your shared calendar is a Usora+ thing 🤍"
             : "Hmm, I couldn't add that just now — want to try again?");
         return json({ text: await secondTurn(contents, part, "add_calendar_event", summary, model, apiKey, tools) ?? fallback, meta, calendarChanged: ok });
       }
 
-      // ---- calendar: list upcoming (BOND+) ----
+      // ---- calendar: list upcoming (Usora+) ----
       if (fc?.name === "list_upcoming_events") {
         // deno-lint-ignore no-explicit-any
         let result: any;
@@ -445,7 +445,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         const fallback = ok
           ? "Here's what's coming up for you two 🤍"
           : (result?.reason === "not_premium"
-            ? "Ooh, your shared calendar is a BOND+ thing 🤍"
+            ? "Ooh, your shared calendar is a Usora+ thing 🤍"
             : "I couldn't reach your calendar just now — try again in a bit?");
         return json({ text: await secondTurn(contents, part, "list_upcoming_events", summary, model, apiKey, tools) ?? fallback, meta });
       }

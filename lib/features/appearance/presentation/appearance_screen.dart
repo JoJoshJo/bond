@@ -10,7 +10,7 @@ import '../../premium/application/entitlement_providers.dart';
 import '../../premium/presentation/paywall_screen.dart';
 import '../application/theme_providers.dart';
 
-/// Theme picker. Mint is free; the rest are BOND+ (locked for free users → the
+/// Theme picker. Mint is free; the rest are Usora+ (locked for free users → the
 /// paywall). Tapping a theme applies it live and persists it on-device.
 class AppearanceScreen extends ConsumerWidget {
   const AppearanceScreen({super.key});
@@ -52,7 +52,7 @@ class AppearanceScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           if (!isPremium)
-            Text('Mint is free. The rest come with BOND+ 🤍',
+            Text('Mint is free. The rest come with Usora+ 🤍',
                 style: AppText.bodySmall.copyWith(color: AppColors.inkMuted)),
           const SizedBox(height: AppSpacing.xxl),
         ],

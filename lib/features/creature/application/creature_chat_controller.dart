@@ -56,7 +56,7 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
           reply = await _ask(text); // resend, now with coordinates
         } else {
           _replaceThinking(
-              'I\'d love to find spots near you two — turn on location for BOND and ask me again 🤍');
+              'I\'d love to find spots near you two — turn on location for Usora and ask me again 🤍');
           return;
         }
       }

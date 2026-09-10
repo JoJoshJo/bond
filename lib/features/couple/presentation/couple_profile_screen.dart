@@ -185,9 +185,9 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               child: BondListTile(
                 leadingIcon: Icons.workspace_premium_rounded,
-                title: isPremium ? 'BOND+ · active' : 'Upgrade to BOND+',
+                title: isPremium ? 'Usora+ · active' : 'Upgrade to Usora+',
                 subtitle: isPremium
-                    ? 'Thanks for supporting BOND 🤍'
+                    ? 'Thanks for supporting Usora 🤍'
                     : 'Unlimited memories, a fully custom creature & more',
                 onTap: () => PaywallScreen.open(context),
                 trailing: Icon(Icons.chevron_right,
@@ -205,7 +205,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     title: 'Shared calendar',
                     subtitle: isPremium
                         ? 'Your dates, anniversaries & plans'
-                        : 'Plan your dates together · BOND+',
+                        : 'Plan your dates together · Usora+',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) =>
                             CalendarScreen(coupleId: widget.coupleId))),
@@ -218,7 +218,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     title: 'Relationship insights',
                     subtitle: isPremium
                         ? 'Your bond over time'
-                        : 'See your bond over time · BOND+',
+                        : 'See your bond over time · Usora+',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) =>
                             InsightsScreen(coupleId: widget.coupleId))),
@@ -237,7 +237,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                 title: 'Appearance',
                 subtitle: isPremium
                     ? 'Pick your theme'
-                    : 'Premium color themes · BOND+',
+                    : 'Premium color themes · Usora+',
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => const AppearanceScreen())),
                 trailing: Icon(Icons.chevron_right, color: AppColors.inkFaint),
@@ -271,7 +271,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                   // RevenueCat wiring (see premiumDevOverrideProvider).
                   SwitchListTile(
                     value: isPremium,
-                    title: Text('DEV: BOND+ override', style: AppText.bodyLarge),
+                    title: Text('DEV: Usora+ override', style: AppText.bodyLarge),
                     subtitle: Text('Force premium on/off (dev only)',
                         style: AppText.bodySmall),
                     onChanged: (v) => ref

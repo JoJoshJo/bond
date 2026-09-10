@@ -5,7 +5,7 @@ import '../../auth/application/auth_providers.dart';
 import '../../couple/application/couple_providers.dart';
 import '../data/subscription_repository.dart';
 
-/// Free tier keeps up to this many memories; BOND+ is unlimited.
+/// Free tier keeps up to this many memories; Usora+ is unlimited.
 const int kFreeMemoryCap = 30;
 
 final subscriptionRepositoryProvider = Provider<SubscriptionRepository>(
@@ -29,7 +29,7 @@ final entitlementProvider = FutureProvider<String>((ref) async {
 /// toggle in the Us tab when RevenueCat purchase is wired in.
 final premiumDevOverrideProvider = StateProvider<bool?>((ref) => null);
 
-/// THE SINGLE SOURCE OF TRUTH for "is this couple BOND+?". Every gate reads this.
+/// THE SINGLE SOURCE OF TRUTH for "is this couple Usora+?". Every gate reads this.
 ///
 /// Honors the dev override first; otherwise reflects the real entitlement.
 /// Defaults to **false while the entitlement is still loading** so gates fail

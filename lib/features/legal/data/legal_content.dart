@@ -1,6 +1,6 @@
-/// Terms of Service + Privacy Policy content for BOND.
+/// Terms of Service + Privacy Policy content for Usora.
 ///
-/// NOTE: written to accurately reflect BOND's actual data practices, but it is
+/// NOTE: written to accurately reflect Usora's actual data practices, but it is
 /// NOT lawyer-reviewed — have counsel review before launch. Fill the
 /// [contactEmail] / [governingLaw] placeholders with real values.
 class LegalContent {
@@ -13,7 +13,7 @@ class LegalContent {
 
   static const List<LegalSection> privacyPolicy = [
     LegalSection('Who we are',
-        'BOND is a private app for two people in a relationship to share a space together — messages, photos, voice notes, memories, daily questions, games, and a companion creature. This policy explains what we collect, how we use it, and the promises we keep.'),
+        'Usora is a private app for two people in a relationship to share a space together — messages, photos, voice notes, memories, daily questions, games, and a companion creature. This policy explains what we collect, how we use it, and the promises we keep.'),
     LegalSection('The short version — our promise',
         'We never sell your data. We never use your content to train AI models. Only the two of you can see your shared space. We ask for the minimum we need, and we tell you plainly what we do with it.'),
     LegalSection('Information we collect',
@@ -38,7 +38,7 @@ class LegalContent {
     LegalSection('Your rights',
         'You can access, correct, or delete your information. Contact us and we\'ll help. Depending on where you live, you may have additional rights under local law, which we honor.'),
     LegalSection('Age',
-        'BOND is for adults. You must be 18 or older to use it. We do not knowingly collect information from anyone under 18.'),
+        'Usora is for adults. You must be 18 or older to use it. We do not knowingly collect information from anyone under 18.'),
     LegalSection('Changes to this policy',
         'If we change this policy, we\'ll update the date above and, for significant changes, let you know in the app.'),
     LegalSection('Contact',
@@ -47,27 +47,27 @@ class LegalContent {
 
   static const List<LegalSection> termsOfService = [
     LegalSection('Acceptance',
-        'By creating an account or using BOND, you agree to these Terms. If you don\'t agree, please don\'t use the app.'),
+        'By creating an account or using Usora, you agree to these Terms. If you don\'t agree, please don\'t use the app.'),
     LegalSection('Eligibility',
-        'You must be 18 or older to use BOND. By using it you confirm that you are.'),
+        'You must be 18 or older to use Usora. By using it you confirm that you are.'),
     LegalSection('Your account',
         'Keep your login secure and provide accurate information. You\'re responsible for activity under your account. Let us know if you suspect unauthorized access.'),
     LegalSection('The couple space',
-        'BOND is designed for two people. When you link with a partner, you share a private space. Content you add is visible to your partner. If you unlink, the shared space is closed per our breakup/unlink process, and progress is handled with care.'),
+        'Usora is designed for two people. When you link with a partner, you share a private space. Content you add is visible to your partner. If you unlink, the shared space is closed per our breakup/unlink process, and progress is handled with care.'),
     LegalSection('Your content',
-        'You own the content you create. You grant BOND the limited permission needed to store your content and display it to you and your linked partner, and to operate the features you use. We never sell your content and never use it to train AI models. You\'re responsible for the content you share and confirm you have the right to share it.'),
+        'You own the content you create. You grant Usora the limited permission needed to store your content and display it to you and your linked partner, and to operate the features you use. We never sell your content and never use it to train AI models. You\'re responsible for the content you share and confirm you have the right to share it.'),
     LegalSection('Acceptable use',
-        'Don\'t use BOND for anything illegal, harmful, harassing, or abusive, and don\'t attempt to break, overload, or misuse the service or access data that isn\'t yours.'),
+        'Don\'t use Usora for anything illegal, harmful, harassing, or abusive, and don\'t attempt to break, overload, or misuse the service or access data that isn\'t yours.'),
     LegalSection('AI features',
-        'BOND\'s companion can suggest things (like movies or nearby places) using third-party data and AI. Suggestions may be wrong or incomplete and are not professional, medical, legal, or financial advice. The creature finds and suggests; you decide and confirm anything involving money, bookings, or sending.'),
+        'Usora\'s companion can suggest things (like movies or nearby places) using third-party data and AI. Suggestions may be wrong or incomplete and are not professional, medical, legal, or financial advice. The creature finds and suggests; you decide and confirm anything involving money, bookings, or sending.'),
     LegalSection('Third-party services',
-        'BOND relies on third-party services (Supabase, Google Gemini, TMDB, Foursquare) to work. Their availability and content are outside our control, and your use of features that depend on them is also subject to their terms.'),
+        'Usora relies on third-party services (Supabase, Google Gemini, TMDB, Foursquare) to work. Their availability and content are outside our control, and your use of features that depend on them is also subject to their terms.'),
     LegalSection('Disclaimers',
-        'BOND is provided "as is" without warranties of any kind. We work hard to keep it reliable, but we can\'t guarantee it will always be available, error-free, or that content from third parties will be accurate.'),
+        'Usora is provided "as is" without warranties of any kind. We work hard to keep it reliable, but we can\'t guarantee it will always be available, error-free, or that content from third parties will be accurate.'),
     LegalSection('Limitation of liability',
-        'To the extent permitted by law, BOND is not liable for indirect, incidental, or consequential damages arising from your use of the app.'),
+        'To the extent permitted by law, Usora is not liable for indirect, incidental, or consequential damages arising from your use of the app.'),
     LegalSection('Termination',
-        'You may stop using BOND and delete your account at any time. We may suspend or end access if these Terms are violated.'),
+        'You may stop using Usora and delete your account at any time. We may suspend or end access if these Terms are violated.'),
     LegalSection('Changes',
         'We may update these Terms; we\'ll update the date above and, for significant changes, notify you in the app. Continued use means you accept the updated Terms.'),
     LegalSection('Governing law',

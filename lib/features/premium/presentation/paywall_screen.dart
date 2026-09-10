@@ -8,7 +8,7 @@ import '../../../shared/theme/app_typography.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../application/entitlement_providers.dart';
 
-/// The BOND+ upgrade screen — the conversion moment. Warm, benefit-led.
+/// The Usora+ upgrade screen — the conversion moment. Warm, benefit-led.
 ///
 /// The Subscribe button is a DEV STUB for now: it flips the in-memory dev
 /// override on so premium can be exercised end-to-end. The real RevenueCat
@@ -40,7 +40,7 @@ class PaywallScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return BondScaffold(
-      title: 'BOND+',
+      title: 'Usora+',
       showBack: true,
       scrollable: true,
       child: Column(
@@ -60,7 +60,7 @@ class PaywallScreen extends ConsumerWidget {
           _priceCard(context, ref),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Connection is always free. BOND+ adds depth and delight. 🤍',
+            'Connection is always free. Usora+ adds depth and delight. 🤍',
             textAlign: TextAlign.center,
             style: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
           ),
@@ -85,7 +85,7 @@ class PaywallScreen extends ConsumerWidget {
         ).animate().scaleXY(
             begin: 0.7, end: 1, duration: 420.ms, curve: Curves.easeOutBack),
         const SizedBox(height: AppSpacing.lg),
-        Text('Unlock BOND+',
+        Text('Unlock Usora+',
             textAlign: TextAlign.center, style: AppText.displayMedium),
         const SizedBox(height: AppSpacing.xs),
         Text(
@@ -166,7 +166,7 @@ class PaywallScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-            'BOND+ enabled (dev). Real purchase wiring comes with RevenueCat.'),
+            'Usora+ enabled (dev). Real purchase wiring comes with RevenueCat.'),
       ),
     );
     Navigator.of(context).maybePop();

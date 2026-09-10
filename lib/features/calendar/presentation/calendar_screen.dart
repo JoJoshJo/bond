@@ -11,7 +11,7 @@ import '../application/calendar_providers.dart';
 import '../data/calendar_models.dart';
 import 'event_editor_sheet.dart';
 
-/// The shared couple calendar — a BOND+ feature. Free users see the lock card
+/// The shared couple calendar — a Usora+ feature. Free users see the lock card
 /// (→ paywall); premium users get the month grid + upcoming list + CRUD.
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key, required this.coupleId});
@@ -26,7 +26,7 @@ class CalendarScreen extends StatelessWidget {
       padded: false,
       child: PremiumGate(
         featureName: 'Shared calendar',
-        blurb: 'Plan your dates together — a BOND+ feature.',
+        blurb: 'Plan your dates together — a Usora+ feature.',
         child: _CalendarBody(coupleId: coupleId),
       ),
     );

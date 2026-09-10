@@ -61,7 +61,7 @@ class PlaceCard {
       );
 }
 
-/// BOND's neutral AI response — what the app sees regardless of provider. When
+/// Usora's neutral AI response — what the app sees regardless of provider. When
 /// the creature used a tool, [movies] / [places] carry result cards.
 /// [needsLocation] means a place search was requested without coordinates.
 @immutable

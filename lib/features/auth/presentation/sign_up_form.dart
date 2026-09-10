@@ -86,7 +86,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     // picker already caps the selectable range).
     if (!_isAdult) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be 18 or older to use BOND.')),
+        const SnackBar(content: Text('You must be 18 or older to use Usora.')),
       );
       return;
     }

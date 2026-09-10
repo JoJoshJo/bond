@@ -1,4 +1,4 @@
-// Barrel export for the BOND design-system components.
+// Barrel export for the Usora design-system components.
 export 'bond_button.dart';
 export 'bond_card.dart';
 export 'bond_chip.dart';

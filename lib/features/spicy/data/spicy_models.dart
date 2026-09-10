@@ -16,7 +16,7 @@ class SpicyStatus {
   /// false here — premium controls on/off locally; see [unlimited].)
   final bool active;
 
-  /// Premium (BOND+): unlimited, anytime — no server window or cooldown.
+  /// Premium (Usora+): unlimited, anytime — no server window or cooldown.
   final bool unlimited;
 
   /// When the current free session ends (server time).

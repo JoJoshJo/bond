@@ -11,7 +11,7 @@ import '../../premium/presentation/premium_gate.dart';
 import '../application/insights_providers.dart';
 import '../data/insights_models.dart';
 
-/// Relationship Insights — a BOND+ "look at us" reflection: warm stats + a
+/// Relationship Insights — a Usora+ "look at us" reflection: warm stats + a
 /// generated narrative in the creature's voice. Free users see the paywall lock.
 class InsightsScreen extends StatelessWidget {
   const InsightsScreen({super.key, required this.coupleId});
@@ -26,7 +26,7 @@ class InsightsScreen extends StatelessWidget {
       scrollable: true,
       child: PremiumGate(
         featureName: 'Relationship insights',
-        blurb: 'See your bond over time — a BOND+ feature.',
+        blurb: 'See your bond over time — a Usora+ feature.',
         child: _InsightsBody(coupleId: coupleId),
       ),
     );
