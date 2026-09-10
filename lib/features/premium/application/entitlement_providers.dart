@@ -19,9 +19,16 @@ final subscriptionRepositoryProvider = Provider<SubscriptionRepository>(
 final entitlementProvider = FutureProvider<String>((ref) async {
   final membership = await ref.watch(myMembershipProvider.future);
   if (membership == null) return SubscriptionRepository.entitlementFree;
-  return ref
-      .watch(subscriptionRepositoryProvider)
-      .entitlementFor(membership.coupleId);
+  final repo = ref.watch(subscriptionRepositoryProvider);
+
+  // Realtime: when the RC webhook writes the couple's subscription row, refresh
+  // this provider so BOTH partners flip to premium within seconds.
+  final channel =
+      repo.channel(membership.coupleId, onChange: ref.invalidateSelf)
+        ..subscribe();
+  ref.onDispose(() => repo.removeChannel(channel));
+
+  return repo.entitlementFor(membership.coupleId);
 });
 
 /// DEV ONLY — a local override so premium can be tested on-device without a real

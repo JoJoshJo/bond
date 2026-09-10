@@ -45,4 +45,24 @@ class SubscriptionRepository {
       return entitlementFree;
     }
   }
+
+  /// Realtime on the couple's `subscriptions` row, so the RC webhook writing the
+  /// couple's entitlement reaches BOTH partners within seconds (Partner B flips
+  /// to premium without reopening). Member SELECT RLS permits this.
+  RealtimeChannel channel(String coupleId, {required void Function() onChange}) {
+    return _client.channel('subscriptions_$coupleId').onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'subscriptions',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'couple_id',
+            value: coupleId,
+          ),
+          callback: (_) => onChange(),
+        );
+  }
+
+  Future<void> removeChannel(RealtimeChannel channel) =>
+      _client.removeChannel(channel);
 }
