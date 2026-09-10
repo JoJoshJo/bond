@@ -4,7 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../auth/application/auth_providers.dart';
+import '../../couple/application/couple_providers.dart';
 import '../../premium/application/entitlement_providers.dart';
 import '../data/spicy_repository.dart';
 
@@ -77,12 +80,23 @@ class SpicyState {
 /// authority; the local timer is only UX.
 class SpicyController extends StateNotifier<SpicyState> {
   SpicyController(this._repo, this._ref) : super(const SpicyState()) {
-    refresh();
+    _init();
   }
 
   final SpicyRepository _repo;
   final Ref _ref;
   Timer? _expiryTimer;
+  RealtimeChannel? _channel;
+
+  /// Initial load + a realtime subscription on the couple's spicy_mode row, so
+  /// a partner's activation / expiry flips this app live (red room + countdown).
+  Future<void> _init() async {
+    await refresh();
+    final membership = await _ref.read(myMembershipProvider.future);
+    final coupleId = membership?.coupleId;
+    if (coupleId == null || !mounted) return;
+    _channel = _repo.channel(coupleId, onChange: refresh)..subscribe();
+  }
 
   /// DEV-ONLY: the client-side premium override forces spicy to unlimited too,
   /// so the "DEV: Usora+" toggle unlocks spicy for testing. The real gate stays
@@ -185,6 +199,8 @@ class SpicyController extends StateNotifier<SpicyState> {
   @override
   void dispose() {
     _expiryTimer?.cancel();
+    final ch = _channel;
+    if (ch != null) _repo.removeChannel(ch);
     super.dispose();
   }
 }

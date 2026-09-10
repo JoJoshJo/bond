@@ -27,4 +27,24 @@ class SpicyRepository {
     final rows = await _client.rpc('activate_spicy_mode') as List<dynamic>;
     return SpicyActivation.fromRow(rows.first as Map<String, dynamic>);
   }
+
+  /// Realtime on the couple's `spicy_mode` row, so one partner's activation (or
+  /// the session expiring) reaches the other partner live. Member SELECT RLS on
+  /// spicy_mode already permits this (Migration 1).
+  RealtimeChannel channel(String coupleId, {required void Function() onChange}) {
+    return _client.channel('spicy_$coupleId').onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'spicy_mode',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'couple_id',
+            value: coupleId,
+          ),
+          callback: (_) => onChange(),
+        );
+  }
+
+  Future<void> removeChannel(RealtimeChannel channel) =>
+      _client.removeChannel(channel);
 }
