@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../couple/application/couple_providers.dart';
 import '../data/subscription_repository.dart';
+import 'purchase_providers.dart';
 
 /// Free tier keeps up to this many memories; Usora+ is unlimited.
 const int kFreeMemoryCap = 30;
@@ -31,12 +32,14 @@ final premiumDevOverrideProvider = StateProvider<bool?>((ref) => null);
 
 /// THE SINGLE SOURCE OF TRUTH for "is this couple Usora+?". Every gate reads this.
 ///
-/// Honors the dev override first; otherwise reflects the real entitlement.
-/// Defaults to **false while the entitlement is still loading** so gates fail
+/// Order: dev override → RevenueCat (`usora` entitlement, the buyer's instant
+/// unlock) → the subscriptions table (couple-shared, written by the RC webhook,
+/// so BOTH partners unlock). Defaults to **false while loading** so gates fail
 /// locked (never accidentally unlock premium).
 final isPremiumProvider = Provider<bool>((ref) {
   final override = ref.watch(premiumDevOverrideProvider);
   if (override != null) return override;
+  if (ref.watch(revenueCatPremiumProvider)) return true;
   final entitlement = ref.watch(entitlementProvider);
   return entitlement.asData?.value == SubscriptionRepository.entitlementPlus;
 });

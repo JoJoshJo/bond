@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/purchases/purchase_service.dart';
 import 'core/supabase/supabase_client.dart';
 import 'features/appearance/application/theme_providers.dart';
 import 'features/appearance/data/theme_repository.dart';
@@ -20,6 +21,21 @@ Future<void> main() async {
   // cold start, so the chosen theme is the correct initial palette.
   final prefs = await SharedPreferences.getInstance();
   AppColors.active = paletteForKey(ThemeRepository(prefs).load());
+
+  // RevenueCat (iOS-only for now; no-op on Android / without a key). Identify
+  // the RC user by their Supabase user id, kept in sync with auth.
+  final purchases = PurchaseService();
+  await purchases.configure();
+  final existing = supabase.auth.currentSession?.user.id;
+  if (existing != null) await purchases.logIn(existing);
+  supabase.auth.onAuthStateChange.listen((data) {
+    final uid = data.session?.user.id;
+    if (uid != null) {
+      purchases.logIn(uid);
+    } else {
+      purchases.logOut();
+    }
+  });
 
   runApp(ProviderScope(
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],

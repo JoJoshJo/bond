@@ -5,8 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+
 import '../../../shared/widgets/widgets.dart';
+import '../../../core/purchases/purchase_service.dart';
 import '../application/entitlement_providers.dart';
+import '../application/purchase_providers.dart';
 
 /// The Usora+ upgrade screen — the conversion moment. Warm, benefit-led.
 ///
@@ -127,6 +131,10 @@ class PaywallScreen extends ConsumerWidget {
   }
 
   Widget _priceCard(BuildContext context, WidgetRef ref) {
+    final packageAsync = ref.watch(monthlyPackageProvider);
+    final package = packageAsync.asData?.value;
+    final price = package?.storeProduct.priceString ?? '\$7.99';
+
     return BondCard(
       color: AppColors.mintWash,
       elevated: false,
@@ -137,7 +145,7 @@ class PaywallScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('\$7.99', style: AppText.displayMedium),
+              Text(price, style: AppText.displayMedium),
               const SizedBox(width: 4),
               Text('/ month',
                   style: AppText.bodyMedium.copyWith(color: AppColors.inkMuted)),
@@ -151,24 +159,57 @@ class PaywallScreen extends ConsumerWidget {
           BondButton(
             label: 'Subscribe',
             icon: Icons.favorite_rounded,
-            onPressed: () => _subscribe(context, ref),
+            onPressed: () => _subscribe(context, ref, package),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          BondButton(
+            label: 'Restore purchases',
+            variant: BondButtonVariant.ghost,
+            onPressed: () => _restore(context, ref),
           ),
         ],
       ),
     );
   }
 
-  // DEV STUB. Real RevenueCat purchase wires in HERE later (one call site):
-  // on success the RC webhook writes the subscriptions row and the app picks it
-  // up via entitlementProvider — the dev override below goes away entirely.
-  void _subscribe(BuildContext context, WidgetRef ref) {
-    ref.read(premiumDevOverrideProvider.notifier).state = true;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-            'Usora+ enabled (dev). Real purchase wiring comes with RevenueCat.'),
-      ),
-    );
-    Navigator.of(context).maybePop();
+  Future<void> _subscribe(
+      BuildContext context, WidgetRef ref, Package? package) async {
+    // No live package (Android / RC unavailable) → dev fallback so testing still
+    // flips premium. Real StoreKit purchase happens on iOS where a package loads.
+    if (package == null) {
+      ref.read(premiumDevOverrideProvider.notifier).state = true;
+      _snack(context, 'Usora+ enabled (dev). Real purchases run on iOS.');
+      Navigator.of(context).maybePop();
+      return;
+    }
+    final outcome = await ref.read(purchaseServiceProvider).purchase(package);
+    if (!context.mounted) return;
+    switch (outcome) {
+      case PurchaseOutcome.success:
+        _snack(context, 'Welcome to Usora+ 🤍');
+        Navigator.of(context).maybePop();
+      case PurchaseOutcome.pending:
+        _snack(context, 'Purchase received — unlocking shortly.');
+        Navigator.of(context).maybePop();
+      case PurchaseOutcome.cancelled:
+        break; // user backed out — say nothing
+      case PurchaseOutcome.error:
+      case PurchaseOutcome.unavailable:
+        _snack(context, 'That didn\'t go through — please try again.');
+    }
   }
+
+  Future<void> _restore(BuildContext context, WidgetRef ref) async {
+    final restored = await ref.read(purchaseServiceProvider).restore();
+    if (!context.mounted) return;
+    if (restored) {
+      _snack(context, 'Purchases restored 🤍');
+      Navigator.of(context).maybePop();
+    } else {
+      _snack(context, 'No purchases to restore.');
+    }
+  }
+
+  void _snack(BuildContext context, String msg) => ScaffoldMessenger.of(context)
+      .showSnackBar(SnackBar(content: Text(msg)));
 }
