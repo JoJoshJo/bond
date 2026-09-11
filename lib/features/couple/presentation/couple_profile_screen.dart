@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -247,6 +248,8 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             _section('Spicy'),
             const SpicySection(),
             const SizedBox(height: AppSpacing.lg),
+            // DEBUG-ONLY dev tools — compiled out of release builds entirely.
+            if (kDebugMode) ...[
             _section('Developer'),
             BondCard(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
@@ -282,6 +285,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
+            ],
             _section('Legal'),
             BondCard(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),

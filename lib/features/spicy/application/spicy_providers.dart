@@ -103,7 +103,9 @@ class SpicyController extends StateNotifier<SpicyState> {
   /// the server RPC (below) for production — free users keep the 3h/14-day
   /// limit and RC-premium gets unlimited server-side; this only short-circuits
   /// when someone explicitly flips the dev override.
-  bool get _devPremium => _ref.read(premiumDevOverrideProvider) == true;
+  // Only honored in DEBUG (release can't set or use the override).
+  bool get _devPremium =>
+      kDebugMode && _ref.read(premiumDevOverrideProvider) == true;
 
   /// Re-read the server truth (call on app load and when opening the toggle).
   Future<void> refresh() async {
