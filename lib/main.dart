@@ -1,8 +1,11 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/purchases/purchase_service.dart';
+import 'core/push/push_service.dart';
 import 'core/supabase/supabase_client.dart';
 import 'features/appearance/application/theme_providers.dart';
 import 'features/appearance/data/theme_repository.dart';
@@ -22,18 +25,31 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   AppColors.active = paletteForKey(ThemeRepository(prefs).load());
 
+  // Firebase + push. initializeApp() reads the native config files
+  // (GoogleService-Info.plist / google-services.json) — no firebase_options
+  // needed for iOS/Android. The background handler must be registered here.
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  final push = PushService(supabase);
+  await push.init();
+
   // RevenueCat (iOS-only for now; no-op on Android / without a key). Identify
   // the RC user by their Supabase user id, kept in sync with auth.
   final purchases = PurchaseService();
   await purchases.configure();
   final existing = supabase.auth.currentSession?.user.id;
-  if (existing != null) await purchases.logIn(existing);
+  if (existing != null) {
+    await purchases.logIn(existing);
+    await push.registerForCurrentUser(); // register token for an already-signed-in user
+  }
   supabase.auth.onAuthStateChange.listen((data) {
     final uid = data.session?.user.id;
     if (uid != null) {
       purchases.logIn(uid);
+      push.registerForCurrentUser();
     } else {
       purchases.logOut();
+      push.clearForCurrentUser();
     }
   });
 
