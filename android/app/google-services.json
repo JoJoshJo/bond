@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "233990367415",
+    "project_id": "bond-75597",
+    "storage_bucket": "bond-75597.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:233990367415:android:297275282f55be589b8532",
+        "android_client_info": {
+          "package_name": "com.usora.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcdlHY8D2Ab9sbR9840X-F7XAn9r5tk-U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
