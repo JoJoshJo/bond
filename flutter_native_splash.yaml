@@ -1,0 +1,22 @@
+# Native splash — Usora wordmark on cream. iOS is the priority (Shipaton).
+# Regenerate with: dart run flutter_native_splash:create
+flutter_native_splash:
+  # Cream background (matches AppColors bg #FCFDFC); same in dark so dark-mode
+  # devices don't show a black splash.
+  color: "#FCFDFC"
+  color_dark: "#FCFDFC"
+
+  # The all-green wordmark, centered. Fine on iOS + Android 11 and below where
+  # the splash image isn't circle-masked.
+  image: assets/branding/usora_wordmark.png
+
+  android_12:
+    # Android 12+ masks the center image to a circle, so a WIDE wordmark would be
+    # clipped and ugly. Put the square green-U app icon in the masked circle and
+    # show the wordmark as the bottom "branding" instead.
+    image: assets/icon/app_icon.png
+    icon_background_color: "#FCFDFC"
+    icon_background_color_dark: "#FCFDFC"
+    color: "#FCFDFC"
+    color_dark: "#FCFDFC"
+    branding: assets/branding/usora_wordmark.png
