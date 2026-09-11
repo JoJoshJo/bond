@@ -73,8 +73,12 @@
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Usora uses speech recognition so you can talk to your creature instead of typing.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Usora uses your location only when you ask your creature to find nearby places. It is never stored or tracked.</string>
+	<string>Usora uses your location to help your creature suggest nearby date spots for you and your partner.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Usora needs photo access so you can share pictures with your partner.</string>
+	<key>UIStatusBarHidden</key>
+	<false/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
