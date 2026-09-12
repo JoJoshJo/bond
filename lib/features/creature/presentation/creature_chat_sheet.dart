@@ -316,7 +316,10 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 216,
+          // Fits the full card: poster (120w @ 2:3 = 180) + gap + up-to-2-line
+          // title + year/rating, plus the list's vertical padding — so nothing
+          // clips at the bottom.
+          height: 258,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
@@ -325,7 +328,8 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
             itemBuilder: (context, i) => _movieCard(movies[i]),
           ),
         ),
-        // Required by TMDB terms of use: logo + disclaimer.
+        const SizedBox(height: AppSpacing.sm),
+        // Required by TMDB terms of use: logo + disclaimer, below the card row.
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -366,7 +370,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
             ),
             const SizedBox(height: 4),
             Text(m.title,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w600)),
             Text(
