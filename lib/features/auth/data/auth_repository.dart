@@ -57,4 +57,16 @@ class AuthRepository {
   }
 
   Future<void> signOut() => _auth.signOut();
+
+  /// Permanently delete the account (Apple 5.1.1(v)). Calls the `delete-account`
+  /// Edge Function (server-side purge of the couple's data + auth.users delete),
+  /// then signs out locally so the app routes back to the Welcome screen.
+  Future<void> deleteAccount() async {
+    final res = await _client.functions.invoke('delete-account');
+    final data = res.data;
+    if (data is Map && data['error'] != null) {
+      throw Exception('account deletion failed: ${data['error']}');
+    }
+    await _auth.signOut();
+  }
 }

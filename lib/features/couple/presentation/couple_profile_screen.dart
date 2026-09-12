@@ -41,6 +41,7 @@ class CoupleProfileScreen extends ConsumerStatefulWidget {
 
 class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
   late String _name = widget.coupleName;
+  bool _deleting = false;
 
   Future<void> _rename() async {
     final controller = TextEditingController(text: _name);
@@ -328,11 +329,87 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
               variant: BondButtonVariant.secondary,
               onPressed: () => ref.read(authRepositoryProvider).signOut(),
             ),
+            const SizedBox(height: AppSpacing.md),
+            TextButton(
+              onPressed: _deleting ? null : _confirmDeleteAccount,
+              child: Text(
+                _deleting ? 'Deleting…' : 'Delete account',
+                style: AppText.bodyMedium.copyWith(
+                    color: AppColors.error, fontWeight: FontWeight.w600),
+              ),
+            ),
             const SizedBox(height: AppSpacing.huge),
           ],
         ),
       ),
     );
+  }
+
+  /// Two-step, explicit confirmation before a permanent, irreversible delete.
+  Future<void> _confirmDeleteAccount() async {
+    // Step 1 — the warning.
+    final step1 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Delete account?'),
+        content: Text(
+          'This permanently deletes your account and removes you from your '
+          'shared space. This can\'t be undone.',
+          style: AppText.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Continue', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (step1 != true || !mounted) return;
+
+    // Step 2 — the final, explicit confirm.
+    final step2 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Are you absolutely sure?'),
+        content: Text(
+          'Your account and your couple space will be deleted for good. Your '
+          'partner\'s space will be closed and they can start over.',
+          style: AppText.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Keep my account'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Delete my account',
+                style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (step2 != true || !mounted) return;
+
+    setState(() => _deleting = true);
+    try {
+      await ref.read(authRepositoryProvider).deleteAccount();
+      // On success the auth stream fires signed-out → AuthGate → WelcomeScreen.
+    } catch (e) {
+      if (mounted) {
+        setState(() => _deleting = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(friendlyError(e)),
+        ));
+      }
+    }
   }
 
   Widget _section(String label) => Padding(
