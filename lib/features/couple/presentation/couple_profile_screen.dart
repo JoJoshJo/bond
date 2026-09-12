@@ -1,6 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/config/app_config.dart';
 
 import '../../../shared/dev/ai_test_screen.dart';
 import '../../../shared/dev/style_gallery_screen.dart';
@@ -248,8 +249,9 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             _section('Spicy'),
             const SpicySection(),
             const SizedBox(height: AppSpacing.lg),
-            // DEBUG-ONLY dev tools — compiled out of release builds entirely.
-            if (kDebugMode) ...[
+            // BETA-ONLY dev tools — shown in debug + TestFlight (kBetaBuild),
+            // compiled out of the App Store production build.
+            if (kBetaBuild) ...[
             _section('Developer'),
             BondCard(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),

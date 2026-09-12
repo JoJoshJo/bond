@@ -1,3 +1,12 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
+
+/// True in DEBUG builds AND in BETA / TestFlight builds (built with
+/// `--dart-define=USORA_BETA=true`). FALSE in the App Store PRODUCTION build
+/// (no flag) — so the dev tools are compiled out of the UI AND the premium
+/// override is powerless there. The final submission build must OMIT the flag.
+const bool kBetaBuild =
+    kDebugMode || bool.fromEnvironment('USORA_BETA', defaultValue: false);
+
 /// Compile-time configuration, supplied via `--dart-define-from-file=env.json`.
 ///
 /// Values are read as `const String.fromEnvironment(...)` so nothing sensitive

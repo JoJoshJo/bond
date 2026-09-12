@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../couple/application/couple_providers.dart';
 import '../../premium/application/entitlement_providers.dart';
@@ -103,9 +104,15 @@ class SpicyController extends StateNotifier<SpicyState> {
   /// the server RPC (below) for production — free users keep the 3h/14-day
   /// limit and RC-premium gets unlimited server-side; this only short-circuits
   /// when someone explicitly flips the dev override.
-  // Only honored in DEBUG (release can't set or use the override).
+  //
+  // Honored only in BETA/TestFlight builds (kBetaBuild). When on, spicy is
+  // treated as premium-unlimited locally — turnOn() short-circuits, bypassing
+  // the 3h/14-day server window — so a beta tester behaves like a real
+  // subscriber. In production (no USORA_BETA flag) this is always false, so the
+  // real server gate (activate_spicy_mode) still enforces the free-tier window
+  // for actual free users; they are UNAFFECTED.
   bool get _devPremium =>
-      kDebugMode && _ref.read(premiumDevOverrideProvider) == true;
+      kBetaBuild && _ref.read(premiumDevOverrideProvider) == true;
 
   /// Re-read the server truth (call on app load and when opening the toggle).
   Future<void> refresh() async {

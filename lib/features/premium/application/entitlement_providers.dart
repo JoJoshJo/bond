@@ -1,6 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+
+import '../../../core/config/app_config.dart';
 
 import '../../auth/application/auth_providers.dart';
 import '../../couple/application/couple_providers.dart';
@@ -45,10 +46,11 @@ final premiumDevOverrideProvider = StateProvider<bool?>((ref) => null);
 /// so BOTH partners unlock). Defaults to **false while loading** so gates fail
 /// locked (never accidentally unlock premium).
 final isPremiumProvider = Provider<bool>((ref) {
-  // The dev override only has power in DEBUG builds — in a release build it can
-  // never force premium true (the toggle is also compiled out of the UI).
+  // The dev override only has power in BETA/TestFlight builds (kBetaBuild) — in
+  // the App Store production build it can never force premium true (the toggle
+  // is also compiled out of the UI).
   final override = ref.watch(premiumDevOverrideProvider);
-  if (kDebugMode && override != null) return override;
+  if (kBetaBuild && override != null) return override;
   if (ref.watch(revenueCatPremiumProvider)) return true;
   final entitlement = ref.watch(entitlementProvider);
   return entitlement.asData?.value == SubscriptionRepository.entitlementPlus;
