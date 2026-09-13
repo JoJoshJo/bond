@@ -1,4 +1,19 @@
+import 'dart:convert';
+import 'dart:io' show Platform;
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+/// Google OAuth client IDs (public — safe in the client). The iOS client is
+/// used on-device; the WEB client is the `serverClientId` whose audience the
+/// Supabase Google provider validates.
+const _googleIosClientId =
+    '760277024151-obp9stu8r9j9diqddsnq50o68m2t5mvd.apps.googleusercontent.com';
+const _googleWebClientId =
+    '760277024151-oad0g6h93vp91ledreg05mfoqmlacj8q.apps.googleusercontent.com';
 
 /// Thin wrapper over Supabase Auth for email/password flows.
 ///
@@ -54,6 +69,93 @@ class AuthRepository {
   /// in-app) requires deep-link recovery, added with the OAuth task.
   Future<void> sendPasswordReset(String email) {
     return _auth.resetPasswordForEmail(email.trim());
+  }
+
+  // ---------------- Social sign-in (native → signInWithIdToken) ----------------
+
+  /// Sign in with Apple via the native AuthenticationServices sheet. Uses a
+  /// nonce (raw → Supabase, SHA-256 → Apple) as Supabase requires. On first
+  /// authorization Apple returns the name; we populate `display_name` then.
+  Future<void> signInWithApple() async {
+    final rawNonce = _randomNonce();
+    final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+    final cred = await SignInWithApple.getAppleIDCredential(
+      scopes: const [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: hashedNonce,
+    );
+    final idToken = cred.identityToken;
+    if (idToken == null) {
+      throw const AuthException('Apple did not return an identity token.');
+    }
+    await _auth.signInWithIdToken(
+      provider: OAuthProvider.apple,
+      idToken: idToken,
+      nonce: rawNonce,
+    );
+    // Apple only sends the name on the FIRST authorization — capture it now.
+    final name = [cred.givenName, cred.familyName]
+        .where((s) => s != null && s.isNotEmpty)
+        .join(' ')
+        .trim();
+    if (name.isNotEmpty) await _setDisplayNameIfEmpty(name);
+  }
+
+  bool _googleInitialized = false;
+
+  /// Sign in with Google via the native sheet. The idToken's audience is the
+  /// web client id (serverClientId), which the Supabase Google provider expects.
+  Future<void> signInWithGoogle() async {
+    final gsi = GoogleSignIn.instance;
+    if (!_googleInitialized) {
+      await gsi.initialize(
+        // iOS needs the iOS OAuth client id; Android derives it from
+        // google-services.json, so pass null there.
+        clientId: Platform.isIOS ? _googleIosClientId : null,
+        serverClientId: _googleWebClientId,
+      );
+      _googleInitialized = true;
+    }
+    final account = await gsi.authenticate();
+    final idToken = account.authentication.idToken;
+    if (idToken == null) {
+      throw const AuthException('Google did not return an identity token.');
+    }
+    await _auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+    );
+    final name = account.displayName;
+    if (name != null && name.isNotEmpty) await _setDisplayNameIfEmpty(name);
+  }
+
+  /// Populate `users.display_name` from the provider only if it's currently
+  /// empty (never overwrite a name the user already has). Best-effort.
+  Future<void> _setDisplayNameIfEmpty(String name) async {
+    final uid = _auth.currentUser?.id;
+    if (uid == null) return;
+    try {
+      final row = await _client
+          .from('users')
+          .select('display_name')
+          .eq('id', uid)
+          .maybeSingle();
+      final existing = row?['display_name'] as String?;
+      if (existing == null || existing.isEmpty) {
+        await _client.from('users').update({'display_name': name}).eq('id', uid);
+      }
+    } catch (_) {/* non-fatal — sign-in already succeeded */}
+  }
+
+  static String _randomNonce([int length = 32]) {
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._';
+    final rand = Random.secure();
+    return List.generate(length, (_) => chars[rand.nextInt(chars.length)])
+        .join();
   }
 
   Future<void> signOut() => _auth.signOut();

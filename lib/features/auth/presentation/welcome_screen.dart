@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/theme/app_colors.dart';
 import 'sign_in_form.dart';
 import 'sign_up_form.dart';
+import 'social_auth_buttons.dart';
 
 /// The entry screen: logo + warm hero, with Sign In / Sign Up on the SAME
 /// screen via a segmented toggle (no intro carousel, per spec).
@@ -64,6 +65,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   SignUpForm(),
                 ],
               ),
+              const SizedBox(height: 24),
+              // Social sign-in — same options for both the Sign in and Sign up
+              // tabs (Apple + Google both create-or-sign-in transparently).
+              const SocialAuthButtons(),
               const SizedBox(height: 24),
             ],
           ),
