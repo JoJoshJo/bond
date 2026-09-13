@@ -19,15 +19,12 @@ class CoupleMembership {
 }
 
 /// The active invite for a pending couple (shown on the waiting screen).
+/// [token] is the bare 6-digit code — shared, copied, and QR-encoded directly.
 class CoupleInvite {
   const CoupleInvite({required this.token, required this.expiresAt});
 
   final String token;
   final DateTime expiresAt;
-
-  /// The shareable/QR URL. Deep-link auto-open lands with the OAuth task;
-  /// until then the token is also entered/pasted manually.
-  String get inviteUrl => 'https://bond.app/invite/$token';
 }
 
 /// Result of a join attempt, mirroring the join_couple() jsonb contract.

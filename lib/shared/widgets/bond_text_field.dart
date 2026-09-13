@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
@@ -17,6 +18,8 @@ class BondTextField extends StatelessWidget {
     this.autofillHints,
     this.validator,
     this.onFieldSubmitted,
+    this.onChanged,
+    this.inputFormatters,
     this.suffix,
   });
 
@@ -29,6 +32,8 @@ class BondTextField extends StatelessWidget {
   final Iterable<String>? autofillHints;
   final String? Function(String?)? validator;
   final void Function(String)? onFieldSubmitted;
+  final void Function(String)? onChanged;
+  final List<TextInputFormatter>? inputFormatters;
   final Widget? suffix;
 
   @override
@@ -46,6 +51,8 @@ class BondTextField extends StatelessWidget {
       autofillHints: autofillHints,
       validator: validator,
       onFieldSubmitted: onFieldSubmitted,
+      onChanged: onChanged,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,

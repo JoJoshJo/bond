@@ -70,24 +70,26 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
     }
   }
 
-  void _copyLink() {
-    final url = _invite?.inviteUrl;
-    if (url == null) return;
-    Clipboard.setData(ClipboardData(text: url));
-    _toast('Invite link copied.');
+  void _copyCode() {
+    final code = _invite?.token;
+    if (code == null) return;
+    Clipboard.setData(ClipboardData(text: code));
+    _toast('Code copied.');
   }
 
-  void _shareLink() {
+  void _shareCode() {
     final invite = _invite;
     if (invite == null) return;
-    // Include the raw code too — deep-link auto-open lands with the OAuth task.
     SharePlus.instance.share(
       ShareParams(
-        text: 'Join me on Usora 💛\n${invite.inviteUrl}\n\n'
-            'Or open Usora → Join → enter code: ${invite.token}',
+        text: 'Join me on Usora 💚 — open the app, tap Join, '
+            'and enter code: ${invite.token}',
       ),
     );
   }
+
+  /// The 6-digit code spaced out for legibility, e.g. "1 2 3 4 5 6".
+  String _spacedCode(String code) => code.split('').join(' ');
 
   void _toast(String message) {
     if (!mounted) return;
@@ -274,7 +276,7 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
           Text('Invite your partner',
               textAlign: TextAlign.center, style: AppText.title),
           const SizedBox(height: AppSpacing.xs),
-          Text('Have them scan this, or send the link.',
+          Text('Have them scan this, or send the code.',
               textAlign: TextAlign.center,
               style: AppText.bodySmall),
           const SizedBox(height: AppSpacing.xl),
@@ -288,10 +290,22 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
                   border: Border.all(color: AppColors.border),
                 ),
                 child: QrImageView(
-                  data: invite.inviteUrl,
+                  data: invite.token,
                   size: 200,
                   backgroundColor: AppColors.surface,
                 ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            // The big, human-readable code for reading aloud or typing in.
+            Text(
+              _spacedCode(invite.token),
+              textAlign: TextAlign.center,
+              style: AppText.mono.copyWith(
+                fontSize: 34,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+                letterSpacing: 1,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -299,32 +313,32 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
               children: [
                 Expanded(
                   child: BondButton(
-                    label: 'Copy link',
+                    label: 'Copy code',
                     variant: BondButtonVariant.secondary,
                     icon: Icons.copy_rounded,
-                    onPressed: _copyLink,
+                    onPressed: _copyCode,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: BondButton(
-                    label: 'Share',
+                    label: 'Share code',
                     icon: Icons.ios_share_rounded,
-                    onPressed: _shareLink,
+                    onPressed: _shareCode,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
             BondButton(
-              label: _regenerating ? 'Regenerating…' : 'Regenerate link',
+              label: _regenerating ? 'Regenerating…' : 'New code',
               variant: BondButtonVariant.ghost,
               loading: _regenerating,
               onPressed: _regenerate,
             ),
           ] else
             BondButton(
-              label: 'Generate invite link',
+              label: 'Generate code',
               onPressed: _regenerate,
               loading: _regenerating,
             ),
