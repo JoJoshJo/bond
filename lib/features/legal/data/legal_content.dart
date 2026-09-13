@@ -6,10 +6,9 @@
 class LegalContent {
   const LegalContent._();
 
-  static const String lastUpdated = 'September 8, 2026';
-  static const String contactEmail = 'support@bond.app'; // TODO: set real contact
-  static const String governingLaw =
-      'the laws of your jurisdiction'; // TODO: set real governing law
+  static const String lastUpdated = 'September 12, 2026';
+  static const String contactEmail = 'lawsonjosh213@gmail.com';
+  static const String governingLaw = 'the State of Georgia, USA';
 
   static const List<LegalSection> privacyPolicy = [
     LegalSection('Who we are',
