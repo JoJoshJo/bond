@@ -49,7 +49,13 @@ paragraphs, at most ~4 sentences total. Weave in one or two of the numbers natur
 (don't list them all, don't make it a stats report). No bullet points, no headings.
 At most one emoji. Make them feel seen. Reply with ONLY the reflection.''';
 
-    final res = await _ai.getAI('creature', prompt);
+    // Pass the same shape of context the creature chat sends, for consistency.
+    final now = DateTime.now();
+    final today = '${now.year.toString().padLeft(4, '0')}-'
+        '${now.month.toString().padLeft(2, '0')}-'
+        '${now.day.toString().padLeft(2, '0')}';
+    final res = await _ai.getAI('creature', prompt,
+        context: {'coupleName': coupleName, 'today': today});
     return res.text.trim();
   }
 }

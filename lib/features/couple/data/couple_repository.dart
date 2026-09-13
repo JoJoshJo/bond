@@ -8,11 +8,13 @@ class CoupleMembership {
     required this.coupleId,
     required this.coupleName,
     required this.status,
+    this.relationshipStartDate,
   });
 
   final String coupleId;
   final String coupleName;
   final String status; // pending | active | sealed | winding_down
+  final DateTime? relationshipStartDate;
 
   bool get isPending => status == 'pending';
   bool get isLinked => status == 'active' || status == 'sealed';
@@ -52,7 +54,7 @@ class CoupleRepository {
 
     final row = await _client
         .from('couple_members')
-        .select('couple_id, couples(name, status)')
+        .select('couple_id, couples(name, status, relationship_start_date)')
         .eq('user_id', uid)
         .maybeSingle();
 
@@ -60,10 +62,13 @@ class CoupleRepository {
     final couple = row['couples'] as Map<String, dynamic>?;
     if (couple == null) return null;
 
+    final startRaw = couple['relationship_start_date'] as String?;
     return CoupleMembership(
       coupleId: row['couple_id'] as String,
       coupleName: (couple['name'] as String?) ?? 'Us',
       status: (couple['status'] as String?) ?? 'pending',
+      relationshipStartDate:
+          startRaw == null ? null : DateTime.tryParse(startRaw),
     );
   }
 

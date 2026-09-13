@@ -25,7 +25,15 @@ class CreatureView extends StatelessWidget {
       CreatureMood.thriving => (0.45, 1.07, false, true),
     };
 
-    Widget creature = _body(glow, eyesClosed);
+    // Mood-driven inner highlight — warmer & sunlit when thriving, cooler &
+    // calmer when resting. Mid/outer stay mint so the identity never shifts.
+    final Color innerHighlight = switch (mood) {
+      CreatureMood.resting => const Color(0xFFC4E7E7), // cool, restful
+      CreatureMood.content => const Color(0xFFCDEFE0), // neutral mint
+      CreatureMood.thriving => const Color(0xFFE3F3C9), // warm, sunlit
+    };
+
+    Widget creature = _body(glow, eyesClosed, innerHighlight);
 
     // Gentle, slow breathing + a soft float bob.
     creature = creature
@@ -70,7 +78,7 @@ class CreatureView extends StatelessWidget {
     );
   }
 
-  Widget _body(double glowOpacity, bool eyesClosed) {
+  Widget _body(double glowOpacity, bool eyesClosed, Color innerHighlight) {
     final eyeW = size * 0.09;
     return Container(
       height: size,
@@ -78,10 +86,10 @@ class CreatureView extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          center: Alignment(-0.3, -0.4), // light from upper-left
+          center: const Alignment(-0.3, -0.4), // light from upper-left
           radius: 1.05,
-          colors: [Color(0xFFCDEFE0), AppColors.mintSoft, AppColors.mint],
-          stops: [0.0, 0.45, 1.0],
+          colors: [innerHighlight, AppColors.mintSoft, AppColors.mint],
+          stops: const [0.0, 0.45, 1.0],
         ),
         boxShadow: [
           // wide ambient glow

@@ -96,6 +96,16 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
       // For resolving relative dates ("Friday", "next week") in calendar tools.
       'today': today,
     };
+    // Relationship milestones — lets Usora reference how long they've been
+    // together naturally (only when the couple has set a start date).
+    final start = membership?.relationshipStartDate;
+    if (start != null) {
+      ctx['relationshipStartDate'] = '${start.year.toString().padLeft(4, '0')}-'
+          '${start.month.toString().padLeft(2, '0')}-'
+          '${start.day.toString().padLeft(2, '0')}';
+      final days = now.difference(start).inDays;
+      if (days >= 0) ctx['daysTogether'] = days;
+    }
     if (mood != null) ctx['mood'] = mood.name;
     if (_ref.read(spicyActiveProvider)) ctx['spicy'] = true;
     if (_lat != null && _lng != null) {
