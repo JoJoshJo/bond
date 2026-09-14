@@ -9,6 +9,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/utils/error_messages.dart';
+import '../../../shared/utils/haptics.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../creature/presentation/assistant_stub.dart';
@@ -398,6 +399,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
     );
     if (step2 != true || !mounted) return;
 
+    Haptics.warning(); // heavy buzz — this is irreversible
     setState(() => _deleting = true);
     try {
       await ref.read(authRepositoryProvider).deleteAccount();

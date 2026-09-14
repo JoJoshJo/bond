@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../shared/utils/haptics.dart';
 import '../../creature/application/creature_controller.dart';
 import '../data/board_models.dart';
 import '../data/game_repository.dart';
@@ -167,6 +168,9 @@ final skillGameControllerProvider = StateNotifierProvider.autoDispose
   return SkillGameController(
     ref.watch(gameRepositoryProvider),
     sessionId,
-    onCompleted: () => ref.read(creatureReactionProvider.notifier).state++,
+    onCompleted: () {
+      Haptics.success();
+      ref.read(creatureReactionProvider.notifier).state++;
+    },
   );
 });

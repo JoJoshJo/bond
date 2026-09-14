@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
+import '../utils/haptics.dart';
 
 enum BondButtonVariant { primary, secondary, ghost }
 
@@ -66,7 +67,12 @@ class BondButton extends StatelessWidget {
         borderRadius: radius,
         child: InkWell(
           borderRadius: radius,
-          onTap: _enabled ? onPressed : null,
+          onTap: _enabled
+              ? () {
+                  Haptics.tap();
+                  onPressed!();
+                }
+              : null,
           child: Container(
             width: fullWidth ? double.infinity : null,
             height: 52,

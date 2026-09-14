@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../shared/utils/haptics.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../creature/application/creature_controller.dart';
 import '../data/game_definitions.dart';
@@ -161,7 +162,9 @@ final gameControllerProvider = StateNotifierProvider.autoDispose
   return GameController(
     ref.watch(gameRepositoryProvider),
     sessionId,
-    onCompleted: () =>
-        ref.read(creatureReactionProvider.notifier).state++,
+    onCompleted: () {
+      Haptics.success();
+      ref.read(creatureReactionProvider.notifier).state++;
+    },
   );
 });

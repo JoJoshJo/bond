@@ -6,6 +6,7 @@ import '../../../core/storage/storage_providers.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
+import '../../../shared/widgets/widgets.dart';
 import '../application/chat_controller.dart';
 import '../data/chat_message.dart';
 import 'widgets/message_bubble.dart';
@@ -45,7 +46,7 @@ class ChatScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: state.loading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const BondSkeletonChat()
                   : reversed.isEmpty
                       ? _empty()
                       : ListView.builder(

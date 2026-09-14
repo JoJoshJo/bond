@@ -5,6 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/utils/error_messages.dart';
+import '../../../shared/utils/haptics.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../application/couple_providers.dart';
 
@@ -62,6 +63,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       final result = await ref.read(coupleRepositoryProvider).joinCouple(code);
       if (!mounted) return;
       if (result.ok) {
+        Haptics.success(); // you're linked 🎉
         await _scanner.stop(); // Free the camera right before we leave.
         if (!mounted) return;
         ref.invalidate(myMembershipProvider); // CoupleGate → Home.

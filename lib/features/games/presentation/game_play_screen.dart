@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
+import '../../../shared/utils/haptics.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../application/game_controller.dart';
 import '../data/game_definitions.dart';
@@ -92,7 +93,10 @@ class GamePlayScreen extends ConsumerWidget {
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.md),
-        onTap: onTap,
+        onTap: () {
+          Haptics.select();
+          onTap();
+        },
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(

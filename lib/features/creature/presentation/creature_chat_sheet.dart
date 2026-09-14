@@ -200,7 +200,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
           ),
         ),
         Text('Places powered by Foursquare.',
-            style: AppText.bodySmall.copyWith(color: AppColors.inkFaint)),
+            style: AppText.bodySmall.copyWith(color: AppColors.inkMuted)),
       ],
     );
   }
@@ -338,7 +338,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
             Expanded(
               child: Text(
                 'Uses the TMDB API but is not endorsed or certified by TMDB.',
-                style: AppText.bodySmall.copyWith(color: AppColors.inkFaint),
+                style: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
               ),
             ),
           ],
@@ -460,7 +460,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
               decoration: InputDecoration(
                 hintText: _listening ? 'Listening…' : 'Say something to Usora',
                 hintStyle:
-                    AppText.bodyMedium.copyWith(color: AppColors.inkFaint),
+                    AppText.bodyMedium.copyWith(color: AppColors.inkMuted),
                 filled: true,
                 fillColor: AppColors.surfaceAlt,
                 contentPadding: const EdgeInsets.symmetric(

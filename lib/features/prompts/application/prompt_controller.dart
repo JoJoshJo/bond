@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../shared/utils/haptics.dart';
 import '../../auth/application/auth_providers.dart';
 import '../data/prompt_bank.dart';
 import '../data/prompt_models.dart';
@@ -116,6 +117,11 @@ class PromptController extends StateNotifier<PromptState> {
     final phase = (mine != null && partner != null)
         ? PromptPhase.revealed
         : (mine != null ? PromptPhase.waiting : PromptPhase.answer);
+
+    // The reveal is a shared "aha" moment — buzz when it first flips revealed.
+    if (phase == PromptPhase.revealed && state.phase != PromptPhase.revealed) {
+      Haptics.success();
+    }
 
     state = state.copyWith(
       phase: phase,

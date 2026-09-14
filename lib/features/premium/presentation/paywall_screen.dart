@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
+import '../../../shared/utils/haptics.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../shared/widgets/widgets.dart';
@@ -186,6 +187,7 @@ class PaywallScreen extends ConsumerWidget {
     if (!context.mounted) return;
     switch (outcome) {
       case PurchaseOutcome.success:
+        Haptics.success();
         _snack(context, 'Welcome to Usora+ 🤍');
         Navigator.of(context).maybePop();
       case PurchaseOutcome.pending:

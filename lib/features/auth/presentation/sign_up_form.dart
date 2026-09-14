@@ -241,7 +241,7 @@ class _DobField extends StatelessWidget {
               child: Text(
                 label,
                 style: AppText.bodyLarge.copyWith(
-                    color: isSet ? AppColors.ink : AppColors.inkFaint),
+                    color: isSet ? AppColors.ink : AppColors.inkMuted),
               ),
             ),
             Icon(Icons.expand_more, color: AppColors.inkFaint),

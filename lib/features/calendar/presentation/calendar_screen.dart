@@ -130,8 +130,8 @@ class _CalendarBodyState extends ConsumerState<_CalendarBody> {
             Icon(Icons.chevron_right, color: AppColors.inkMuted),
       ),
       daysOfWeekStyle: DaysOfWeekStyle(
-        weekdayStyle: AppText.bodySmall.copyWith(color: AppColors.inkFaint),
-        weekendStyle: AppText.bodySmall.copyWith(color: AppColors.inkFaint),
+        weekdayStyle: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
+        weekendStyle: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
       ),
       calendarStyle: CalendarStyle(
         outsideDaysVisible: false,

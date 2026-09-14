@@ -57,7 +57,7 @@ const BondPalette mintPalette = BondPalette(
   mintDeep: Color(0xFF3B9274),
   onMint: Color(0xFF12261F),
   ink: Color(0xFF22302B),
-  inkMuted: Color(0xFF6B7B74),
+  inkMuted: Color(0xFF66766E), // deepened from 6B7B74 → WCAG 4.5:1 on white
   inkFaint: Color(0xFF9AAAA3),
   success: Color(0xFF3FA981),
   successBg: Color(0xFFE6F4EE),

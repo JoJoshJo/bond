@@ -47,10 +47,7 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
       child: state.error != null
           ? _errorView(state.error!)
           : switch (state.phase) {
-        PromptPhase.loading => const Padding(
-            padding: EdgeInsets.only(top: AppSpacing.huge),
-            child: BondLoader(),
-          ),
+        PromptPhase.loading => const BondSkeletonCards(count: 2, height: 120),
         PromptPhase.answer => _answerView(state, controller),
         PromptPhase.waiting => _waitingView(state, controller),
         PromptPhase.revealed => _revealView(state, controller),

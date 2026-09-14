@@ -11,6 +11,7 @@ import '../../creature/presentation/assistant_stub.dart';
 import '../../creature/presentation/creature_chat_sheet.dart';
 import '../../creature/presentation/creature_view.dart';
 import '../../prompts/presentation/widgets/prompt_banner.dart';
+import 'widgets/animated_flame.dart';
 
 /// The emotional home: the creature front-and-center, the couple name, the Usora
 /// flame + score, and today's question. First thing you see on open.
@@ -73,19 +74,7 @@ class HomeScreen extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.local_fire_department_rounded,
-            color: lit ? AppColors.mint : AppColors.inkFaint,
-            size: 32,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('$number', style: AppText.title),
-              Text('bond score', style: AppText.bodySmall),
-            ],
-          ),
+          AnimatedFlame(number: number, lit: lit),
           if (stage.isNotEmpty) ...[
             const SizedBox(width: AppSpacing.lg),
             BondChip(label: stage, tone: BondChipTone.mint),

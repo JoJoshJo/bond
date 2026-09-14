@@ -108,7 +108,8 @@ class _SegmentedToggle extends StatelessWidget {
       child: GestureDetector(
         onTap: () => onChanged(i),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: selected ? AppColors.mint : Colors.transparent,

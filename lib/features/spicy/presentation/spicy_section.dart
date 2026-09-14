@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
+import '../../../shared/utils/haptics.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../../premium/presentation/paywall_screen.dart';
 import '../application/spicy_providers.dart';
@@ -37,6 +38,7 @@ class _SpicySectionState extends ConsumerState<SpicySection> {
     switch (outcome) {
       case SpicyActivateOutcome.activated:
       case SpicyActivateOutcome.unlimited:
+        Haptics.success(); // spicy mode on — a satisfying flip
         break; // theme flips via the provider
       case SpicyActivateOutcome.cooldown:
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

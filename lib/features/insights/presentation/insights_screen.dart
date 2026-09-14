@@ -54,10 +54,7 @@ class _InsightsBodyState extends ConsumerState<_InsightsBody> {
     final statsAsync = ref.watch(insightsStatsProvider);
 
     return statsAsync.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.only(top: AppSpacing.huge),
-        child: BondLoader(),
-      ),
+      loading: () => const BondSkeletonCards(count: 4, height: 88),
       error: (_, _) => Padding(
         padding: const EdgeInsets.only(top: AppSpacing.huge),
         child: Center(

@@ -41,7 +41,7 @@ class MemoryVaultScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: state.loading
-            ? const BondLoader()
+            ? const BondSkeletonGrid()
             : state.isEmpty
                 ? _empty(context, ref)
                 : ListView(

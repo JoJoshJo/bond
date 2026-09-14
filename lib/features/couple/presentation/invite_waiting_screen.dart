@@ -9,6 +9,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/utils/error_messages.dart';
+import '../../../shared/utils/haptics.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../application/couple_providers.dart';
 import '../data/couple_repository.dart';
@@ -74,12 +75,14 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
     final code = _invite?.token;
     if (code == null) return;
     Clipboard.setData(ClipboardData(text: code));
+    Haptics.tap();
     _toast('Code copied.');
   }
 
   void _shareCode() {
     final invite = _invite;
     if (invite == null) return;
+    Haptics.tap();
     SharePlus.instance.share(
       ShareParams(
         text: 'Join me on Usora 💚 — open the app, tap Join, '

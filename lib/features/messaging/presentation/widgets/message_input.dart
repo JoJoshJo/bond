@@ -8,6 +8,7 @@ import 'package:record/record.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_spacing.dart';
 import '../../../../shared/theme/app_typography.dart';
+import '../../../../shared/utils/haptics.dart';
 
 /// Chat composer: reply preview, attach (photo), text field, and a trailing
 /// button that sends text or starts a voice recording. Tap-to-record.
@@ -64,6 +65,7 @@ class _MessageInputState extends State<MessageInput> {
   void _sendText() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
+    Haptics.tap();
     widget.onSendText(text);
     _controller.clear();
   }
@@ -91,7 +93,10 @@ class _MessageInputState extends State<MessageInput> {
     final path = await _recorder.stop();
     if (!mounted) return;
     setState(() => _recording = false);
-    if (path != null && _seconds >= 1) widget.onSendVoice(path);
+    if (path != null && _seconds >= 1) {
+      Haptics.tap();
+      widget.onSendVoice(path);
+    }
   }
 
   Future<void> _cancelRecording() async {
@@ -192,7 +197,7 @@ class _MessageInputState extends State<MessageInput> {
             decoration: InputDecoration(
               hintText: 'Message',
               hintStyle:
-                  AppText.bodyMedium.copyWith(color: AppColors.inkFaint),
+                  AppText.bodyMedium.copyWith(color: AppColors.inkMuted),
               filled: true,
               fillColor: AppColors.surfaceAlt,
               contentPadding: const EdgeInsets.symmetric(
