@@ -53,10 +53,22 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
 
   Future<void> _initSpeech() async {
     try {
-      final ok = await _speech.initialize();
+      final ok = await _speech.initialize(
+        // Reset the button when the recognizer stops on its own (pause/timeout)
+        // so hold-to-speak can never get stuck in the listening state.
+        onStatus: (status) {
+          if ((status == 'done' || status == 'notListening') && mounted) {
+            setState(() => _listening = false);
+          }
+        },
+        onError: (_) {
+          if (mounted) setState(() => _listening = false);
+        },
+      );
       if (mounted) setState(() => _speechReady = ok);
     } catch (_) {
-      // Voice unavailable → type-only; no error surfaced.
+      // Voice unavailable → type-only; mic stays hidden via _speechReady.
+      if (mounted) setState(() => _speechReady = false);
     }
   }
 

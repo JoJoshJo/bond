@@ -61,5 +61,11 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- speech_to_text: on Android 11+ (package visibility) the app must
+             declare the speech recognition service to see the on-device
+             recognizer. Used by the creature-chat mic (hold-to-speak). -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
+        </intent>
     </queries>
 </manifest>
