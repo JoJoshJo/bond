@@ -28,10 +28,20 @@ Future<void> main() async {
   // Firebase + push. initializeApp() reads the native config files
   // (GoogleService-Info.plist / google-services.json) — no firebase_options
   // needed for iOS/Android. The background handler must be registered here.
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  //
+  // Defense-in-depth: a Firebase/push failure (e.g. a missing/unbundled native
+  // config file) must NEVER block the app from launching. We log and continue —
+  // push degrades gracefully, but the UI always renders.
   final push = PushService(supabase);
-  await push.init();
+  var pushReady = false;
+  try {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    await push.init();
+    pushReady = true;
+  } catch (e, st) {
+    debugPrint('Firebase/push init failed — continuing without push: $e\n$st');
+  }
 
   // RevenueCat (iOS-only for now; no-op on Android / without a key). Identify
   // the RC user by their Supabase user id, kept in sync with auth.
@@ -40,16 +50,18 @@ Future<void> main() async {
   final existing = supabase.auth.currentSession?.user.id;
   if (existing != null) {
     await purchases.logIn(existing);
-    await push.registerForCurrentUser(); // register token for an already-signed-in user
+    if (pushReady) {
+      await push.registerForCurrentUser(); // register token for an already-signed-in user
+    }
   }
   supabase.auth.onAuthStateChange.listen((data) {
     final uid = data.session?.user.id;
     if (uid != null) {
       purchases.logIn(uid);
-      push.registerForCurrentUser();
+      if (pushReady) push.registerForCurrentUser();
     } else {
       purchases.logOut();
-      push.clearForCurrentUser();
+      if (pushReady) push.clearForCurrentUser();
     }
   });
 
