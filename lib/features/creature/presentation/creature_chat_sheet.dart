@@ -211,7 +211,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
             itemBuilder: (context, i) => _placeCard(places[i]),
           ),
         ),
-        Text('Places powered by Foursquare.',
+        Text('Places powered by Google',
             style: AppText.bodySmall.copyWith(color: AppColors.inkMuted)),
       ],
     );

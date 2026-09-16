@@ -3,16 +3,24 @@
 // file into the Supabase dashboard function `ai-router`).
 //
 // - Neutral Usora request/response shape; config-per-job.
-// - Gemini adapter with retry/backoff (503/429 absorbed).
+// - Gemini adapter with a MODEL FALLBACK CHAIN as the primary defense
+//   against Google-side 503 "high demand" overloads: on 503/UNAVAILABLE
+//   from one model we immediately switch to the next model (circuit
+//   breaker), rather than re-hammering the same overloaded model.
+// - The model chain is discovered at runtime from ListModels (real names
+//   that exist on THIS key, never "-latest"), with a static fallback.
 // - CREATURE job uses Gemini FUNCTION-CALLING. Tools:
 //     search_movies        → TMDB        (returns `movies`)
-//     search_places        → Foursquare  (returns `places`; needs lat/lng)
+//     search_places        → Google Places (New) (returns `places`; needs lat/lng)
 //     add_calendar_event   → important_dates via RPC (Usora+; JWT-scoped)
 //     list_upcoming_events → important_dates via RPC (Usora+; JWT-scoped)
 //   Tools run server-side; Gemini phrases results in character.
 // - Secrets: GEMINI_API_KEY (required), TMDB_API_KEY (movies),
-//   FOURSQUARE_API_KEY (places). SUPABASE_URL / SUPABASE_ANON_KEY are
+//   GOOGLE_PLACES_API_KEY (places). SUPABASE_URL / SUPABASE_ANON_KEY are
 //   auto-injected. Never in the app. JWT ON.
+//
+// All outbound fetches (Gemini, TMDB, Google Places, RPCs) have a ~20s
+// AbortController timeout so a hung upstream can't stall the function.
 //
 // CALENDAR SECURITY: the calendar tools call SECURITY DEFINER RPCs
 // (ai_add_calendar_event / ai_list_upcoming_events) forwarding the
@@ -36,12 +44,57 @@ const CONFIG: Record<AIJob, string> = {
   content: "gemini",
   creature: "gemini",
 };
-const MODELS: Record<string, string> = { gemini: "gemini-flash-latest" };
 
-// ---------- retry ----------
-const RETRYABLE = new Set([429, 500, 502, 503, 504]);
-const BACKOFF_MS = [500, 1000, 2000];
+// Static fallback chain (real, current, stable Flash names — NOT "-latest",
+// NOT the retired 2.0/2.5 families, which now 404 for new users). Used only if
+// runtime ListModels discovery fails. Fastest/cheapest first (primary), fuller
+// flash models after (fallback).
+const MODEL_FALLBACK_SEED = [
+  "gemini-3.5-flash-lite",
+  "gemini-3.6-flash",
+  "gemini-3.7-flash",
+];
+
+// ---------- error handling / retry ----------
+// 503 / UNAVAILABLE / "high demand" = Google-side OVERLOAD → switch MODELS
+// immediately (do not waste retries on an overloaded model).
+const OVERLOAD_STATUS = new Set([503]);
+// Genuinely transient on the SAME model → a short retry is worth it.
+const TRANSIENT_STATUS = new Set([429, 500, 502, 504]);
+const BACKOFF_MS = [400, 900];
+const FETCH_TIMEOUT_MS = 20000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// fetch with an AbortController timeout so a hung upstream can't stall us.
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit = {},
+  ms = FETCH_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Thrown when EVERY model in the chain failed (overloaded/unavailable). The
+// router turns this into a calm "AI is busy" message rather than generic foggy.
+class GeminiUnavailable extends Error {}
+
+// Thrown for a single model; `overloaded` means "switch models now".
+class ModelAttemptError extends Error {
+  constructor(
+    public model: string,
+    public status: number,
+    public overloaded: boolean,
+    message: string,
+  ) {
+    super(message);
+  }
+}
 
 // Strong tool-use bias for the creature: prefer CALLING a tool over declining.
 const CREATURE_SYSTEM =
@@ -58,9 +111,74 @@ const CREATURE_SYSTEM =
   "you CAN. Only decline tasks that have no tool at all (booking, ordering, payments). " +
   "Never claim you can't find movies or places or manage the calendar.";
 
-async function geminiGenerate(
-  contents: unknown[],
+// ---------- model discovery (ListModels) ----------
+// Cached across warm invocations. Only a SUCCESSFUL discovery is cached; if we
+// fall back to the seed we don't cache, so a later invocation can retry.
+let cachedChain: string[] | null = null;
+
+async function getModelChain(apiKey: string): Promise<string[]> {
+  if (cachedChain) return cachedChain;
+  try {
+    const res = await fetchWithTimeout(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
+      { method: "GET" },
+      8000,
+    );
+    if (!res.ok) {
+      console.error(`ListModels failed ${res.status}: ${await res.text()}`);
+      return MODEL_FALLBACK_SEED;
+    }
+    const data = await res.json();
+    // deno-lint-ignore no-explicit-any
+    const models: any[] = Array.isArray(data?.models) ? data.models : [];
+    const names: string[] = models
+      .filter((m) =>
+        Array.isArray(m?.supportedGenerationMethods) &&
+        m.supportedGenerationMethods.includes("generateContent")
+      )
+      .map((m) => String(m?.name ?? "").replace(/^models\//, ""))
+      // fast, stable Flash models only: no aliases, no retired 2.0/2.5 families
+      // (they 404 for new users), no preview/experimental/thinking variants.
+      .filter((n) =>
+        n.includes("flash") &&
+        !n.endsWith("-latest") &&
+        !n.startsWith("gemini-2.0-flash") &&
+        !/gemini-2\.5-flash/.test(n) &&
+        !n.includes("preview") &&
+        !n.includes("exp") &&
+        !n.includes("thinking")
+      );
+    if (names.length === 0) {
+      console.error("ListModels returned no usable flash models; using seed");
+      return MODEL_FALLBACK_SEED;
+    }
+    // Order: lite (fastest/cheapest) before full flash; newer version first.
+    const version = (n: string) =>
+      parseFloat((n.match(/gemini-([0-9]+(?:\.[0-9]+)?)/)?.[1]) ?? "0");
+    names.sort((a, b) => {
+      const liteA = a.includes("lite") ? 0 : 1;
+      const liteB = b.includes("lite") ? 0 : 1;
+      if (liteA !== liteB) return liteA - liteB; // lite first
+      return version(b) - version(a); // newer first
+    });
+    // Prefer seeds that actually exist on the key, then the discovered order.
+    const ordered = [
+      ...MODEL_FALLBACK_SEED.filter((s) => names.includes(s)),
+      ...names,
+    ].filter((n, i, arr) => arr.indexOf(n) === i).slice(0, 3);
+    cachedChain = ordered;
+    console.error(`model chain: ${ordered.join(" -> ")}`);
+    return cachedChain;
+  } catch (e) {
+    console.error(`ListModels error: ${e}`);
+    return MODEL_FALLBACK_SEED;
+  }
+}
+
+// ---------- one model attempt (short retry for transient only) ----------
+async function generateOnModel(
   model: string,
+  contents: unknown[],
   apiKey: string,
   tools?: unknown[],
   systemInstruction?: string,
@@ -73,27 +191,69 @@ async function geminiGenerate(
     body.systemInstruction = { parts: [{ text: systemInstruction }] };
   }
 
-  let lastError = "";
   for (let attempt = 0; attempt <= BACKOFF_MS.length; attempt++) {
     let res: Response;
     try {
-      res = await fetch(endpoint, {
+      res = await fetchWithTimeout(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
     } catch (e) {
-      lastError = `network error: ${e}`;
+      // network error or 20s timeout — treat as transient on this model.
+      console.error(`Gemini ${model} network/timeout: ${e}`);
       if (attempt < BACKOFF_MS.length) { await sleep(BACKOFF_MS[attempt]); continue; }
-      break;
+      throw new ModelAttemptError(model, 0, false, `network/timeout: ${e}`);
     }
     if (res.ok) return await res.json();
-    lastError = `Gemini API error ${res.status}: ${await res.text()}`;
-    if (!RETRYABLE.has(res.status)) break;
-    if (attempt >= BACKOFF_MS.length) break;
+
+    const detail = await res.text();
+    const status = res.status;
+    const overloaded = OVERLOAD_STATUS.has(status) ||
+      /UNAVAILABLE|overloaded|high demand/i.test(detail);
+    console.error(`Gemini ${model} error ${status}: ${detail.slice(0, 200)}`);
+
+    // Overloaded → don't retry this model; signal an immediate model switch.
+    if (overloaded) throw new ModelAttemptError(model, status, true, detail);
+    // Non-transient (400/403/404 bad model or key, etc.) → switch models too
+    // (this model may just be invalid on the key; the next one may work).
+    if (!TRANSIENT_STATUS.has(status)) {
+      throw new ModelAttemptError(model, status, false, detail);
+    }
+    // Transient on this model → short retry.
+    if (attempt >= BACKOFF_MS.length) {
+      throw new ModelAttemptError(model, status, false, detail);
+    }
     await sleep(BACKOFF_MS[attempt]);
   }
-  throw new Error(lastError || "Gemini call failed");
+  throw new ModelAttemptError(model, 0, false, "exhausted");
+}
+
+// ---------- generate with model fallback ----------
+// Walks the chain; on ANY failure logs and tries the next model. Returns the
+// raw response AND which model actually answered (for meta). Throws
+// GeminiUnavailable only when EVERY model failed.
+async function geminiGenerate(
+  contents: unknown[],
+  apiKey: string,
+  tools?: unknown[],
+  systemInstruction?: string,
+): Promise<{ raw: Record<string, unknown>; model: string }> {
+  const chain = await getModelChain(apiKey);
+  let last = "";
+  for (const model of chain) {
+    try {
+      const raw = await generateOnModel(model, contents, apiKey, tools, systemInstruction);
+      return { raw, model };
+    } catch (e) {
+      last = e instanceof ModelAttemptError
+        ? `${model} [${e.status}]${e.overloaded ? " overloaded" : ""}: ${e.message}`
+        : String(e);
+      console.error(`model ${model} failed → trying next: ${last}`);
+      continue;
+    }
+  }
+  throw new GeminiUnavailable(last || "all models failed");
 }
 
 // deno-lint-ignore no-explicit-any
@@ -120,7 +280,7 @@ async function callRpc(
   const url = Deno.env.get("SUPABASE_URL");
   const anon = Deno.env.get("SUPABASE_ANON_KEY");
   if (!url || !anon) throw new Error("SUPABASE_URL/SUPABASE_ANON_KEY not set");
-  const res = await fetch(`${url}/rest/v1/rpc/${fnName}`, {
+  const res = await fetchWithTimeout(`${url}/rest/v1/rpc/${fnName}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -169,7 +329,7 @@ async function executeMovieSearch(args: { genre?: string; query?: string }): Pro
   } else {
     url = `${base}/trending/movie/week?api_key=${key}`;
   }
-  const res = await fetch(url);
+  const res = await fetchWithTimeout(url);
   if (!res.ok) throw new Error(`TMDB error ${res.status}`);
   const data = await res.json();
   const results = Array.isArray(data?.results) ? data.results : [];
@@ -188,14 +348,24 @@ async function executeMovieSearch(args: { genre?: string; query?: string }): Pro
 }
 
 // ============================================================
-// TOOL 2 — PLACES (Foursquare Places API, new places-api host)
+// TOOL 2 — PLACES (Google Places API (New) — Text Search / searchText)
+// Auth: X-Goog-Api-Key: GOOGLE_PLACES_API_KEY. Billed by field mask, so we
+// request ONLY the fields the PlaceCard needs (cheaper tier).
 // ============================================================
-const PLACE_CATEGORIES: Record<string, string> = {
-  restaurant: "13065",     // Restaurant
-  movie_theater: "10024",  // Movie Theater
-  museum: "10027",         // Museum
-  attraction: "16000",     // Landmarks & Outdoors
+// Google Text Search uses natural-language text, not category IDs — map the
+// tool's category enum to query terms combined with the optional keyword.
+const PLACE_CATEGORY_TERMS: Record<string, string> = {
+  restaurant: "restaurant",
+  movie_theater: "movie theater",
+  museum: "museum",
+  attraction: "things to do",
 };
+
+// Place photos are served via the PUBLIC `place-photo` proxy function, which
+// adds the API key server-side — so GOOGLE_PLACES_API_KEY never reaches the
+// client. photoUrl points at that proxy (see mapPlace). Requires the
+// `place-photo` function to be deployed with JWT verification OFF.
+const INCLUDE_PLACE_PHOTOS = true;
 const searchPlacesDeclaration = {
   name: "search_places",
   description:
@@ -205,7 +375,7 @@ const searchPlacesDeclaration = {
     properties: {
       category: {
         type: "string",
-        enum: Object.keys(PLACE_CATEGORIES),
+        enum: Object.keys(PLACE_CATEGORY_TERMS),
         description: "the kind of place",
       },
       query: { type: "string", description: "optional keyword, e.g. 'thai' or 'sushi'" },
@@ -218,21 +388,27 @@ interface PlaceCard {
   distance: number | null; rating: number | null;
   photoUrl: string | null; lat: number | null; lng: number | null;
 }
+// Google types look like "italian_restaurant" — make them human-readable.
+function readableType(t: unknown): string {
+  return typeof t === "string" ? t.replace(/_/g, " ") : "";
+}
 // deno-lint-ignore no-explicit-any
-function mapPlace(p: any): PlaceCard {
-  const photo = p?.photos?.[0];
-  const photoUrl = photo?.prefix && photo?.suffix
-    ? `${photo.prefix}original${photo.suffix}`
+function mapPlace(p: any, funcBase: string): PlaceCard {
+  const photoName = p?.photos?.[0]?.name;
+  // Point at the public place-photo proxy (key added server-side), NOT the
+  // direct Google media URL (which would require the key in the URL).
+  const photoUrl = INCLUDE_PLACE_PHOTOS && typeof photoName === "string" && funcBase
+    ? `${funcBase}/place-photo?name=${encodeURIComponent(photoName)}`
     : null;
   return {
-    name: p?.name ?? "Somewhere",
-    category: p?.categories?.[0]?.name ?? "",
-    address: p?.location?.formatted_address ?? p?.location?.address ?? "",
-    distance: typeof p?.distance === "number" ? p.distance : null,
+    name: p?.displayName?.text ?? "Somewhere",
+    category: readableType(p?.types?.[0]),
+    address: p?.formattedAddress ?? "",
+    distance: null, // Text Search doesn't return distance directly.
     rating: typeof p?.rating === "number" ? p.rating : null,
     photoUrl,
-    lat: p?.latitude ?? p?.geocodes?.main?.latitude ?? null,
-    lng: p?.longitude ?? p?.geocodes?.main?.longitude ?? null,
+    lat: p?.location?.latitude ?? null,
+    lng: p?.location?.longitude ?? null,
   };
 }
 async function executePlaceSearch(
@@ -240,27 +416,40 @@ async function executePlaceSearch(
   lat: number,
   lng: number,
 ): Promise<PlaceCard[]> {
-  const key = Deno.env.get("FOURSQUARE_API_KEY");
-  if (!key) throw new Error("FOURSQUARE_API_KEY secret is not set");
+  const key = Deno.env.get("GOOGLE_PLACES_API_KEY");
+  if (!key) throw new Error("GOOGLE_PLACES_API_KEY secret is not set");
 
-  const params = new URLSearchParams({ ll: `${lat},${lng}`, limit: "8", sort: "DISTANCE" });
-  if (args.query && args.query.trim().length) params.set("query", args.query);
-  if (args.category && PLACE_CATEGORIES[args.category]) {
-    params.set("fsq_category_ids", PLACE_CATEGORIES[args.category]);
-  }
-  params.set("fields", "name,location,categories,distance,latitude,longitude,rating,photos");
+  // Build a natural-language text query from the optional keyword + category
+  // term, e.g. "sushi" + restaurant → "sushi restaurant"; museum → "museum".
+  const term = (args.category && PLACE_CATEGORY_TERMS[args.category]) || "";
+  const textQuery = [args.query?.trim(), term]
+    .filter((s) => s && s.length)
+    .join(" ")
+    .trim() || "places to go";
 
-  const res = await fetch(`https://places-api.foursquare.com/places/search?${params}`, {
+  const res = await fetchWithTimeout("https://places.googleapis.com/v1/places:searchText", {
+    method: "POST",
     headers: {
-      "Authorization": `Bearer ${key}`,
-      "X-Places-Api-Version": "2025-06-17",
-      "accept": "application/json",
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": key,
+      // Field mask — request ONLY what PlaceCard needs (Google bills by field).
+      "X-Goog-FieldMask":
+        "places.displayName,places.formattedAddress,places.rating,places.location,places.photos,places.types",
     },
+    body: JSON.stringify({
+      textQuery,
+      locationBias: {
+        circle: { center: { latitude: lat, longitude: lng }, radius: 5000 },
+      },
+      maxResultCount: 8,
+    }),
   });
-  if (!res.ok) throw new Error(`Foursquare error ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw new Error(`Google Places error ${res.status}: ${await res.text()}`);
   const data = await res.json();
-  const results = Array.isArray(data?.results) ? data.results : [];
-  return results.slice(0, 8).map(mapPlace);
+  const results = Array.isArray(data?.places) ? data.places : [];
+  // Base URL for the public place-photo proxy (auto-injected SUPABASE_URL).
+  const funcBase = `${Deno.env.get("SUPABASE_URL") ?? ""}/functions/v1`;
+  return results.slice(0, 8).map((p: unknown) => mapPlace(p, funcBase));
 }
 
 // ============================================================
@@ -331,6 +520,17 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+// The calm "all models overloaded" reply (200, so the client renders it as the
+// creature speaking — clearer than the generic foggy line). `aiBusy` lets the
+// client style/report it distinctly later without a redeploy.
+function aiBusyResponse(meta: Record<string, unknown>): Response {
+  return json({
+    text: "The AI is a little overwhelmed right now — give me a moment and try again in a bit 🤍",
+    meta,
+    aiBusy: true,
+  });
+}
+
 // ---------- router ----------
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -356,8 +556,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) return json({ error: "GEMINI_API_KEY secret is not set" }, 500);
-  const model = MODELS[providerName] ?? "";
-  const meta = { provider: "gemini", model };
+  const meta: Record<string, unknown> = { provider: "gemini", model: "" };
 
   const ctx = payload.context ?? {};
   const hasCtx = Object.keys(ctx).length > 0;
@@ -374,8 +573,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
         ],
       }];
       const contents: unknown[] = [{ role: "user", parts: [{ text }] }];
-      const r1 = await geminiGenerate(contents, model, apiKey, tools, CREATURE_SYSTEM);
-      const part = firstPart(r1);
+      const g1 = await geminiGenerate(contents, apiKey, tools, CREATURE_SYSTEM);
+      meta.model = g1.model;
+      const part = firstPart(g1.raw);
       const fc = part?.functionCall;
 
       // ---- movies ----
@@ -383,10 +583,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
         let movies: MovieCard[] = [];
         try {
           movies = await executeMovieSearch(fc.args ?? {});
-        } catch (_) {
+        } catch (e) {
+          console.error("movies tool failed:", e);
           return json({ text: "I reached for the movie shelf but it's a little foggy right now — try me again in a bit? 🌫️", meta });
         }
-        return json({ text: await secondTurn(contents, part, "search_movies", movies.map((m) => ({ title: m.title, year: m.year })), model, apiKey, tools) ?? "Ooh, movie night? Here are a few I think you two would love 🍿", meta, movies });
+        return json({ text: await secondTurn(contents, part, "search_movies", movies.map((m) => ({ title: m.title, year: m.year })), apiKey, tools) ?? "Ooh, movie night? Here are a few I think you two would love 🍿", meta, movies });
       }
 
       // ---- places ----
@@ -399,13 +600,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
         let places: PlaceCard[] = [];
         try {
           places = await executePlaceSearch(fc.args ?? {}, lat, lng);
-        } catch (_) {
+        } catch (e) {
+          console.error("places tool failed:", e);
           return json({ text: "I peeked out the window but it's a bit foggy right now — try me again in a bit? 🌫️", meta });
         }
         if (places.length === 0) {
           return json({ text: "Hmm, I couldn't spot anything good nearby right now — want to try a different vibe?", meta, places: [] });
         }
-        return json({ text: await secondTurn(contents, part, "search_places", places.map((p) => ({ name: p.name, category: p.category })), model, apiKey, tools) ?? "Here are a few spots near you two 🤍", meta, places });
+        return json({ text: await secondTurn(contents, part, "search_places", places.map((p) => ({ name: p.name, category: p.category })), apiKey, tools) ?? "Here are a few spots near you two 🤍", meta, places });
       }
 
       // ---- calendar: add (Usora+; couple resolved from JWT in the RPC) ----
@@ -414,7 +616,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         let result: any;
         try {
           result = await executeAddCalendarEvent(fc.args ?? {}, authHeader);
-        } catch (_) {
+        } catch (e) {
+          console.error("calendar add tool failed:", e);
           return json({ text: "I tried to jot that in your calendar but my pen slipped — try me again in a moment? 🌫️", meta });
         }
         const ok = result?.ok === true;
@@ -426,7 +629,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           : (result?.reason === "not_premium"
             ? "Ooh, managing your shared calendar is a Usora+ thing 🤍"
             : "Hmm, I couldn't add that just now — want to try again?");
-        return json({ text: await secondTurn(contents, part, "add_calendar_event", summary, model, apiKey, tools) ?? fallback, meta, calendarChanged: ok });
+        return json({ text: await secondTurn(contents, part, "add_calendar_event", summary, apiKey, tools) ?? fallback, meta, calendarChanged: ok });
       }
 
       // ---- calendar: list upcoming (Usora+) ----
@@ -435,7 +638,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         let result: any;
         try {
           result = await executeListUpcoming(fc.args ?? {}, authHeader);
-        } catch (_) {
+        } catch (e) {
+          console.error("calendar list tool failed:", e);
           return json({ text: "I tried to peek at your calendar but it's a little foggy — try me again in a bit? 🌫️", meta });
         }
         const ok = result?.ok === true;
@@ -447,33 +651,40 @@ Deno.serve(async (req: Request): Promise<Response> => {
           : (result?.reason === "not_premium"
             ? "Ooh, your shared calendar is a Usora+ thing 🤍"
             : "I couldn't reach your calendar just now — try again in a bit?");
-        return json({ text: await secondTurn(contents, part, "list_upcoming_events", summary, model, apiKey, tools) ?? fallback, meta });
+        return json({ text: await secondTurn(contents, part, "list_upcoming_events", summary, apiKey, tools) ?? fallback, meta });
       }
 
       // ---- plain chat ----
-      return json({ text: part?.text ?? extractText(r1) ?? "🤍", meta });
+      return json({ text: part?.text ?? extractText(g1.raw) ?? "🤍", meta });
     }
 
     // ---- other jobs ----
     const contents = [{ role: "user", parts: [{ text }] }];
-    const raw = await geminiGenerate(contents, model, apiKey);
-    const out = extractText(raw);
+    const g = await geminiGenerate(contents, apiKey);
+    meta.model = g.model;
+    const out = extractText(g.raw);
     if (out == null) throw new Error("Unexpected Gemini response");
     return json({ text: out, meta });
   } catch (err) {
+    // Every model in the chain was overloaded/unavailable → calm "busy" reply.
+    if (err instanceof GeminiUnavailable) {
+      console.error("ai-router all models unavailable:", err.message);
+      return aiBusyResponse(meta);
+    }
     console.error("ai-router error:", err);
     return json({ error: "ai_call_failed", detail: String(err) }, 502);
   }
 });
 
 // Second Gemini turn: feed the tool result back so it phrases in character.
+// Uses the same model fallback chain; on total failure returns null so the
+// caller falls back to its canned in-character line (cards still render).
 async function secondTurn(
   contents: unknown[],
   // deno-lint-ignore no-explicit-any
   fcPart: any,
   toolName: string,
   resultSummary: unknown,
-  model: string,
   apiKey: string,
   tools: unknown[],
 ): Promise<string | null> {
@@ -483,8 +694,8 @@ async function secondTurn(
       role: "user",
       parts: [{ functionResponse: { name: toolName, response: { results: resultSummary } } }],
     });
-    const r2 = await geminiGenerate(contents, model, apiKey, tools, CREATURE_SYSTEM);
-    return extractText(r2);
+    const g2 = await geminiGenerate(contents, apiKey, tools, CREATURE_SYSTEM);
+    return extractText(g2.raw);
   } catch (_) {
     return null;
   }

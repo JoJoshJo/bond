@@ -26,7 +26,7 @@ class MovieCard {
       );
 }
 
-/// A place result card returned by the creature's tool-use (Foursquare).
+/// A place result card returned by the creature's tool-use (Google Places).
 @immutable
 class PlaceCard {
   const PlaceCard({

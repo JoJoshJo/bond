@@ -28,7 +28,7 @@ class LegalContent {
         'Supabase — our backend: secure database, authentication, and encrypted file storage.\n\n'
             'Google Gemini (via our server) — generates the creature\'s replies. Minimal context only; not used to train models.\n\n'
             'TMDB — movie and show information for recommendations. This product uses the TMDB API but is not endorsed or certified by TMDB.\n\n'
-            'Foursquare — nearby-places information when you ask the creature to find somewhere to go.\n\n'
+            'Google Places — nearby-places information when you ask the creature to find somewhere to go.\n\n'
             'These providers process data only to deliver their part of the service.'),
     LegalSection('How your data is protected',
         'Your shared space is protected by row-level security so that only the two of you can ever access it, and your data is encrypted in transit and at rest. Media is stored in a private bucket and served only through short-lived signed links. We are honest about what we deliver: true end-to-end encryption is not offered yet, so we do not claim it.'),
@@ -60,7 +60,7 @@ class LegalContent {
     LegalSection('AI features',
         'Usora\'s companion can suggest things (like movies or nearby places) using third-party data and AI. Suggestions may be wrong or incomplete and are not professional, medical, legal, or financial advice. The creature finds and suggests; you decide and confirm anything involving money, bookings, or sending.'),
     LegalSection('Third-party services',
-        'Usora relies on third-party services (Supabase, Google Gemini, TMDB, Foursquare) to work. Their availability and content are outside our control, and your use of features that depend on them is also subject to their terms.'),
+        'Usora relies on third-party services (Supabase, Google Gemini, TMDB, Google Places) to work. Their availability and content are outside our control, and your use of features that depend on them is also subject to their terms.'),
     LegalSection('Disclaimers',
         'Usora is provided "as is" without warranties of any kind. We work hard to keep it reliable, but we can\'t guarantee it will always be available, error-free, or that content from third parties will be accurate.'),
     LegalSection('Limitation of liability',

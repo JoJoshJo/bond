@@ -46,7 +46,7 @@ class CreditsScreen extends StatelessWidget {
               children: [
                 Text('Places', style: AppText.title),
                 const SizedBox(height: AppSpacing.sm),
-                Text('Nearby places are powered by Foursquare.',
+                Text('Nearby places are powered by Google.',
                     style: AppText.bodyMedium),
               ],
             ),
