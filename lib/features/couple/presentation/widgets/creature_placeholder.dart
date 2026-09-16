@@ -3,11 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../shared/theme/app_colors.dart';
 
-/// A soft, breathing mint orb standing in for the future creature.
-///
-/// SWAP POINT: when the real creature lands (a later layer), replace the body
-/// of this widget with the creature view — every screen that shows
-/// [CreaturePlaceholder] gets it for free, no other changes needed.
+/// The real creature art on a soft mint glow, gently breathing. Shown on the
+/// invite-waiting and daily-prompt screens; every screen that uses
+/// [CreaturePlaceholder] gets the art for free.
 class CreaturePlaceholder extends StatelessWidget {
   const CreaturePlaceholder({super.key, this.size = 160});
 
@@ -15,39 +13,50 @@ class CreaturePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final orb = Container(
+    final creature = SizedBox(
       height: size,
       width: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [AppColors.mintSoft, AppColors.mint],
-          stops: [0.15, 1.0],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.mint.withValues(alpha: 0.35),
-            blurRadius: size * 0.35,
-            spreadRadius: size * 0.04,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Soft mint glow behind the creature.
+          Container(
+            height: size * 0.9,
+            width: size * 0.9,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFFCDEFE0).withValues(alpha: 0.55),
+                  AppColors.mintWash.withValues(alpha: 0.0),
+                ],
+                stops: const [0.0, 1.0],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.mint.withValues(alpha: 0.28),
+                  blurRadius: size * 0.35,
+                  spreadRadius: size * 0.02,
+                ),
+              ],
+            ),
+          ),
+          // The real creature art — dead center, contained, no overflow.
+          Padding(
+            padding: EdgeInsets.all(size * 0.04),
+            child: Image.asset(
+              'assets/creature/usora_creature.png',
+              fit: BoxFit.contain,
+              alignment: Alignment.center,
+              filterQuality: FilterQuality.medium,
+            ),
           ),
         ],
       ),
-      // A soft highlight to keep it warm, not flat.
-      child: Align(
-        alignment: const Alignment(-0.35, -0.4),
-        child: Container(
-          height: size * 0.28,
-          width: size * 0.28,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.35),
-          ),
-        ),
-      ),
     );
 
-    // Tasteful slow breathing: gentle scale loop (the glow lives in the shadow).
-    return orb
+    // Tasteful slow breathing: gentle scale loop.
+    return creature
         .animate(onPlay: (c) => c.repeat(reverse: true))
         .scaleXY(
           begin: 0.96,

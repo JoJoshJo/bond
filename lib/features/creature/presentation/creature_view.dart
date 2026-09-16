@@ -4,12 +4,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../data/creature_models.dart';
 
-/// The creature — the app's centerpiece. Procedural placeholder for now (soft
-/// mint blob with a face); swap-ready for real art.
+/// The creature — the app's centerpiece. The real art (a mint kawaii creature)
+/// centered on a soft, mood-driven mint glow, gently breathing.
 ///
-/// SWAP POINT: when the generated PNGs land, replace `_body` with
-/// `Image.asset('assets/creature/creature_<mood>.png')` per mood. Nothing else
-/// on the home screen changes.
+/// The PNG is pre-cropped to the creature's opaque bounding box and centered on
+/// a square canvas, so `BoxFit.contain` + `Alignment.center` render it dead
+/// center with no runtime offset needed.
 class CreatureView extends StatelessWidget {
   const CreatureView({super.key, required this.mood, this.size = 200});
 
@@ -18,24 +18,25 @@ class CreatureView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mood tuning (procedural stand-ins for the future art states).
-    final (glow, breatheTo, eyesClosed, sparkles) = switch (mood) {
-      CreatureMood.resting => (0.18, 1.02, true, false),
-      CreatureMood.content => (0.30, 1.05, false, false),
-      CreatureMood.thriving => (0.45, 1.07, false, true),
+    // Mood tuning: glow intensity, breathing amplitude, and the celebratory
+    // sparkles (thriving only).
+    final (glow, breatheTo, sparkles) = switch (mood) {
+      CreatureMood.resting => (0.14, 1.02, false),
+      CreatureMood.content => (0.24, 1.05, false),
+      CreatureMood.thriving => (0.42, 1.07, true),
     };
 
-    // Mood-driven inner highlight — warmer & sunlit when thriving, cooler &
-    // calmer when resting. Mid/outer stay mint so the identity never shifts.
-    final Color innerHighlight = switch (mood) {
+    // Mood-driven aura tint — warmer & sunlit when thriving, cooler & calmer
+    // when resting. Stays in the mint family so the identity never shifts.
+    final Color auraTint = switch (mood) {
       CreatureMood.resting => const Color(0xFFC4E7E7), // cool, restful
       CreatureMood.content => const Color(0xFFCDEFE0), // neutral mint
       CreatureMood.thriving => const Color(0xFFE3F3C9), // warm, sunlit
     };
 
-    Widget creature = _body(glow, eyesClosed, innerHighlight);
+    Widget creature = _body(glow, auraTint);
 
-    // Gentle, slow breathing + a soft float bob.
+    // Gentle, slow breathing + a soft float bob (unchanged idle animation).
     creature = creature
         .animate(onPlay: (c) => c.repeat(reverse: true))
         .scaleXY(begin: 0.98, end: breatheTo, duration: 3000.ms, curve: Curves.easeInOut)
@@ -78,128 +79,47 @@ class CreatureView extends StatelessWidget {
     );
   }
 
-  Widget _body(double glowOpacity, bool eyesClosed, Color innerHighlight) {
-    final eyeW = size * 0.09;
-    return Container(
+  Widget _body(double glowOpacity, Color auraTint) {
+    return SizedBox(
       height: size,
       width: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          center: const Alignment(-0.3, -0.4), // light from upper-left
-          radius: 1.05,
-          colors: [innerHighlight, AppColors.mintSoft, AppColors.mint],
-          stops: const [0.0, 0.45, 1.0],
-        ),
-        boxShadow: [
-          // wide ambient glow
-          BoxShadow(
-            color: AppColors.mint.withValues(alpha: glowOpacity),
-            blurRadius: size * 0.55,
-            spreadRadius: size * 0.06,
-          ),
-          // tighter inner glow for depth
-          BoxShadow(
-            color: AppColors.mint.withValues(alpha: glowOpacity * 0.6),
-            blurRadius: size * 0.18,
-          ),
-        ],
-      ),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // top sheen highlight
-          Align(
-            alignment: const Alignment(-0.35, -0.55),
-            child: Container(
-              height: size * 0.34,
-              width: size * 0.42,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  colors: [
-                    Colors.white.withValues(alpha: 0.5),
-                    Colors.white.withValues(alpha: 0.0),
-                  ],
+          // Mood-driven mint glow/aura BEHIND the creature — a soft radial
+          // tint plus a wide ambient bloom. No hard disc; reads as a halo.
+          Container(
+            height: size * 0.9,
+            width: size * 0.9,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  auraTint.withValues(alpha: 0.55),
+                  AppColors.mintWash.withValues(alpha: 0.0),
+                ],
+                stops: const [0.0, 1.0],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.mint.withValues(alpha: glowOpacity),
+                  blurRadius: size * 0.5,
+                  spreadRadius: size * 0.02,
                 ),
-                borderRadius: BorderRadius.circular(size),
-              ),
-            ),
-          ),
-          // cream belly
-          Align(
-            alignment: const Alignment(0, 0.35),
-            child: Container(
-              height: size * 0.4,
-              width: size * 0.5,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFDF6EC).withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(size),
-              ),
-            ),
-          ),
-          // eyes
-          Align(
-            alignment: const Alignment(0, -0.1),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _eye(eyeW, eyesClosed),
-                SizedBox(width: size * 0.16),
-                _eye(eyeW, eyesClosed),
               ],
             ),
           ),
-          // rosy cheeks
-          Align(
-            alignment: const Alignment(0, 0.08),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _cheek(),
-                SizedBox(width: size * 0.34),
-                _cheek(),
-              ],
+          // The real creature art — dead center, contained, no overflow.
+          Padding(
+            padding: EdgeInsets.all(size * 0.04),
+            child: Image.asset(
+              'assets/creature/usora_creature.png',
+              fit: BoxFit.contain,
+              alignment: Alignment.center,
+              filterQuality: FilterQuality.medium,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _eye(double w, bool closed) {
-    if (closed) {
-      // peaceful closed eye (a soft downward arc)
-      return Container(
-        width: w,
-        height: w * 0.35,
-        decoration: BoxDecoration(
-          color: AppColors.ink,
-          borderRadius: BorderRadius.circular(w),
-        ),
-      );
-    }
-    return Container(
-      width: w,
-      height: w,
-      decoration: BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
-      child: Align(
-        alignment: const Alignment(-0.3, -0.4),
-        child: Container(
-          width: w * 0.32,
-          height: w * 0.32,
-          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-        ),
-      ),
-    );
-  }
-
-  Widget _cheek() {
-    return Container(
-      width: size * 0.12,
-      height: size * 0.08,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF6A6A0).withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(size),
       ),
     );
   }
