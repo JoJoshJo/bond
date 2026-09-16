@@ -46,11 +46,11 @@ final premiumDevOverrideProvider = StateProvider<bool?>((ref) => null);
 /// so BOTH partners unlock). Defaults to **false while loading** so gates fail
 /// locked (never accidentally unlock premium).
 final isPremiumProvider = Provider<bool>((ref) {
-  // The dev override only has power in BETA/TestFlight builds (kBetaBuild) — in
-  // the App Store production build it can never force premium true (the toggle
-  // is also compiled out of the UI).
+  // The dev override only has power when dev tools are enabled (kShowDevTools,
+  // default on). In the submission build (USORA_DEV=false) it can never force
+  // premium true — the toggle is also hidden from the UI there.
   final override = ref.watch(premiumDevOverrideProvider);
-  if (kBetaBuild && override != null) return override;
+  if (kShowDevTools && override != null) return override;
   if (ref.watch(revenueCatPremiumProvider)) return true;
   final entitlement = ref.watch(entitlementProvider);
   return entitlement.asData?.value == SubscriptionRepository.entitlementPlus;

@@ -1,11 +1,22 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 
-/// True in DEBUG builds AND in BETA / TestFlight builds (built with
-/// `--dart-define=USORA_BETA=true`). FALSE in the App Store PRODUCTION build
-/// (no flag) — so the dev tools are compiled out of the UI AND the premium
-/// override is powerless there. The final submission build must OMIT the flag.
-const bool kBetaBuild =
-    kDebugMode || bool.fromEnvironment('USORA_BETA', defaultValue: false);
+/// Whether the in-app DEVELOPER tools are visible AND functional — the
+/// "Developer" section in the Us tab, the premium dev-override, and the spicy
+/// dev-unlock.
+///
+/// DEFAULTS TO TRUE: a normal build (no flags) SHOWS the dev tools, so any
+/// build can be used to test premium / spicy. The FINAL submission build turns
+/// them OFF — hidden in the UI AND the override made powerless — by passing
+/// `--dart-define=USORA_DEV=false`.
+///
+/// Build commands (`apk` or `ipa`):
+///   • Testing build (dev toggle VISIBLE — the default, no flag needed):
+///       `flutter build apk --release --dart-define-from-file=env.json`
+///   • SUBMISSION build (dev toggle OFF):
+///       `flutter build ipa --release --dart-define-from-file=env.json
+///        --dart-define=USORA_DEV=false`
+const bool kShowDevTools =
+    kDebugMode || bool.fromEnvironment('USORA_DEV', defaultValue: true);
 
 /// Compile-time configuration, supplied via `--dart-define-from-file=env.json`.
 ///

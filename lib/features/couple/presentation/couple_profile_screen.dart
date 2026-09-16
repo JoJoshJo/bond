@@ -251,9 +251,10 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             _section('Spicy'),
             const SpicySection(),
             const SizedBox(height: AppSpacing.lg),
-            // BETA-ONLY dev tools — shown in debug + TestFlight (kBetaBuild),
-            // compiled out of the App Store production build.
-            if (kBetaBuild) ...[
+            // Developer tools — VISIBLE by default in every build (kShowDevTools)
+            // so any build can test premium/spicy. Hidden only in the submission
+            // build (built with --dart-define=USORA_DEV=false).
+            if (kShowDevTools) ...[
             _section('Developer'),
             BondCard(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),

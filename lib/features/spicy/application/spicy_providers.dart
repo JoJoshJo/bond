@@ -105,14 +105,14 @@ class SpicyController extends StateNotifier<SpicyState> {
   /// limit and RC-premium gets unlimited server-side; this only short-circuits
   /// when someone explicitly flips the dev override.
   //
-  // Honored only in BETA/TestFlight builds (kBetaBuild). When on, spicy is
-  // treated as premium-unlimited locally — turnOn() short-circuits, bypassing
-  // the 3h/14-day server window — so a beta tester behaves like a real
-  // subscriber. In production (no USORA_BETA flag) this is always false, so the
-  // real server gate (activate_spicy_mode) still enforces the free-tier window
-  // for actual free users; they are UNAFFECTED.
+  // Honored only when dev tools are enabled (kShowDevTools, default on). When
+  // on, spicy is treated as premium-unlimited locally — turnOn() short-circuits,
+  // bypassing the 3h/14-day server window — so a tester behaves like a real
+  // subscriber. In the submission build (USORA_DEV=false) this is always false,
+  // so the real server gate (activate_spicy_mode) still enforces the free-tier
+  // window for actual free users; they are UNAFFECTED.
   bool get _devPremium =>
-      kBetaBuild && _ref.read(premiumDevOverrideProvider) == true;
+      kShowDevTools && _ref.read(premiumDevOverrideProvider) == true;
 
   /// Re-read the server truth (call on app load and when opening the toggle).
   Future<void> refresh() async {
