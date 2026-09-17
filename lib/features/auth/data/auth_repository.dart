@@ -25,6 +25,13 @@ class AuthRepository {
 
   final SupabaseClient _client;
 
+  /// Deep link Supabase redirects back to after email confirmation / password
+  /// reset. The `usora` scheme is registered natively (iOS Info.plist +
+  /// Android intent-filter); supabase_flutter catches the incoming link and
+  /// completes the PKCE session automatically. Must be in the Supabase
+  /// dashboard's Redirect URLs allow-list.
+  static const _redirect = 'usora://login-callback';
+
   GoTrueClient get _auth => _client.auth;
 
   /// Current session, or null if signed out.
@@ -49,7 +56,12 @@ class AuthRepository {
     required String password,
     Map<String, dynamic>? data,
   }) {
-    return _auth.signUp(email: email.trim(), password: password, data: data);
+    return _auth.signUp(
+      email: email.trim(),
+      password: password,
+      data: data,
+      emailRedirectTo: _redirect,
+    );
   }
 
   /// Sign in with email + password.
@@ -62,13 +74,17 @@ class AuthRepository {
 
   /// Resend the signup confirmation email.
   Future<void> resendConfirmation(String email) {
-    return _auth.resend(type: OtpType.signup, email: email.trim());
+    return _auth.resend(
+      type: OtpType.signup,
+      email: email.trim(),
+      emailRedirectTo: _redirect,
+    );
   }
 
   /// Send a password-reset email. Completing the reset (setting a new password
   /// in-app) requires deep-link recovery, added with the OAuth task.
   Future<void> sendPasswordReset(String email) {
-    return _auth.resetPasswordForEmail(email.trim());
+    return _auth.resetPasswordForEmail(email.trim(), redirectTo: _redirect);
   }
 
   // ---------------- Social sign-in (native → signInWithIdToken) ----------------
