@@ -11,6 +11,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/purchases/purchase_service.dart';
+import '../../legal/presentation/legal_screen.dart';
 import '../application/entitlement_providers.dart';
 import '../application/purchase_providers.dart';
 
@@ -28,13 +29,12 @@ class PaywallScreen extends ConsumerWidget {
         MaterialPageRoute(builder: (_) => const PaywallScreen()),
       );
 
+  // Only list what actually ships AND is gated behind Usora+ (Guideline 2.3.1).
   static const _benefits = <(IconData, String, String)>[
-    (Icons.auto_awesome_rounded, 'A creature that\'s fully yours',
-        'Outfits, looks, personality depth, evolutions.'),
-    (Icons.event_available_rounded, 'Calendar management',
-        'Connect your Google/Apple calendar — the creature weaves in your dates.'),
-    (Icons.smart_toy_rounded, 'Richer AI assistant',
-        'Deeper "do things for us" tasks, personalized to your relationship.'),
+    (Icons.event_available_rounded, 'Shared calendar',
+        'Plan your dates together.'),
+    (Icons.smart_toy_rounded, 'Creature date-keeper',
+        'Let your creature add and track dates for you.'),
     (Icons.photo_library_rounded, 'Unlimited memories',
         'No cap on your shared vault — keep every moment.'),
     (Icons.insights_rounded, 'Insights',
@@ -66,6 +66,8 @@ class PaywallScreen extends ConsumerWidget {
           ],
           const SizedBox(height: AppSpacing.md),
           _priceCard(context, ref),
+          const SizedBox(height: AppSpacing.md),
+          _disclosures(context),
           const SizedBox(height: AppSpacing.lg),
           Text(
             'Connection is always free. Usora+ adds depth and delight. 🤍',
@@ -154,7 +156,7 @@ class PaywallScreen extends ConsumerWidget {
             children: [
               Text(price, style: AppText.displayMedium),
               const SizedBox(width: 4),
-              Text('/ month',
+              Text(_periodLabel(package?.storeProduct.subscriptionPeriod),
                   style: AppText.bodyMedium.copyWith(color: AppColors.inkMuted)),
             ],
           ),
@@ -177,6 +179,58 @@ class PaywallScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Billing period from the store product's ISO 8601 period (e.g. `P1M` →
+  /// "/ month", `P1Y` → "/ year", `P3M` → "/ 3 months"). Falls back to
+  /// "/ month" only when the product isn't loaded.
+  static String _periodLabel(String? iso) {
+    final match = RegExp(r'^P(\d+)([DWMY])$').firstMatch(iso ?? '');
+    if (match == null) return '/ month';
+    final count = int.parse(match.group(1)!);
+    const units = {'D': 'day', 'W': 'week', 'M': 'month', 'Y': 'year'};
+    final unit = units[match.group(2)]!;
+    return count == 1 ? '/ $unit' : '/ $count ${unit}s';
+  }
+
+  /// Apple-required subscription disclosures (Guideline 3.1.2): auto-renewal
+  /// terms plus working Terms of Service and Privacy Policy links. Sits on the page
+  /// background (not the mint card) so the small text keeps WCAG contrast.
+  Widget _disclosures(BuildContext context) {
+    final linkStyle = AppText.bodySmall.copyWith(
+      color: AppColors.ink,
+      fontWeight: FontWeight.w600,
+      decoration: TextDecoration.underline,
+    );
+    return Column(
+      children: [
+        Text(
+          'Payment will be charged to your Apple ID account at confirmation of '
+          'purchase. Subscription automatically renews unless canceled at least '
+          '24 hours before the end of the current period. Manage or cancel '
+          'anytime in your App Store settings.',
+          textAlign: TextAlign.center,
+          style: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => LegalScreen.terms())),
+              child: Text('Terms of Service', style: linkStyle),
+            ),
+            Text('·', style: AppText.bodySmall),
+            TextButton(
+              onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => LegalScreen.privacy())),
+              child: Text('Privacy Policy', style: linkStyle),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
