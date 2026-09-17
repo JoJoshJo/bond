@@ -9,15 +9,18 @@ import '../../../shared/utils/haptics.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../shared/widgets/widgets.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/purchases/purchase_service.dart';
 import '../application/entitlement_providers.dart';
 import '../application/purchase_providers.dart';
 
 /// The Usora+ upgrade screen — the conversion moment. Warm, benefit-led.
 ///
-/// The Subscribe button is a DEV STUB for now: it flips the in-memory dev
-/// override on so premium can be exercised end-to-end. The real RevenueCat
-/// purchase call slots in at [_subscribe] later — one call site.
+/// Subscribe runs the real RevenueCat/StoreKit purchase for the
+/// `usora_plus_monthly` package. Only when dev tools are enabled
+/// ([kShowDevTools]) and no package is available does it fall back to flipping
+/// the in-memory dev override, so testing works where RC can't load. In
+/// production a missing package shows an honest "store unavailable" error.
 class PaywallScreen extends ConsumerWidget {
   const PaywallScreen({super.key});
 
@@ -134,6 +137,9 @@ class PaywallScreen extends ConsumerWidget {
   Widget _priceCard(BuildContext context, WidgetRef ref) {
     final packageAsync = ref.watch(monthlyPackageProvider);
     final package = packageAsync.asData?.value;
+    // While offerings are still loading, keep Subscribe busy so an early tap
+    // can't hit the "no package" path before RevenueCat has answered.
+    final loadingOfferings = packageAsync.isLoading;
     final price = package?.storeProduct.priceString ?? '\$7.99';
 
     return BondCard(
@@ -160,6 +166,7 @@ class PaywallScreen extends ConsumerWidget {
           BondButton(
             label: 'Subscribe',
             icon: Icons.favorite_rounded,
+            loading: loadingOfferings,
             onPressed: () => _subscribe(context, ref, package),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -175,12 +182,26 @@ class PaywallScreen extends ConsumerWidget {
 
   Future<void> _subscribe(
       BuildContext context, WidgetRef ref, Package? package) async {
-    // No live package (Android / RC unavailable) → dev fallback so testing still
-    // flips premium. Real StoreKit purchase happens on iOS where a package loads.
     if (package == null) {
-      ref.read(premiumDevOverrideProvider.notifier).state = true;
-      _snack(context, 'Usora+ enabled (dev). Real purchases run on iOS.');
-      Navigator.of(context).maybePop();
+      // Dev/testing builds only: no live package (Android / RC unavailable) →
+      // flip the dev override so premium can still be exercised end-to-end.
+      if (kShowDevTools) {
+        ref.read(premiumDevOverrideProvider.notifier).state = true;
+        _snack(context, 'Usora+ enabled (dev). Real purchases run on iOS.');
+        Navigator.of(context).maybePop();
+        return;
+      }
+      // Production: never fake a purchase. Be honest, and re-fetch offerings so
+      // a retry can pick up the package once RevenueCat is reachable.
+      ref.invalidate(monthlyPackageProvider);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text(
+            'The store isn\'t available right now — please try again in a moment.'),
+        action: SnackBarAction(
+          label: 'Retry',
+          onPressed: () => ref.invalidate(monthlyPackageProvider),
+        ),
+      ));
       return;
     }
     final outcome = await ref.read(purchaseServiceProvider).purchase(package);

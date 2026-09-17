@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -67,21 +68,43 @@ class PurchaseService {
   /// offering's monthly slot / first package as a fallback). Null when RC isn't
   /// available or the offering can't be fetched.
   Future<Package?> monthlyPackage() async {
-    if (!_configured) return null;
+    if (!_configured) {
+      _log('monthlyPackage: RevenueCat not configured '
+          '(non-iOS or REVENUECAT_APPLE_KEY missing)');
+      return null;
+    }
     try {
       final offerings = await Purchases.getOfferings();
       final offering = offerings.current ?? offerings.all['default'];
-      if (offering == null) return null;
+      if (offering == null) {
+        _log('monthlyPackage: no current/default offering '
+            '(offerings: ${offerings.all.keys.toList()})');
+        return null;
+      }
       for (final p in offering.availablePackages) {
         if (p.storeProduct.identifier == monthlyProductId) return p;
       }
-      return offering.monthly ??
+      final fallback = offering.monthly ??
           (offering.availablePackages.isNotEmpty
               ? offering.availablePackages.first
               : null);
-    } catch (_) {
+      if (fallback == null) {
+        _log('monthlyPackage: offering "${offering.identifier}" has no '
+            'packages — check the product is attached in RevenueCat and '
+            'fetchable from App Store Connect');
+      }
+      return fallback;
+    } catch (e, st) {
+      // Surface the real reason (e.g. StoreKit can't fetch products, missing
+      // Paid Apps Agreement, misconfigured offering) instead of hiding it.
+      _log('monthlyPackage: getOfferings failed', error: e, stackTrace: st);
       return null;
     }
+  }
+
+  static void _log(String message, {Object? error, StackTrace? stackTrace}) {
+    developer.log(message,
+        name: 'PurchaseService', error: error, stackTrace: stackTrace);
   }
 
   Future<PurchaseOutcome> purchase(Package package) async {
