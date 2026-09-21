@@ -6,6 +6,7 @@ import '../../../core/config/app_config.dart';
 import '../../../shared/dev/ai_test_screen.dart';
 import '../../../shared/dev/style_gallery_screen.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_shadows.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/utils/error_messages.dart';
@@ -141,6 +142,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             const SizedBox(height: AppSpacing.lg),
             _section('Settings'),
             BondCard(
+              color: AppColors.usTint((t) => t.neutral),
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               child: Column(
                 children: [
@@ -164,7 +166,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     value: floating,
                     title: Text('Floating assistant', style: AppText.bodyLarge),
                     subtitle: Text('Quick-access creature button',
-                        style: AppText.bodySmall),
+                        style: AppText.bodySmall.copyWith(color: _tintText)),
                     onChanged: (v) => ref
                         .read(assistantFloatingEnabledProvider.notifier)
                         .state = v,
@@ -175,7 +177,9 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             const SizedBox(height: AppSpacing.lg),
             _section('Privacy'),
             BondCard(
-              color: AppColors.mintWash,
+              color: AppColors.usTinted
+                  ? AppColors.usTint((t) => t.privacy)
+                  : AppColors.mintWash,
               elevated: false,
               child: Text(
                 'We never sell your data, never train AI on it, and only the two '
@@ -185,14 +189,18 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
             _section('Membership'),
-            BondCard(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            _GoldCard(
               child: BondListTile(
+                badgeColor:
+                    AppColors.usMembership == null ? null : AppColors.accent,
+                iconColor:
+                    AppColors.usMembership == null ? null : AppColors.surface,
                 leadingIcon: Icons.workspace_premium_rounded,
                 title: isPremium ? 'Usora+ · active' : 'Upgrade to Usora+',
                 subtitle: isPremium
                     ? 'Thanks for supporting Usora 🤍'
                     : 'Unlimited memories, a fully custom creature & more',
+                subtitleColor: _tintText,
                 onTap: () => PaywallScreen.open(context),
                 trailing: Icon(Icons.chevron_right,
                     color: AppColors.inkFaint),
@@ -201,6 +209,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             const SizedBox(height: AppSpacing.lg),
             _section('Planning'),
             BondCard(
+              color: AppColors.usTint((t) => t.planning),
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               child: Column(
                 children: [
@@ -210,6 +219,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     subtitle: isPremium
                         ? 'Your dates, anniversaries & plans'
                         : 'Plan your dates together · Usora+',
+                    subtitleColor: _tintText,
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) =>
                             CalendarScreen(coupleId: widget.coupleId))),
@@ -223,6 +233,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     subtitle: isPremium
                         ? 'Your bond over time'
                         : 'See your bond over time · Usora+',
+                    subtitleColor: _tintText,
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) =>
                             InsightsScreen(coupleId: widget.coupleId))),
@@ -235,6 +246,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             const SizedBox(height: AppSpacing.lg),
             _section('Personalize'),
             BondCard(
+              color: AppColors.usTint((t) => t.personalize),
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               child: BondListTile(
                 leadingIcon: Icons.palette_rounded,
@@ -242,6 +254,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                 subtitle: isPremium
                     ? 'Pick your theme'
                     : 'Premium color themes · Usora+',
+                subtitleColor: _tintText,
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => const AppearanceScreen())),
                 trailing: Icon(Icons.chevron_right, color: AppColors.inkFaint),
@@ -249,7 +262,9 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
             _section('Spicy'),
-            const SpicySection(),
+            SpicySection(
+                color: AppColors.usTint((t) => t.spicy),
+                textColor: _tintText),
             const SizedBox(height: AppSpacing.lg),
             // Developer tools — VISIBLE by default in every build (kShowDevTools)
             // so any build can test premium/spicy. Hidden only in the submission
@@ -257,6 +272,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             if (kShowDevTools) ...[
             _section('Developer'),
             BondCard(
+              color: AppColors.usTint((t) => t.neutral),
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               child: Column(
                 children: [
@@ -281,7 +297,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     value: isPremium,
                     title: Text('DEV: Usora+ override', style: AppText.bodyLarge),
                     subtitle: Text('Force premium on/off (dev only)',
-                        style: AppText.bodySmall),
+                        style: AppText.bodySmall.copyWith(color: _tintText)),
                     onChanged: (v) => ref
                         .read(premiumDevOverrideProvider.notifier)
                         .state = v,
@@ -293,6 +309,7 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
             ],
             _section('Legal'),
             BondCard(
+              color: AppColors.usTint((t) => t.neutral),
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               child: Column(
                 children: [
@@ -417,6 +434,9 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
     }
   }
 
+  /// Body text on a tinted "Us" card must be ink (inkMuted fails on tints).
+  Color? get _tintText => AppColors.usTinted ? AppColors.ink : null;
+
   Widget _section(String label) => Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.sm, left: AppSpacing.xs),
         child: Text(label.toUpperCase(),
@@ -425,4 +445,32 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2)),
       );
+}
+
+/// The Membership card: a light-gold gradient standout on themes that define
+/// one; otherwise the plain [BondCard].
+class _GoldCard extends StatelessWidget {
+  const _GoldCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final gold = AppColors.usMembership;
+    const padding = EdgeInsets.symmetric(vertical: AppSpacing.sm);
+    if (gold == null) return BondCard(padding: padding, child: child);
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gold,
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: AppShadows.card,
+      ),
+      child: child,
+    );
+  }
 }

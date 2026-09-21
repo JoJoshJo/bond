@@ -12,7 +12,11 @@ import '../application/spicy_providers.dart';
 /// The Spicy-mode control in the Us tab: a toggle plus the free-tier session
 /// countdown / cooldown state, with a paywall nudge when locked.
 class SpicySection extends ConsumerStatefulWidget {
-  const SpicySection({super.key});
+  const SpicySection({super.key, this.color, this.textColor});
+
+  /// Optional card fill + body-text color (ink on a tinted card).
+  final Color? color;
+  final Color? textColor;
 
   @override
   ConsumerState<SpicySection> createState() => _SpicySectionState();
@@ -67,6 +71,7 @@ class _SpicySectionState extends ConsumerState<SpicySection> {
     });
 
     return BondCard(
+      color: widget.color,
       padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.sm, horizontal: AppSpacing.md),
       child: Column(
@@ -74,7 +79,8 @@ class _SpicySectionState extends ConsumerState<SpicySection> {
           SwitchListTile(
             value: state.on,
             title: Text('Spicy mode 🌶️', style: AppText.bodyLarge),
-            subtitle: Text(_subtitle(state), style: AppText.bodySmall),
+            subtitle: Text(_subtitle(state),
+                style: AppText.bodySmall.copyWith(color: widget.textColor)),
             onChanged: state.busy ? null : _onToggle,
           ),
           if (state.inCooldown)
@@ -86,7 +92,8 @@ class _SpicySectionState extends ConsumerState<SpicySection> {
                   Expanded(
                     child: Text(
                       'Free spicy is a 3-hour session every 2 weeks.',
-                      style: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
+                      style: AppText.bodySmall.copyWith(
+                          color: widget.textColor ?? AppColors.inkMuted),
                     ),
                   ),
                   TextButton(

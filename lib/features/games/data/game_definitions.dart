@@ -124,7 +124,7 @@ class GameCatalog {
     type: 'target_shot',
     title: 'Target Shot',
     tagline: 'Steady your aim — hit the bullseye',
-    icon: Icons.gps_fixed_rounded,
+    icon: Icons.track_changes_rounded,
     xp: 20,
     skill: true,
     shots: 5,
@@ -166,7 +166,7 @@ class GameCatalog {
     type: 'spicy_this_or_that',
     title: 'Spicy This or That',
     tagline: 'Quick-fire, a little flirty',
-    icon: Icons.whatshot_rounded,
+    icon: Icons.nightlife_rounded,
     xp: 15,
     spicy: true,
     rounds: [
@@ -183,7 +183,7 @@ class GameCatalog {
     type: 'heat_check',
     title: 'Heat Check',
     tagline: 'How well do you match tonight?',
-    icon: Icons.favorite_rounded,
+    icon: Icons.thermostat_rounded,
     xp: 25,
     spicy: true,
     rounds: [
