@@ -31,6 +31,8 @@ class BondPalette {
     required this.error,
     required this.errorBg,
     required this.dark,
+    this.anchor,
+    this.accent,
   });
 
   final Color bg, bgAlt, surface, surfaceAlt;
@@ -41,6 +43,14 @@ class BondPalette {
 
   /// True for a dark-brightness palette (drives ThemeData.brightness etc.).
   final bool dark;
+
+  /// Optional deep tone for headings/anchors (stronger hierarchy). Themes that
+  /// don't set it fall back to [ink].
+  final Color? anchor;
+
+  /// Optional warm accent used sparingly (~10%) — e.g. the bond flame + meter
+  /// fill. Themes that don't set it fall back to [warning].
+  final Color? accent;
 }
 
 /// The locked "Modern & Fresh" White + Mint scheme — soft, warm, low-saturation.
@@ -66,6 +76,8 @@ const BondPalette mintPalette = BondPalette(
   error: Color(0xFFD9695E),
   errorBg: Color(0xFFF7E5E2),
   dark: false,
+  anchor: Color(0xFF1F4D3A), // deep forest green — headings (≥8.6:1)
+  accent: Color(0xFFC0821A), // gold — flame + meter fill (3.3:1 on white)
 );
 
 /// Spicy mode's "red room" — deep warm reds, sultry dark, a luminous rose accent.
@@ -130,4 +142,10 @@ class AppColors {
   static Color get warningBg => active.warningBg;
   static Color get error => active.error;
   static Color get errorBg => active.errorBg;
+
+  /// Deep heading/anchor tone (forest green on mint; [ink] elsewhere).
+  static Color get anchor => active.anchor ?? active.ink;
+
+  /// Sparing warm accent (gold on mint; [warning] elsewhere).
+  static Color get accent => active.accent ?? active.warning;
 }

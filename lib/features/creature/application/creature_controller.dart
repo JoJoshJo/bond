@@ -50,9 +50,9 @@ CreatureState _derive(ConnectionSnapshot s, DateTime now) {
   }
 
   final CreatureStage stage;
-  if (s.bondScore < 50) {
+  if (s.bondScore < kGrowingAtScore) {
     stage = CreatureStage.hatchling;
-  } else if (s.bondScore < 200) {
+  } else if (s.bondScore < kFlourishingAtScore) {
     stage = CreatureStage.growing;
   } else {
     stage = CreatureStage.flourishing;

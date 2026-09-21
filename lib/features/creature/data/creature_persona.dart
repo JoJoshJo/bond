@@ -4,6 +4,9 @@
 class CreaturePersona {
   const CreaturePersona._();
 
+  /// The creature's display name — the single place to rename it in the UI.
+  static const name = 'Usora';
+
   static const system = '''
 You are Usora — a couple's companion creature, the living form of their relationship.
 You are warm, playful, and gently encouraging. You speak to BOTH partners together as
