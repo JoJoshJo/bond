@@ -9,14 +9,14 @@ import '../../../shared/widgets/widgets.dart';
 import '../../premium/application/entitlement_providers.dart';
 import '../../premium/presentation/paywall_screen.dart';
 import '../application/memory_controller.dart';
+import '../application/memory_resurface.dart';
 import '../data/memory_models.dart';
 import 'add_memory_screen.dart';
 import 'memory_viewer_screen.dart';
-import 'widgets/flashback_card.dart';
 import 'widgets/memory_tile.dart';
 
-/// The shared memory vault: a month-grouped timeline grid, an in-app flashback
-/// card, and an add-memory entry point.
+/// The shared memory vault: an "on this day" band, then a month-grouped
+/// scrapbook timeline (one card per memory), and an add-memory entry point.
 class MemoryVaultScreen extends ConsumerWidget {
   const MemoryVaultScreen({super.key, required this.coupleId});
 
@@ -45,37 +45,34 @@ class MemoryVaultScreen extends ConsumerWidget {
             : state.isEmpty
                 ? _empty(context, ref)
                 : ListView(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.lg,
+                        AppSpacing.sm, AppSpacing.lg, AppSpacing.xxl),
                     children: [
-                      if (state.flashbacks.isNotEmpty)
-                        FlashbackCard(
-                          memory: state.flashbacks.first,
+                      if (state.flashback case final f?) ...[
+                        _OnThisDayBand(
+                          found: f,
                           signUrl: controller.signedUrl,
                           onTap: () =>
-                              _openViewer(context, state.flashbacks.first, controller),
+                              _openViewer(context, f.memory, controller),
                         ),
+                        const SizedBox(height: AppSpacing.lg),
+                      ],
                       for (final group in state.groups) ...[
                         Padding(
                           padding: const EdgeInsets.only(
-                              bottom: AppSpacing.sm, top: AppSpacing.sm),
-                          child: Text(group.label, style: AppText.title),
+                              top: AppSpacing.md, bottom: AppSpacing.md),
+                          child: Text(group.label,
+                              style: AppText.title
+                                  .copyWith(color: AppColors.anchor)),
                         ),
-                        GridView.count(
-                          crossAxisCount: 3,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          mainAxisSpacing: AppSpacing.sm,
-                          crossAxisSpacing: AppSpacing.sm,
-                          children: [
-                            for (final m in group.memories)
-                              MemoryTile(
-                                memory: m,
-                                signUrl: controller.signedUrl,
-                                onTap: () => _openViewer(context, m, controller),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
+                        for (final m in group.memories) ...[
+                          _MemoryCard(
+                            memory: m,
+                            signUrl: controller.signedUrl,
+                            onTap: () => _openViewer(context, m, controller),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                        ],
                       ],
                     ],
                   ),
@@ -85,11 +82,11 @@ class MemoryVaultScreen extends ConsumerWidget {
 
   Widget _empty(BuildContext context, WidgetRef ref) {
     return BondEmptyState(
-      icon: Icons.photo_library_outlined,
-      title: 'No memories yet',
-      message: 'Photos and videos you save together will live here.',
+      icon: Icons.favorite_border_rounded,
+      title: 'Start your collection',
+      message: 'Save the little moments together — they\'ll all live here.',
       action: BondButton(
-        label: 'Add your first',
+        label: 'Add your first memory',
         fullWidth: false,
         onPressed: () => _addSheet(context, ref),
       ),
@@ -212,6 +209,138 @@ class MemoryVaultScreen extends ConsumerWidget {
         Navigator.of(ctx).pop();
         onTap();
       },
+    );
+  }
+}
+
+/// One scrapbook card: the rounded photo (or video poster), then the caption
+/// (if any) and the date. Text is ink/anchor on white — never inkMuted.
+class _MemoryCard extends StatelessWidget {
+  const _MemoryCard(
+      {required this.memory, required this.signUrl, required this.onTap});
+
+  final Memory memory;
+  final Future<String> Function(String path) signUrl;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final caption = memory.caption?.trim();
+    final hasCaption = caption != null && caption.isNotEmpty;
+    return BondCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      radius: AppRadius.xl,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AspectRatio(
+            aspectRatio: 4 / 3,
+            child: IgnorePointer(
+              // The whole card is the tap target.
+              child: MemoryTile(memory: memory, signUrl: signUrl, onTap: () {}),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.sm, AppSpacing.md, AppSpacing.sm, AppSpacing.xs),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (hasCaption)
+                        Text(caption,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.bodyLarge
+                                .copyWith(color: AppColors.ink)),
+                      Text(memoryLongDate(memory.takenAt),
+                          style: AppText.bodySmall.copyWith(
+                              color: hasCaption
+                                  ? AppColors.ink
+                                  : AppColors.anchor,
+                              fontWeight: hasCaption
+                                  ? FontWeight.w400
+                                  : FontWeight.w600)),
+                    ],
+                  ),
+                ),
+                // Decorative only — memories have no reactions in the model.
+                Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.sm, top: 2),
+                  child: ExcludeSemantics(
+                    child: Icon(Icons.favorite_rounded,
+                        size: 18, color: AppColors.mintSoft),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "A year ago today" band — warm pale gold, same on-this-day logic as home.
+class _OnThisDayBand extends StatelessWidget {
+  const _OnThisDayBand(
+      {required this.found, required this.signUrl, required this.onTap});
+
+  final ResurfacedMemory found;
+  final Future<String> Function(String path) signUrl;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(AppRadius.xl);
+    return Material(
+      color: AppColors.accentWash,
+      borderRadius: radius,
+      child: InkWell(
+        borderRadius: radius,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 84,
+                height: 84,
+                child: IgnorePointer(
+                  child: MemoryTile(
+                      memory: found.memory, signUrl: signUrl, onTap: () {}),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(found.eyebrow.toUpperCase(),
+                        style: AppText.bodySmall.copyWith(
+                            color: AppColors.onAccentWash,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8)),
+                    const SizedBox(height: 2),
+                    Text(found.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.title.copyWith(color: AppColors.ink)),
+                    Text(memoryLongDate(found.memory.takenAt),
+                        style: AppText.bodySmall
+                            .copyWith(color: AppColors.ink)),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_rounded, color: AppColors.onAccentWash),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

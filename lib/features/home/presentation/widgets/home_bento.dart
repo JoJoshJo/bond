@@ -11,6 +11,7 @@ import '../../../calendar/presentation/calendar_screen.dart';
 import '../../../creature/data/creature_persona.dart';
 import '../../../creature/presentation/creature_chat_sheet.dart';
 import '../../../memories/application/memory_controller.dart';
+import '../../../memories/application/memory_resurface.dart';
 import '../../../memories/data/memory_models.dart';
 import '../../../memories/presentation/memory_viewer_screen.dart';
 import '../../../prompts/application/prompt_controller.dart';
@@ -210,7 +211,8 @@ class _ContextualSlot extends ConsumerWidget {
     final next = calendar.loading ? null : _nextDate(calendar, now);
     final memory = (next != null || vault.loading)
         ? null
-        : _resurfacedMemory(vault.groups.expand((g) => g.memories), now);
+        : resurfaceMemory(vault.groups.expand((g) => g.memories), now,
+            windowDays: _memoryWindowDays);
 
     if (next != null) {
       child = _DateCard(
@@ -255,55 +257,6 @@ class _ContextualSlot extends ConsumerWidget {
     }
     return null;
   }
-
-  /// A memory whose anniversary falls within ±[_memoryWindowDays] of today, from
-  /// a previous year. Prefers the closest day, then the most recent year.
-  static _Resurfaced? _resurfacedMemory(Iterable<Memory> memories, DateTime now) {
-    // UTC date-only math so DST shifts can't produce off-by-one day counts.
-    final today = DateTime.utc(now.year, now.month, now.day);
-    _Resurfaced? best;
-    for (final m in memories) {
-      // Check the anniversary in last/this/next year to handle Dec↔Jan wrap.
-      for (final year in [today.year - 1, today.year, today.year + 1]) {
-        final anniversary = DateTime.utc(year, m.takenAt.month, m.takenAt.day);
-        final dayOffset = anniversary.difference(today).inDays.abs();
-        final years = year - m.takenAt.year;
-        if (dayOffset > _memoryWindowDays || years < 1) continue;
-        final candidate =
-            _Resurfaced(memory: m, years: years, dayOffset: dayOffset);
-        if (best == null || candidate.isBetterThan(best)) best = candidate;
-      }
-    }
-    return best;
-  }
-}
-
-class _Resurfaced {
-  const _Resurfaced(
-      {required this.memory, required this.years, required this.dayOffset});
-
-  final Memory memory;
-  final int years;
-  final int dayOffset;
-
-  bool isBetterThan(_Resurfaced other) {
-    if (dayOffset != other.dayOffset) return dayOffset < other.dayOffset;
-    if (years != other.years) return years < other.years;
-    return memory.takenAt.isAfter(other.memory.takenAt);
-  }
-
-  /// Google-Photos-style eyebrow.
-  String get eyebrow {
-    final when = dayOffset == 0 ? 'today' : 'this week';
-    return years == 1 ? 'A year ago $when' : '$years years ago $when';
-  }
-
-  /// No title field exists on memories — use the caption, else the date.
-  String get title {
-    final caption = memory.caption?.trim();
-    if (caption != null && caption.isNotEmpty) return caption;
-    return _longDate(memory.takenAt);
-  }
 }
 
 class _DateCard extends StatelessWidget {
@@ -334,7 +287,7 @@ class _DateCard extends StatelessWidget {
 class _MemoryCard extends StatelessWidget {
   const _MemoryCard({super.key, required this.found, required this.signUrl});
 
-  final _Resurfaced found;
+  final ResurfacedMemory found;
   final Future<String> Function(String path) signUrl;
 
   @override
@@ -499,13 +452,7 @@ class _MemoryThumbState extends State<_MemoryThumb> {
   }
 }
 
-const _monthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
 const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-String _longDate(DateTime d) => '${_monthNames[d.month - 1]} ${d.day}, ${d.year}';
 
 String _dayLabel(DateTime when) {
   final now = DateTime.now();
