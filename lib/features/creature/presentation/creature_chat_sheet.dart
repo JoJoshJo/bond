@@ -541,7 +541,9 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
                 backgroundColor:
                     _listening ? AppColors.error : AppColors.surfaceAlt,
                 child: Icon(Icons.mic,
-                    color: _listening ? Colors.white : AppColors.inkMuted),
+                    // onMint reads on the accent fill in every palette; plain
+                    // white vanishes on the dark themes' lighter error tone.
+                    color: _listening ? AppColors.onMint : AppColors.inkMuted),
               ),
             ),
           const SizedBox(width: AppSpacing.sm),
