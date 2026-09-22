@@ -11,6 +11,8 @@ import '../../../shared/widgets/widgets.dart';
 import '../application/creature_chat_controller.dart';
 import '../application/creature_controller.dart';
 import '../../ai/data/ai_models.dart';
+import '../../calendar/application/calendar_providers.dart';
+import '../../premium/presentation/paywall_screen.dart';
 import '../data/creature_chat_models.dart';
 import '../data/creature_models.dart';
 import 'creature_view.dart';
@@ -113,6 +115,9 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
   @override
   Widget build(BuildContext context) {
     final messages = ref.watch(creatureChatProvider(widget.coupleId));
+    // Keep the couple's calendar loaded while chatting, so a confirmed change
+    // writes through the same controller and resolves against live events.
+    ref.watch(calendarControllerProvider(widget.coupleId));
     ref.listen(creatureChatProvider(widget.coupleId), (_, _) => _scrollToBottom());
     final mood =
         ref.watch(creatureStateProvider(widget.coupleId)).asData?.value.mood ??
@@ -132,7 +137,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
                 controller: _scroll,
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 itemCount: messages.length,
-                itemBuilder: (context, i) => _bubble(messages[i]),
+                itemBuilder: (context, i) => _bubble(messages[i], i),
               ),
             ),
             _inputBar(),
@@ -165,7 +170,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
     );
   }
 
-  Widget _bubble(CreatureChatMessage m) {
+  Widget _bubble(CreatureChatMessage m, int index) {
     final mine = !m.fromCreature;
     return Column(
       crossAxisAlignment:
@@ -193,6 +198,29 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
         ),
         if (m.movies.isNotEmpty) _movieRow(m.movies),
         if (m.places.isNotEmpty) _placeRow(m.places),
+        if (m.proposal case final p?)
+          _CalendarProposalCard(
+            proposal: p,
+            status: m.proposalStatus,
+            error: m.proposalError,
+            onYes: () => ref
+                .read(creatureChatProvider(widget.coupleId).notifier)
+                .confirmProposal(index),
+            onNo: () => ref
+                .read(creatureChatProvider(widget.coupleId).notifier)
+                .declineProposal(index),
+          ),
+        if (m.showUpgrade)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
+            child: BondButton(
+              label: 'See Usora+',
+              icon: Icons.workspace_premium_rounded,
+              fullWidth: false,
+              variant: BondButtonVariant.secondary,
+              onPressed: () => PaywallScreen.open(context),
+            ),
+          ),
       ],
     );
   }
@@ -512,6 +540,152 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Yes/No confirmation for a calendar change Usora proposed. Nothing is written
+/// until Yes. Text is ink / forest green on white (never inkMuted).
+class _CalendarProposalCard extends StatelessWidget {
+  const _CalendarProposalCard({
+    required this.proposal,
+    required this.status,
+    required this.onYes,
+    required this.onNo,
+    this.error,
+  });
+
+  final CalendarProposal proposal;
+  final ProposalStatus status;
+
+  /// DEV ONLY: raw save error, shown under "Nothing changed".
+  final String? error;
+  final VoidCallback onYes;
+  final VoidCallback onNo;
+
+  @override
+  Widget build(BuildContext context) {
+    final (heading, yesLabel, doneLabel) = switch (proposal.op) {
+      CalendarOp.add => ('Add to your calendar?', 'Yes, add it', 'Added'),
+      CalendarOp.update => ('Change this event?', 'Yes, change it', 'Updated'),
+      CalendarOp.delete => ('Remove this event?', 'Yes, remove it', 'Removed'),
+    };
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      constraints:
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.calendar_month_rounded,
+                  size: 18, color: AppColors.anchor),
+              const SizedBox(width: AppSpacing.sm),
+              Text(heading,
+                  style: AppText.bodyMedium.copyWith(
+                      color: AppColors.anchor, fontWeight: FontWeight.w700)),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ..._body(),
+          const SizedBox(height: AppSpacing.md),
+          _footer(yesLabel, doneLabel),
+          if (error != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.errorBg,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: SelectableText('DEV · $error',
+                  style: AppText.bodySmall.copyWith(
+                      color: AppColors.ink, fontFamily: 'monospace')),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _body() {
+    switch (proposal.op) {
+      case CalendarOp.add:
+        return [_event(proposal.after!)];
+      case CalendarOp.delete:
+        return [_event(proposal.before!)];
+      case CalendarOp.update:
+        return [
+          _label('Now'),
+          _event(proposal.before!),
+          const SizedBox(height: AppSpacing.sm),
+          _label('Will become'),
+          _event(proposal.after!, emphasize: true),
+        ];
+    }
+  }
+
+  Widget _label(String s) => Text(s.toUpperCase(),
+      style: AppText.bodySmall.copyWith(
+          color: AppColors.anchor,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.8));
+
+  Widget _event(ProposedEvent e, {bool emphasize = false}) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(e.title,
+              style: AppText.bodyLarge.copyWith(
+                  color: AppColors.ink,
+                  fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500)),
+          Text(describeProposedWhen(e) + (e.recurring ? ' · every year' : ''),
+              style: AppText.bodySmall.copyWith(color: AppColors.ink)),
+        ],
+      );
+
+  Widget _footer(String yesLabel, String doneLabel) {
+    final (IconData? icon, String? text) = switch (status) {
+      ProposalStatus.pending || ProposalStatus.applying => (null, null),
+      ProposalStatus.applied => (Icons.check_circle_rounded, doneLabel),
+      ProposalStatus.declined => (Icons.remove_circle_outline, 'Left as is'),
+      ProposalStatus.failed => (Icons.error_outline, 'Nothing changed'),
+    };
+    if (text != null) {
+      return Row(children: [
+        Icon(icon, size: 18, color: AppColors.anchor),
+        const SizedBox(width: AppSpacing.xs),
+        Text(text,
+            style: AppText.bodySmall.copyWith(
+                color: AppColors.anchor, fontWeight: FontWeight.w600)),
+      ]);
+    }
+    final busy = status == ProposalStatus.applying;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        BondButton(
+          label: 'No',
+          fullWidth: false,
+          variant: BondButtonVariant.ghost,
+          onPressed: busy ? null : onNo,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        BondButton(
+          label: yesLabel,
+          fullWidth: false,
+          loading: busy,
+          onPressed: busy ? null : onYes,
+        ),
+      ],
     );
   }
 }

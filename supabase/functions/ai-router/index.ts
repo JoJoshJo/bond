@@ -12,8 +12,11 @@
 // - CREATURE job uses Gemini FUNCTION-CALLING. Tools:
 //     search_movies        → TMDB        (returns `movies`)
 //     search_places        → Google Places (New) (returns `places`; needs lat/lng)
-//     add_calendar_event   → important_dates via RPC (Usora+; JWT-scoped)
 //     list_upcoming_events → important_dates via RPC (Usora+; JWT-scoped)
+//     find_events          → important_dates READ via REST (Usora+; JWT/RLS)
+//     propose_event_add    ┐ PROPOSAL ONLY — never write. Validate + resolve,
+//     propose_event_update ├ then return a `calendarAction` the APP shows as a
+//     propose_event_delete ┘ Yes/No card and writes via its own calendar path.
 //   Tools run server-side; Gemini phrases results in character.
 // - Secrets: GEMINI_API_KEY (required), TMDB_API_KEY (movies),
 //   GOOGLE_PLACES_API_KEY (places). SUPABASE_URL / SUPABASE_ANON_KEY are
@@ -27,13 +30,24 @@
 // CALLER'S JWT. The RPC resolves couple_id from auth.uid() — there is
 // NO couple_id parameter, so neither the model nor the client can target
 // another couple. Premium is enforced inside the RPC. Member RLS on
-// important_dates is the backstop. Add + read only (no edit/delete).
+// important_dates is the backstop.
+//
+// CALENDAR WRITES (add/edit/delete) — "router proposes, app writes":
+// the propose_* tools NEVER write. They (1) check Usora+ server-side from the
+// caller's own `subscriptions` row (JWT-scoped; no calendarAction is ever
+// returned to a free couple, whatever the phrasing), (2) validate/normalize
+// dates + times, (3) resolve WHICH event from the couple's own rows (read with
+// the caller's JWT, so RLS scopes it), and (4) return
+//   { calendarAction: { op: "add"|"update"|"delete", eventId?, before?, after? } }
+// or, if anything is missing/ambiguous, a clarifying question and NO action.
+// The app confirms with the user and writes through its normal calendar path.
+// (ai_add_calendar_event is no longer called by this router.)
 //
 // Location: the app sends lat/lng in `context` ONLY when it has it.
 // If a place search is requested without coords, we return
 // { needsLocation: true } and the app fetches location + resends.
 // Relative dates: the app sends `today` in `context`; the model computes
-// an absolute YYYY-MM-DD for add_calendar_event.
+// an absolute YYYY-MM-DD for the calendar proposal tools.
 // ============================================================
 
 type AIJob = "assistant" | "personality" | "content" | "creature";
@@ -100,16 +114,24 @@ class ModelAttemptError extends Error {
 const CREATURE_SYSTEM =
   "You are the couple's companion creature and you HAVE working tools: " +
   "`search_movies` (movies/shows to watch), `search_places` (nearby restaurants, " +
-  "movie theaters, attractions, museums), `add_calendar_event` (add a date, " +
-  "anniversary, date night, reminder or plan to their shared calendar), and " +
-  "`list_upcoming_events` (read what's coming up on their calendar). When the couple " +
+  "movie theaters, attractions, museums), `list_upcoming_events` (what's coming up), " +
+  "`find_events` (look up specific events on their calendar), and three calendar " +
+  "PROPOSAL tools: `propose_event_add`, `propose_event_update` (move/rename/retime an " +
+  "event) and `propose_event_delete` (cancel/remove an event). When the couple " +
   "asks what to watch, CALL search_movies. When they ask to find/eat/go/do something " +
   "nearby, CALL search_places. When they ask to add/save/schedule/remember a date or " +
-  "plan, CALL add_calendar_event (compute an absolute YYYY-MM-DD date from today's date " +
-  "in the context). When they ask what's coming up or about their plans, CALL " +
-  "list_upcoming_events. Always prefer calling the matching tool over saying you can't — " +
-  "you CAN. Only decline tasks that have no tool at all (booking, ordering, payments). " +
-  "Never claim you can't find movies or places or manage the calendar.";
+  "plan, CALL propose_event_add. When they ask to move/change/reschedule/rename an " +
+  "event, CALL propose_event_update. When they ask to cancel/delete/remove one, CALL " +
+  "propose_event_delete. Compute absolute YYYY-MM-DD dates and 24-hour HH:MM times from " +
+  "today's date in the context. If the DATE is missing, or a time is genuinely " +
+  "ambiguous (e.g. '8' could be morning or evening and nothing suggests which), do NOT " +
+  "call a proposal tool — ask a short clarifying question instead. Evening plans like " +
+  "dinner or a movie at '8' mean 20:00. The proposal tools do NOT save anything: after " +
+  "one, tell them to check the card and tap Yes — never say it's already done. When " +
+  "they ask what's coming up or about their plans, CALL list_upcoming_events. Always " +
+  "prefer calling the matching tool over saying you can't — you CAN. Only decline tasks " +
+  "that have no tool at all (booking, ordering, payments). Never claim you can't find " +
+  "movies or places or manage the calendar.";
 
 // ---------- model discovery (ListModels) ----------
 // Cached across warm invocations. Only a SUCCESSFUL discovery is cached; if we
@@ -457,27 +479,6 @@ async function executePlaceSearch(
 // couple_id is resolved server-side from the JWT inside the RPC — there
 // is NO couple_id parameter here, by design.
 // ============================================================
-const addCalendarEventDeclaration = {
-  name: "add_calendar_event",
-  description:
-    "Add an event to the couple's shared calendar. Use when they ask to add/save/schedule/remember a date, anniversary, date night, reminder, or plan. Compute an absolute date (YYYY-MM-DD) from relative phrases using today's date from the context.",
-  parameters: {
-    type: "object",
-    properties: {
-      title: { type: "string", description: "short event title, e.g. 'Date night'" },
-      date: { type: "string", description: "absolute date in YYYY-MM-DD" },
-      time: { type: "string", description: "optional 24-hour time HH:MM" },
-      note: { type: "string", description: "optional short note" },
-      type: {
-        type: "string",
-        enum: ["anniversary", "date_night", "milestone", "reminder", "custom"],
-        description: "event type",
-      },
-      recurring: { type: "boolean", description: "true if it repeats every year (e.g. anniversaries)" },
-    },
-    required: ["title", "date"],
-  },
-};
 const listUpcomingEventsDeclaration = {
   name: "list_upcoming_events",
   description:
@@ -491,21 +492,319 @@ const listUpcomingEventsDeclaration = {
 };
 
 // deno-lint-ignore no-explicit-any
-async function executeAddCalendarEvent(args: any, authHeader: string): Promise<Record<string, unknown>> {
-  return await callRpc("ai_add_calendar_event", {
-    p_label: args?.title ?? null,
-    p_date: args?.date ?? null,
-    p_time: args?.time ?? null,
-    p_note: args?.note ?? null,
-    p_type: args?.type ?? "custom",
-    p_recurring: args?.recurring ?? false,
-  }, authHeader);
-}
-// deno-lint-ignore no-explicit-any
 async function executeListUpcoming(args: any, authHeader: string): Promise<Record<string, unknown>> {
   return await callRpc("ai_list_upcoming_events", {
     p_limit: typeof args?.limit === "number" ? args.limit : 10,
   }, authHeader);
+}
+
+// ============================================================
+// TOOLS 5–8 — CALENDAR PROPOSALS (read-only; the APP writes after Yes)
+// ============================================================
+const EVENT_TYPES = ["anniversary", "date_night", "milestone", "reminder", "custom"];
+
+const findEventsDeclaration = {
+  name: "find_events",
+  description:
+    "Look up specific events on the couple's shared calendar by name and/or date (read-only). Use when they ask when something is or whether something is on the calendar.",
+  parameters: {
+    type: "object",
+    properties: {
+      query: { type: "string", description: "what they call the event, e.g. 'movie night'" },
+      date: { type: "string", description: "optional YYYY-MM-DD the event is on" },
+    },
+  },
+};
+const proposeEventAddDeclaration = {
+  name: "propose_event_add",
+  description:
+    "Propose adding an event to the couple's shared calendar. Does NOT save — the couple confirms on a card. Only call when you know the date.",
+  parameters: {
+    type: "object",
+    properties: {
+      title: { type: "string", description: "short event title, e.g. 'Dinner'" },
+      date: { type: "string", description: "absolute date YYYY-MM-DD" },
+      time: { type: "string", description: "optional 24-hour time HH:MM" },
+      note: { type: "string", description: "optional short note" },
+      type: { type: "string", enum: EVENT_TYPES, description: "event type" },
+      recurring: { type: "boolean", description: "true if it repeats every year (e.g. anniversaries)" },
+    },
+    required: ["title", "date"],
+  },
+};
+const proposeEventUpdateDeclaration = {
+  name: "propose_event_update",
+  description:
+    "Propose changing an existing calendar event (new date, time, or title). Does NOT save — the couple confirms on a card. Identify the event by what they call it.",
+  parameters: {
+    type: "object",
+    properties: {
+      event: { type: "string", description: "what they call the existing event, e.g. 'our anniversary'" },
+      event_date: { type: "string", description: "optional YYYY-MM-DD the existing event is currently on, if they said it" },
+      new_title: { type: "string", description: "optional new title" },
+      new_date: { type: "string", description: "optional new date YYYY-MM-DD" },
+      new_time: { type: "string", description: "optional new 24-hour time HH:MM" },
+      remove_time: { type: "boolean", description: "true to make it all-day" },
+      new_note: { type: "string", description: "optional new note" },
+    },
+    required: ["event"],
+  },
+};
+const proposeEventDeleteDeclaration = {
+  name: "propose_event_delete",
+  description:
+    "Propose cancelling/removing an existing calendar event. Does NOT delete — the couple confirms on a card. Identify the event by what they call it.",
+  parameters: {
+    type: "object",
+    properties: {
+      event: { type: "string", description: "what they call the event, e.g. 'movie night'" },
+      event_date: { type: "string", description: "optional YYYY-MM-DD the event is on, if they said it" },
+    },
+    required: ["event"],
+  },
+};
+const PROPOSAL_TOOLS = new Set([
+  "find_events", "propose_event_add", "propose_event_update", "propose_event_delete",
+]);
+
+type EventShape = {
+  title: string; date: string; time: string | null; note: string | null;
+  type: string; recurring: boolean;
+};
+
+// ---------- validation / normalization ----------
+function normDate(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v.trim());
+  if (!m) return null;
+  const y = +m[1], mo = +m[2], d = +m[3];
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return null;
+  if (y < 1900 || y > 2200) return null;
+  return `${m[1]}-${m[2]}-${m[3]}`;
+}
+function normTime(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const m = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(v.trim());
+  if (!m) return null;
+  const h = +m[1], mi = +m[2];
+  if (h > 23 || mi > 59) return null;
+  return `${String(h).padStart(2, "0")}:${m[2]}`;
+}
+function cleanText(v: unknown, max: number): string | null {
+  if (typeof v !== "string") return null;
+  const t = v.replace(/\s+/g, " ").trim();
+  return t.length ? t.slice(0, max) : null;
+}
+
+// ---------- caller identity / premium (JWT-scoped REST reads) ----------
+function jwtSub(authHeader: string): string | null {
+  try {
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const part = token.split(".")[1];
+    if (!part) return null;
+    const b64 = part.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(b64 + "=".repeat((4 - b64.length % 4) % 4)));
+    return typeof payload?.sub === "string" ? payload.sub : null;
+  } catch {
+    return null;
+  }
+}
+async function restGet(path: string, authHeader: string): Promise<unknown[]> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const anon = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!url || !anon) throw new Error("SUPABASE_URL/SUPABASE_ANON_KEY not set");
+  const res = await fetchWithTimeout(`${url}/rest/v1/${path}`, {
+    method: "GET",
+    headers: { "apikey": anon, "Authorization": authHeader },
+  });
+  if (!res.ok) throw new Error(`rest ${path.split("?")[0]} ${res.status}: ${await res.text()}`);
+  const rows = await res.json();
+  return Array.isArray(rows) ? rows : [];
+}
+// The caller's couple — read as the caller (RLS applies). null = not linked.
+async function callerCoupleId(authHeader: string): Promise<string | null> {
+  const uid = jwtSub(authHeader);
+  if (!uid) return null;
+  // deno-lint-ignore no-explicit-any
+  const rows = await restGet(`couple_members?select=couple_id&user_id=eq.${encodeURIComponent(uid)}&limit=1`, authHeader) as any[];
+  return rows[0]?.couple_id ?? null;
+}
+// Mirrors the app's SubscriptionRepository.entitlementFor: bond_plus + active +
+// not expired. Fail-locked: any error → not premium.
+async function isCouplePremium(coupleId: string, authHeader: string): Promise<boolean> {
+  try {
+    // deno-lint-ignore no-explicit-any
+    const rows = await restGet(`subscriptions?select=entitlement,status,expires_at&couple_id=eq.${encodeURIComponent(coupleId)}&limit=1`, authHeader) as any[];
+    const r = rows[0];
+    if (!r || r.entitlement !== "bond_plus" || r.status !== "active") return false;
+    if (r.expires_at && new Date(r.expires_at).getTime() < Date.now()) return false;
+    return true;
+  } catch (e) {
+    console.error("premium check failed:", e);
+    return false;
+  }
+}
+
+// ---------- event lookup / resolution ----------
+// deno-lint-ignore no-explicit-any
+function toShape(r: any): EventShape & { id: string } {
+  return {
+    id: r.id,
+    title: r.label ?? "",
+    date: r.date,
+    time: r.event_time ? String(r.event_time).slice(0, 5) : null,
+    note: r.note ?? null,
+    type: EVENT_TYPES.includes(r.type) ? r.type : "custom",
+    recurring: r.recurring_yearly === true,
+  };
+}
+async function coupleEvents(coupleId: string, authHeader: string) {
+  const rows = await restGet(
+    `important_dates?select=id,label,date,event_time,note,type,recurring_yearly&couple_id=eq.${encodeURIComponent(coupleId)}&order=date.asc&limit=500`,
+    authHeader,
+  );
+  return rows.map(toShape);
+}
+const STOP = new Set(["our", "the", "a", "an", "my", "your", "us", "we", "event", "plan", "plans", "on", "for", "to", "of"]);
+function tokens(s: string): string[] {
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((t) => t && !STOP.has(t));
+}
+function sameDay(e: EventShape, ymd: string): boolean {
+  if (e.date === ymd) return true;
+  return e.recurring && e.date.slice(5) === ymd.slice(5); // yearly: month-day
+}
+// Returns every event that plausibly matches. Exactly one = resolved.
+function matchEvents(events: (EventShape & { id: string })[], query: string | null, dateHint: string | null) {
+  let pool = dateHint ? events.filter((e) => sameDay(e, dateHint)) : events;
+  const q = query ? tokens(query) : [];
+  if (q.length) {
+    const all = pool.filter((e) => { const t = tokens(e.title); return q.every((w) => t.includes(w)); });
+    pool = all.length ? all : pool.filter((e) => { const t = tokens(e.title); return q.some((w) => t.includes(w)); });
+  } else if (!dateHint) {
+    return [];
+  }
+  // Prefer upcoming ones when several share a name.
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = pool.filter((e) => e.recurring || e.date >= today);
+  return upcoming.length && upcoming.length < pool.length && upcoming.length === 1 ? upcoming : pool;
+}
+const brief = (e: EventShape) => ({ title: e.title, date: e.date, time: e.time });
+
+type ToolOutcome = {
+  summary: Record<string, unknown>;       // fed to the second (voice) turn
+  fallback: string;                        // in-character line if that fails
+  calendarAction?: Record<string, unknown>;
+  premiumRequired?: boolean;
+};
+
+// deno-lint-ignore no-explicit-any
+async function runCalendarProposal(name: string, args: any, authHeader: string): Promise<ToolOutcome> {
+  const coupleId = await callerCoupleId(authHeader);
+  if (!coupleId) {
+    return { summary: { status: "not_linked" }, fallback: "Link up with your partner first and then I can keep your shared calendar 🤍" };
+  }
+  // SERVER-SIDE Usora+ gate — independent of the app and of the wording.
+  if (!(await isCouplePremium(coupleId, authHeader))) {
+    return {
+      summary: { status: "usora_plus_required", note: "Managing the shared calendar is a Usora+ feature. Nothing was changed." },
+      fallback: "Ooh, I'd love to handle your calendar for you two — that's a Usora+ thing 🤍",
+      premiumRequired: true,
+    };
+  }
+
+  if (name === "propose_event_add") {
+    const title = cleanText(args?.title, 80);
+    const date = normDate(args?.date);
+    const hasTime = args?.time != null && String(args.time).trim() !== "";
+    const time = hasTime ? normTime(args.time) : null;
+    if (!title || !date || (hasTime && !time)) {
+      return {
+        summary: { status: "needs_clarification", missing: [!title && "title", !date && "a valid date", hasTime && !time && "a valid time"].filter(Boolean) },
+        fallback: !date ? "Ooh, which day should I put that on? 🤍" : "What should I call it? 🤍",
+      };
+    }
+    const after: EventShape = {
+      title, date, time,
+      note: cleanText(args?.note, 280),
+      type: EVENT_TYPES.includes(args?.type) ? args.type : "custom",
+      recurring: args?.recurring === true,
+    };
+    return {
+      summary: { status: "awaiting_confirmation", op: "add", event: brief(after), note: "Not saved yet — they must tap Yes on the card." },
+      fallback: `Want me to add "${title}" to your calendar? Tap Yes and it's in 🤍`,
+      calendarAction: { op: "add", after },
+    };
+  }
+
+  const events = await coupleEvents(coupleId, authHeader);
+
+  if (name === "find_events") {
+    const date = normDate(args?.date);
+    const found = matchEvents(events, cleanText(args?.query, 80), date).slice(0, 10);
+    return {
+      summary: { status: "ok", events: found.map(brief) },
+      fallback: found.length ? "Here's what I found on your calendar 🤍" : "I couldn't spot that on your calendar 🤍",
+    };
+  }
+
+  // update / delete: resolve exactly one event, or ask.
+  const query = cleanText(args?.event, 80);
+  const dateHint = args?.event_date ? normDate(args.event_date) : null;
+  const matches = matchEvents(events, query, dateHint);
+  if (matches.length === 0) {
+    return {
+      summary: { status: "needs_clarification", reason: "no_matching_event", looked_for: query },
+      fallback: "Hmm, I couldn't find that one on your calendar — what's it called? 🤍",
+    };
+  }
+  if (matches.length > 1) {
+    return {
+      summary: { status: "needs_clarification", reason: "several_events_match", candidates: matches.slice(0, 5).map(brief) },
+      fallback: "A few events match that — which one did you mean? 🤍",
+    };
+  }
+  const before = matches[0];
+  const beforeShape: EventShape = { title: before.title, date: before.date, time: before.time, note: before.note, type: before.type, recurring: before.recurring };
+
+  if (name === "propose_event_delete") {
+    return {
+      summary: { status: "awaiting_confirmation", op: "delete", event: brief(before), note: "Not deleted yet — they must tap Yes on the card." },
+      fallback: `Want me to remove "${before.title}"? Tap Yes to confirm 🤍`,
+      calendarAction: { op: "delete", eventId: before.id, before: beforeShape },
+    };
+  }
+
+  // propose_event_update
+  const newTitle = args?.new_title != null ? cleanText(args.new_title, 80) : null;
+  const newDate = args?.new_date != null ? normDate(args.new_date) : null;
+  const wantsTime = args?.new_time != null && String(args.new_time).trim() !== "";
+  const newTime = wantsTime ? normTime(args.new_time) : null;
+  if ((args?.new_date != null && !newDate) || (wantsTime && !newTime)) {
+    return {
+      summary: { status: "needs_clarification", reason: "invalid_new_date_or_time", event: brief(before) },
+      fallback: "Which date and time should I move it to? 🤍",
+    };
+  }
+  const after: EventShape = {
+    ...beforeShape,
+    title: newTitle ?? beforeShape.title,
+    date: newDate ?? beforeShape.date,
+    time: args?.remove_time === true ? null : (newTime ?? beforeShape.time),
+    note: args?.new_note != null ? cleanText(args.new_note, 280) : beforeShape.note,
+  };
+  const changed = (["title", "date", "time", "note"] as const).some((k) => after[k] !== beforeShape[k]);
+  if (!changed) {
+    return {
+      summary: { status: "needs_clarification", reason: "no_change_specified", event: brief(before) },
+      fallback: `What should I change about "${before.title}"? 🤍`,
+    };
+  }
+  return {
+    summary: { status: "awaiting_confirmation", op: "update", before: brief(beforeShape), after: brief(after), note: "Not saved yet — they must tap Yes on the card." },
+    fallback: `Want me to update "${before.title}"? Tap Yes to confirm 🤍`,
+    calendarAction: { op: "update", eventId: before.id, before: beforeShape, after },
+  };
 }
 
 // ---------- HTTP plumbing ----------
@@ -568,8 +867,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
         functionDeclarations: [
           searchMoviesDeclaration,
           searchPlacesDeclaration,
-          addCalendarEventDeclaration,
           listUpcomingEventsDeclaration,
+          findEventsDeclaration,
+          proposeEventAddDeclaration,
+          proposeEventUpdateDeclaration,
+          proposeEventDeleteDeclaration,
         ],
       }];
       const contents: unknown[] = [{ role: "user", parts: [{ text }] }];
@@ -610,26 +912,22 @@ Deno.serve(async (req: Request): Promise<Response> => {
         return json({ text: await secondTurn(contents, part, "search_places", places.map((p) => ({ name: p.name, category: p.category })), apiKey, tools) ?? "Here are a few spots near you two 🤍", meta, places });
       }
 
-      // ---- calendar: add (Usora+; couple resolved from JWT in the RPC) ----
-      if (fc?.name === "add_calendar_event") {
-        // deno-lint-ignore no-explicit-any
-        let result: any;
+      // ---- calendar: find + add/update/delete PROPOSALS (never write) ----
+      if (fc?.name && PROPOSAL_TOOLS.has(fc.name)) {
+        let outcome: ToolOutcome;
         try {
-          result = await executeAddCalendarEvent(fc.args ?? {}, authHeader);
+          outcome = await runCalendarProposal(fc.name, fc.args ?? {}, authHeader);
         } catch (e) {
-          console.error("calendar add tool failed:", e);
-          return json({ text: "I tried to jot that in your calendar but my pen slipped — try me again in a moment? 🌫️", meta });
+          console.error(`calendar ${fc.name} failed:`, e);
+          return json({ text: "I tried to peek at your calendar but it's a little foggy — try me again in a bit? 🌫️", meta });
         }
-        const ok = result?.ok === true;
-        const summary = ok
-          ? { added: true, event: result.event }
-          : { added: false, reason: result?.reason ?? "error" };
-        const fallback = ok
-          ? "Done — added that to your calendar 🤍"
-          : (result?.reason === "not_premium"
-            ? "Ooh, managing your shared calendar is a Usora+ thing 🤍"
-            : "Hmm, I couldn't add that just now — want to try again?");
-        return json({ text: await secondTurn(contents, part, "add_calendar_event", summary, apiKey, tools) ?? fallback, meta, calendarChanged: ok });
+        const spoken = await secondTurn(contents, part, fc.name, outcome.summary, apiKey, tools) ?? outcome.fallback;
+        return json({
+          text: spoken,
+          meta,
+          ...(outcome.calendarAction ? { calendarAction: outcome.calendarAction } : {}),
+          ...(outcome.premiumRequired ? { premiumRequired: true } : {}),
+        });
       }
 
       // ---- calendar: list upcoming (Usora+) ----

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/app_config.dart';
+import '../../../shared/utils/dev_error.dart';
+
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
@@ -123,12 +126,16 @@ class _EventEditorSheetState extends ConsumerState<EventEditorSheet> {
         );
       }
       if (mounted) Navigator.of(context).pop();
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('calendar ${_isEditing ? 'update' : 'add'} failed: $e\n$st');
       if (mounted) {
         setState(() => _saving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Couldn\'t save — try again.')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          duration: Duration(seconds: kShowDevTools ? 12 : 4),
+          content: Text(kShowDevTools
+              ? 'Couldn\'t save — DEV · ${devErrorText(e)}'
+              : 'Couldn\'t save — try again.'),
+        ));
       }
     }
   }
