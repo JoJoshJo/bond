@@ -36,6 +36,7 @@ class BondPalette {
     this.chatMine,
     this.onChatMine,
     this.doodle,
+    this.doodleOpacity,
     this.gameTints,
     this.accentWash,
     this.onAccentWash,
@@ -68,6 +69,10 @@ class BondPalette {
   /// Optional stroke color for the chat doodle background. Null = that theme
   /// shows no doodles (keeps its existing plain look).
   final Color? doodle;
+
+  /// Optional doodle strength (dark themes draw fainter, light-on-dark
+  /// strokes). Null = [DoodleBackground.defaultOpacity].
+  final double? doodleOpacity;
 
   /// Optional soft pastel tints for the Games grid (each game gets a stable
   /// one). Null = game tiles keep the plain [surface] look.
@@ -178,6 +183,29 @@ const BondPalette redRoomPalette = BondPalette(
   error: Color(0xFFD98A83),
   errorBg: Color(0xFF35201F),
   dark: true,
+  // Ported designs, spicy dark: blush-white hierarchy, warm gold accent, wine bubbles (white 7.6:1), faint light doodles; tints ink ≥10.6:1, anchor ≥12:1.
+  anchor: Color(0xFFFAEEEE),
+  accent: Color(0xFFD9A866),
+  chatMine: Color(0xFF8A3A46),
+  onChatMine: Color(0xFFFFFFFF),
+  doodle: Color(0xFFD79AA0),
+  doodleOpacity: 0.1,
+  gameTints: [
+    Color(0xFF3A2530),
+    Color(0xFF33282A),
+    Color(0xFF382B22),
+    Color(0xFF2E2636),
+  ],
+  accentWash: Color(0xFF3D2C1E),
+  onAccentWash: Color(0xFFEDC78F),
+  usTints: UsTints(
+    planning: Color(0xFF30252A),
+    privacy: Color(0xFF2C2530),
+    personalize: Color(0xFF35262B),
+    spicy: Color(0xFF3B2527),
+    neutral: Color(0xFF312729),
+  ),
+  usMembership: [Color(0xFF46331F), Color(0xFF553D22)],
 );
 
 /// Runtime color accessor. Keeps the original static API (`AppColors.mint`,
@@ -228,6 +256,9 @@ class AppColors {
 
   /// Chat doodle stroke color, or null when the theme has no doodles.
   static Color? get doodle => active.doodle;
+
+  /// Chat doodle strength for the active theme (null = widget default).
+  static double? get doodleOpacity => active.doodleOpacity;
 
   /// Games-grid tints, or null when the theme keeps plain tiles.
   static List<Color>? get gameTints => active.gameTints;

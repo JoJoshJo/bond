@@ -43,6 +43,28 @@ const _sunset = BondPalette(
   error: Color(0xFFD9695E),
   errorBg: Color(0xFFF9E7E2),
   dark: false,
+  // Ported designs: deep terracotta hierarchy, gold accent, terracotta bubbles (white 5.2:1); tints ink ≥11.2:1, anchor ≥8.5:1.
+  anchor: Color(0xFF6A2E16),
+  accent: Color(0xFFC0821A),
+  chatMine: Color(0xFFB24E2B),
+  onChatMine: Color(0xFFFFFFFF),
+  doodle: Color(0xFFC75F3B),
+  gameTints: [
+    Color(0xFFFCEADF),
+    Color(0xFFFBF1D9),
+    Color(0xFFF9E4E6),
+    Color(0xFFEAF1E6),
+  ],
+  accentWash: Color(0xFFF6E7C8),
+  onAccentWash: Color(0xFF7A4E08),
+  usTints: UsTints(
+    planning: Color(0xFFFDF2EA),
+    privacy: Color(0xFFF8F1EC),
+    personalize: Color(0xFFFBEFEF),
+    spicy: Color(0xFFFCF5E8),
+    neutral: Color(0xFFF8F4F1),
+  ),
+  usMembership: [Color(0xFFFCEFD3), Color(0xFFF7E1B8)],
 );
 
 // ---- Ocean — calm teal / blue (light) ----
@@ -68,6 +90,28 @@ const _ocean = BondPalette(
   error: Color(0xFFD9695E),
   errorBg: Color(0xFFF6E5E2),
   dark: false,
+  // Ported designs: deep teal hierarchy, gold accent, teal bubbles (white 5.7:1); tints ink ≥10.8:1, anchor ≥8.7:1.
+  anchor: Color(0xFF0E4555),
+  accent: Color(0xFFC0821A),
+  chatMine: Color(0xFF1C6F86),
+  onChatMine: Color(0xFFFFFFFF),
+  doodle: Color(0xFF1F7A93),
+  gameTints: [
+    Color(0xFFE2F2F5),
+    Color(0xFFFBEEDB),
+    Color(0xFFE7EAF8),
+    Color(0xFFE4F3EA),
+  ],
+  accentWash: Color(0xFFF6E7C8),
+  onAccentWash: Color(0xFF7A4E08),
+  usTints: UsTints(
+    planning: Color(0xFFEEF6F4),
+    privacy: Color(0xFFEEF3FA),
+    personalize: Color(0xFFF4F1FA),
+    spicy: Color(0xFFFBF4EC),
+    neutral: Color(0xFFF3F6F7),
+  ),
+  usMembership: [Color(0xFFFCEFD3), Color(0xFFF7E1B8)],
 );
 
 // ---- Lavender — soft dusk lilac / violet (light) ----
@@ -93,6 +137,28 @@ const _lavender = BondPalette(
   error: Color(0xFFD9695E),
   errorBg: Color(0xFFF6E6EC),
   dark: false,
+  // Ported designs: deep violet hierarchy, honey accent, violet bubbles (white 6.7:1), rose-gold membership; tints ink ≥12:1, anchor ≥10.5:1.
+  anchor: Color(0xFF3A2766),
+  accent: Color(0xFFB7791F),
+  chatMine: Color(0xFF6A4BA3),
+  onChatMine: Color(0xFFFFFFFF),
+  doodle: Color(0xFF6E4FA8),
+  gameTints: [
+    Color(0xFFEFE8F9),
+    Color(0xFFF9E6EE),
+    Color(0xFFE6EEF8),
+    Color(0xFFFBF0DC),
+  ],
+  accentWash: Color(0xFFF6E7C8),
+  onAccentWash: Color(0xFF7A4E08),
+  usTints: UsTints(
+    planning: Color(0xFFF4F0FA),
+    privacy: Color(0xFFEFF1FA),
+    personalize: Color(0xFFFAF0F5),
+    spicy: Color(0xFFFBF3EE),
+    neutral: Color(0xFFF5F3F8),
+  ),
+  usMembership: [Color(0xFFFBEBDD), Color(0xFFF4D9C4)],
 );
 
 // ---- Charcoal — warm dark mono (dark) ----
@@ -118,6 +184,29 @@ const _charcoal = BondPalette(
   error: Color(0xFFD98A83),
   errorBg: Color(0xFF352220),
   dark: true,
+  // Ported designs, dark: bright warm-white hierarchy, sand-gold accent, taupe bubbles (white 6.2:1), faint light doodles; tints ink ≥11:1, anchor ≥12:1.
+  anchor: Color(0xFFF7F3EE),
+  accent: Color(0xFFD6A972),
+  chatMine: Color(0xFF6B5F54),
+  onChatMine: Color(0xFFFFFFFF),
+  doodle: Color(0xFFD8CCBE),
+  doodleOpacity: 0.1,
+  gameTints: [
+    Color(0xFF332E27),
+    Color(0xFF2C302C),
+    Color(0xFF322A2C),
+    Color(0xFF2A2E33),
+  ],
+  accentWash: Color(0xFF3B301F),
+  onAccentWash: Color(0xFFEBC690),
+  usTints: UsTints(
+    planning: Color(0xFF2B2D2A),
+    privacy: Color(0xFF292B30),
+    personalize: Color(0xFF302A2B),
+    spicy: Color(0xFF302B25),
+    neutral: Color(0xFF2E2C2A),
+  ),
+  usMembership: [Color(0xFF43351F), Color(0xFF52401F)],
 );
 
 /// The theme catalog. Mint is free + default; the rest are Usora+.

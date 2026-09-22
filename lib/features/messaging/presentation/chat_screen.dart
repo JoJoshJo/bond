@@ -111,7 +111,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           child: DoodleBackground(
             base: base,
             color: doodle,
-            opacity: _chatDoodleOpacity,
+            opacity: AppColors.doodleOpacity ?? _chatDoodleOpacity,
             fade: _chatDoodleFade(context),
           ),
         ),
