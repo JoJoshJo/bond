@@ -131,7 +131,17 @@ const CREATURE_SYSTEM =
   "they ask what's coming up or about their plans, CALL list_upcoming_events. Always " +
   "prefer calling the matching tool over saying you can't — you CAN. Only decline tasks " +
   "that have no tool at all (booking, ordering, payments). Never claim you can't find " +
-  "movies or places or manage the calendar.";
+  "movies or places or manage the calendar. " +
+  "MEMORY: earlier turns of this conversation come before the latest message, and " +
+  "lines like [Found movies: …], [Found places: …] or [Proposed calendar …] are results " +
+  "you already showed them. Use them to resolve 'it', 'that', 'that one' or 'there' — " +
+  "e.g. 'add a movie night Saturday to watch it' after finding Dune → propose_event_add " +
+  "titled 'Movie night: Dune'; 'dinner there Friday at 8' after finding a place → use " +
+  "that place's name in the title and its address in the note. If a reference could " +
+  "mean more than one thing, or nothing recent matches, ASK which one — never guess. " +
+  "NO WEB LOOKUP: you cannot look up real-world facts (event dates, opening hours, " +
+  "schedules, news, prices). If they need one, say you can't look that up yet and ask " +
+  "them for the details — never state dates or facts from memory.";
 
 // ---------- model discovery (ListModels) ----------
 // Cached across warm invocations. Only a SUCCESSFUL discovery is cached; if we
@@ -807,6 +817,39 @@ async function runCalendarProposal(name: string, args: any, authHeader: string):
   };
 }
 
+// ---------- conversation memory (creature job) ----------
+// The app sends the last few turns as [{role:"user"|"model", text}]. Re-capped
+// here so a tampered request can't send more; text only (no tool parts, no
+// write capability). Consecutive same-role turns are merged and the history
+// must start with a user turn and end with a model turn, so the new user
+// message keeps Gemini's alternating-roles shape.
+const HISTORY_MAX_TURNS = 6;
+const HISTORY_MAX_CHARS = 700; // ~400 text + the compact tool-result lines
+const HISTORY_MAX_TOTAL = 4000;
+
+// deno-lint-ignore no-explicit-any
+function historyContents(raw: any): { role: string; parts: { text: string }[] }[] {
+  if (!Array.isArray(raw)) return [];
+  const turns: { role: string; text: string }[] = [];
+  for (const t of raw.slice(-HISTORY_MAX_TURNS)) {
+    const role = t?.role === "model" ? "model" : t?.role === "user" ? "user" : null;
+    const txt = typeof t?.text === "string" ? t.text.trim().slice(0, HISTORY_MAX_CHARS) : "";
+    if (!role || !txt) continue;
+    const last = turns[turns.length - 1];
+    if (last && last.role === role) last.text = `${last.text}\n${txt}`.slice(0, HISTORY_MAX_CHARS * 2);
+    else turns.push({ role, text: txt });
+  }
+  while (turns.length && turns[0].role !== "user") turns.shift();
+  while (turns.length && turns[turns.length - 1].role !== "model") turns.pop();
+  // Keep the most recent turns within the total budget (drop oldest pairs).
+  let total = turns.reduce((n, t) => n + t.text.length, 0);
+  while (total > HISTORY_MAX_TOTAL && turns.length >= 2) {
+    total -= turns[0].text.length + turns[1].text.length;
+    turns.splice(0, 2);
+  }
+  return turns.map((t) => ({ role: t.role, parts: [{ text: t.text }] }));
+}
+
 // ---------- HTTP plumbing ----------
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -838,7 +881,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
   // The caller's JWT (JWT verification is ON), forwarded to calendar RPCs.
   const authHeader = req.headers.get("Authorization") ?? "";
 
-  let payload: { job: AIJob; prompt: string; context?: Record<string, unknown> };
+  let payload: {
+    job: AIJob; prompt: string; context?: Record<string, unknown>; history?: unknown;
+  };
   try {
     payload = await req.json();
   } catch {
@@ -874,7 +919,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
           proposeEventDeleteDeclaration,
         ],
       }];
-      const contents: unknown[] = [{ role: "user", parts: [{ text }] }];
+      // Short conversation memory (bounded again here — never trust the client).
+      const contents: unknown[] = [
+        ...historyContents(payload.history),
+        { role: "user", parts: [{ text }] },
+      ];
       const g1 = await geminiGenerate(contents, apiKey, tools, CREATURE_SYSTEM);
       meta.model = g1.model;
       const part = firstPart(g1.raw);

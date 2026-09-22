@@ -47,6 +47,9 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
     if (text.isEmpty || _sending) return;
     _sending = true;
 
+    // Snapshot the recent conversation BEFORE adding this turn.
+    final history = _history();
+
     state = [
       ...state,
       CreatureChatMessage(fromCreature: false, text: text),
@@ -54,7 +57,7 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
     ];
 
     try {
-      var reply = await _ask(text);
+      var reply = await _ask(text, history);
 
       // Location handshake: creature wants a place search but we have no coords.
       if (reply.needsLocation && _lat == null) {
@@ -62,7 +65,7 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
         if (loc != null) {
           _lat = loc.lat;
           _lng = loc.lng;
-          reply = await _ask(text); // resend, now with coordinates
+          reply = await _ask(text, history); // resend, now with coordinates
         } else {
           _replaceThinking(
               'I\'d love to find spots near you two — turn on location for Usora and ask me again 🤍');
@@ -95,13 +98,57 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
     }
   }
 
-  Future<AiResponse> _ask(String text) {
+  Future<AiResponse> _ask(String text, List<Map<String, String>> history) {
     final spicy = _ref.read(spicyActiveProvider);
     return _ref
         .read(aiRepositoryProvider)
         .getAI('creature', CreaturePersona.prompt(text, spicy: spicy),
-            context: _context())
+            context: _context(), history: history)
         .timeout(const Duration(seconds: 30));
+  }
+
+  // Short, bounded memory so "it" / "that" / "there" resolve across turns.
+  // Text only; prior tool results ride along as compact lines. The router
+  // re-caps all of this server-side.
+  static const _historyTurns = 6;
+  static const _historyChars = 400;
+  static const _historyItems = 5;
+
+  List<Map<String, String>> _history() {
+    final turns = state
+        .skip(1) // the canned greeting
+        .where((m) => !m.thinking)
+        .toList();
+    final recent = turns.length > _historyTurns
+        ? turns.sublist(turns.length - _historyTurns)
+        : turns;
+    return [
+      for (final m in recent)
+        {
+          'role': m.fromCreature ? 'model' : 'user',
+          'text': _historyText(m),
+        },
+    ];
+  }
+
+  static String _historyText(CreatureChatMessage m) {
+    var text = m.text.trim();
+    if (text.length > _historyChars) {
+      text = '${text.substring(0, _historyChars)}…';
+    }
+    final lines = <String>[text];
+    if (m.movies.isNotEmpty) {
+      lines.add('[Found movies: ${m.movies.take(_historyItems).map((x) => x.year.isEmpty ? x.title : '${x.title} (${x.year})').join(', ')}]');
+    }
+    if (m.places.isNotEmpty) {
+      lines.add('[Found places: ${m.places.take(_historyItems).map((x) => x.address.isEmpty ? x.name : '${x.name} — ${x.address}').join('; ')}]');
+    }
+    final p = m.proposal;
+    if (p != null) {
+      final e = p.after ?? p.before!;
+      lines.add('[Proposed calendar ${p.op.name}: "${e.title}" ${describeProposedWhen(e)} — ${m.proposalStatus.name}]');
+    }
+    return lines.join('\n');
   }
 
   /// Minimal context: couple name + mood; plus lat/lng ONLY when we already have

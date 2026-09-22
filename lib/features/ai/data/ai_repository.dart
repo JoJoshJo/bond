@@ -16,10 +16,17 @@ class AiRepository {
     String job,
     String prompt, {
     Map<String, dynamic> context = const {},
+    List<Map<String, String>> history = const [],
   }) async {
     final res = await _client.functions.invoke(
       'ai-router',
-      body: {'job': job, 'prompt': prompt, 'context': context},
+      body: {
+        'job': job,
+        'prompt': prompt,
+        'context': context,
+        // Short conversation memory (creature chat) — only sent when present.
+        if (history.isNotEmpty) 'history': history,
+      },
     );
 
     final data = res.data;
