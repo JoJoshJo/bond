@@ -8,6 +8,7 @@ import '../../../shared/dev/style_gallery_screen.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_shadows.dart';
 import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/utils/input_limits.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/utils/error_messages.dart';
 import '../../../shared/utils/haptics.dart';
@@ -68,7 +69,10 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
           children: [
             Text('Name your space', style: AppText.title),
             const SizedBox(height: AppSpacing.md),
-            BondTextField(controller: controller, label: 'Couple name'),
+            BondTextField(
+                controller: controller,
+                label: 'Couple name',
+                maxLength: kMaxCoupleNameChars),
             const SizedBox(height: AppSpacing.lg),
             BondButton(
               label: 'Save',

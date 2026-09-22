@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
+import '../../../../shared/utils/input_limits.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_spacing.dart';
 import '../../../../shared/theme/app_typography.dart';
@@ -215,6 +216,8 @@ class _MessageInputState extends State<MessageInput> {
             focusNode: _focus,
             minLines: 1,
             maxLines: 5,
+            maxLength: kMaxChatMessageChars,
+            buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
             textCapitalization: TextCapitalization.sentences,
             style: AppText.bodyMedium,
             decoration: InputDecoration(

@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/utils/input_limits.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -104,6 +105,8 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
           controller: _answer,
           minLines: 4,
           maxLines: 10,
+          maxLength: kMaxPromptAnswerChars,
+          buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
           textCapitalization: TextCapitalization.sentences,
           style: AppText.bodyMedium,
           decoration: InputDecoration(
@@ -181,6 +184,8 @@ class _DailyPromptScreenState extends ConsumerState<DailyPromptScreen> {
                   controller: _edit,
                   minLines: 3,
                   maxLines: 8,
+                  maxLength: kMaxPromptAnswerChars,
+                  buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
                   autofocus: true,
                   style: AppText.bodyMedium,
                   decoration: InputDecoration(

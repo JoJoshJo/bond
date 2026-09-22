@@ -21,6 +21,7 @@ class BondTextField extends StatelessWidget {
     this.onChanged,
     this.inputFormatters,
     this.suffix,
+    this.maxLength,
   });
 
   final TextEditingController controller;
@@ -36,6 +37,9 @@ class BondTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final Widget? suffix;
 
+  /// Hard character cap. The counter is hidden — typing simply stops.
+  final int? maxLength;
+
   @override
   Widget build(BuildContext context) {
     OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
@@ -45,6 +49,8 @@ class BondTextField extends StatelessWidget {
 
     return TextFormField(
       controller: controller,
+      maxLength: maxLength,
+      buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
       keyboardType: keyboardType,
       obscureText: obscureText,
       textInputAction: textInputAction,

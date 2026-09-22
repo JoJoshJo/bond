@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/utils/input_limits.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/utils/error_messages.dart';
 import '../../../shared/utils/haptics.dart';
@@ -123,7 +124,10 @@ class _InviteWaitingScreenState extends ConsumerState<InviteWaitingScreen> {
           children: [
             Text('Name your space', style: AppText.title),
             const SizedBox(height: AppSpacing.md),
-            BondTextField(controller: controller, label: 'Couple name'),
+            BondTextField(
+                controller: controller,
+                label: 'Couple name',
+                maxLength: kMaxCoupleNameChars),
             const SizedBox(height: AppSpacing.lg),
             BondButton(
               label: 'Save',

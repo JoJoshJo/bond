@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/utils/input_limits.dart';
 import '../../../shared/utils/error_messages.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../application/memory_controller.dart';
@@ -101,7 +102,10 @@ class _AddMemoryScreenState extends ConsumerState<AddMemoryScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          BondTextField(controller: _caption, label: 'Caption (optional)'),
+          BondTextField(
+              controller: _caption,
+              label: 'Caption (optional)',
+              maxLength: kMaxMemoryCaptionChars),
           const SizedBox(height: AppSpacing.md),
           BondCard(
             padding: const EdgeInsets.symmetric(

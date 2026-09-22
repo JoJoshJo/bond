@@ -5,6 +5,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/utils/input_limits.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -511,6 +512,8 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
               controller: _controller,
               minLines: 1,
               maxLines: 4,
+              maxLength: kMaxChatMessageChars,
+              buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
               textCapitalization: TextCapitalization.sentences,
               style: AppText.bodyMedium,
               decoration: InputDecoration(
