@@ -24,7 +24,10 @@ class ImageBubble extends StatelessWidget {
     final local = message.localPath;
     final hasLocal = local != null && File(local).existsSync();
 
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label: 'Photo, open full screen',
+      child: GestureDetector(
       onTap: () => _openViewer(context, hasLocal ? local : null),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -33,6 +36,7 @@ class ImageBubble extends StatelessWidget {
           child: hasLocal
               ? Image.file(File(local), fit: BoxFit.cover)
               : _remote(),
+        ),
         ),
       ),
     );

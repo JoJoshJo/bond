@@ -165,6 +165,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
           Text('Usora', style: AppText.title),
           const Spacer(),
           IconButton(
+            tooltip: 'Close',
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop(),
           ),
@@ -263,7 +264,10 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
   }
 
   Widget _placeCard(PlaceCard p) {
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label: '${p.name}${p.category.isEmpty ? '' : ', ${p.category}'}, open in maps',
+      child: GestureDetector(
       onTap: () => _openPlace(p),
       child: SizedBox(
         width: 170,
@@ -303,6 +307,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
               style: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -405,7 +410,10 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
   }
 
   Widget _movieCard(MovieCard m) {
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label: '${m.title}${m.year.isEmpty ? '' : ' (${m.year})'}, open details',
+      child: GestureDetector(
       onTap: () => _openMovie(m),
       child: SizedBox(
         width: 120,
@@ -438,6 +446,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
               style: AppText.bodySmall.copyWith(color: AppColors.inkMuted),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -533,7 +542,10 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
           ),
           const SizedBox(width: AppSpacing.sm),
           if (_speechReady)
-            GestureDetector(
+            Semantics(
+              button: true,
+              label: 'Hold to speak',
+              child: GestureDetector(
               onLongPressStart: (_) => _startListening(),
               onLongPressEnd: (_) => _stopListening(),
               child: CircleAvatar(
@@ -545,6 +557,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
                     // white vanishes on the dark themes' lighter error tone.
                     color: _listening ? AppColors.onMint : AppColors.inkMuted),
               ),
+            ),
             ),
           const SizedBox(width: AppSpacing.sm),
           Material(

@@ -88,7 +88,10 @@ class _TalkToCreatureTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BondCard(
+    return Semantics(
+      button: true,
+      label: 'Talk to Usora',
+      child: BondCard(
       color: AppColors.mintWash,
       padding: const EdgeInsets.all(_tilePad),
       onTap: () => CreatureChatSheet.open(context, coupleId),
@@ -109,6 +112,7 @@ class _TalkToCreatureTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: AppText.bodySmall.copyWith(color: AppColors.ink)),
         ],
+      ),
       ),
     );
   }
@@ -133,7 +137,10 @@ class _TodaysQuestionTile extends ConsumerWidget {
     final showFooter =
         state.phase != PromptPhase.loading && footer.trim().isNotEmpty;
 
-    return BondCard(
+    return Semantics(
+      button: true,
+      label: 'Today\'s question',
+      child: BondCard(
       padding: const EdgeInsets.all(_tilePad),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => DailyPromptScreen(coupleId: coupleId)),
@@ -180,6 +187,7 @@ class _TodaysQuestionTile extends ConsumerWidget {
             ),
           ],
         ],
+      ),
       ),
     );
   }
@@ -339,7 +347,10 @@ class _WideCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BondCard(
+    return Semantics(
+      button: true,
+      label: '$eyebrow: $title',
+      child: BondCard(
       padding: const EdgeInsets.all(AppSpacing.lg),
       onTap: onTap,
       child: Row(
@@ -369,6 +380,7 @@ class _WideCard extends StatelessWidget {
             Icon(Icons.chevron_right, color: AppColors.inkMuted),
           ],
         ],
+      ),
       ),
     );
   }

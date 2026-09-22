@@ -62,10 +62,14 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               Center(
-                child: GestureDetector(
-                  onTap: () => CreatureChatSheet.open(context, coupleId),
-                  child: CreatureView(
-                      mood: creature?.mood ?? CreatureMood.content),
+                child: Semantics(
+                  button: true,
+                  label: 'Talk to Usora',
+                  child: GestureDetector(
+                    onTap: () => CreatureChatSheet.open(context, coupleId),
+                    child: CreatureView(
+                        mood: creature?.mood ?? CreatureMood.content),
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),

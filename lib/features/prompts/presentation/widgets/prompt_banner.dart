@@ -32,7 +32,10 @@ class PromptBanner extends ConsumerWidget {
 
     final (label, cta, highlight) = promptPhaseCopy(state.phase);
 
-    return Material(
+    return Semantics(
+      button: true,
+      label: 'Today\'s question',
+      child: Material(
       color: highlight ? AppColors.mintWash : AppColors.surfaceAlt,
       child: InkWell(
         onTap: () => Navigator.of(context).push(
@@ -72,6 +75,7 @@ class PromptBanner extends ConsumerWidget {
               Icon(Icons.chevron_right, color: AppColors.inkFaint),
             ],
           ),
+        ),
         ),
       ),
     );

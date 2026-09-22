@@ -274,6 +274,7 @@ class _MessageInputState extends State<MessageInput> {
       children: [
         IconButton(
           onPressed: _cancelRecording,
+          tooltip: 'Delete recording',
           icon: Icon(Icons.delete_outline, color: AppColors.error),
         ),
         Icon(Icons.fiber_manual_record, color: AppColors.error, size: 14),
@@ -319,6 +320,7 @@ class _MessageInputState extends State<MessageInput> {
             ),
           ),
           IconButton(
+            tooltip: 'Cancel reply',
             icon: Icon(Icons.close, size: 18, color: AppColors.inkMuted),
             onPressed: widget.onCancelReply,
           ),

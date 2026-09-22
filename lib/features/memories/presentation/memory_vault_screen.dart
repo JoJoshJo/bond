@@ -227,7 +227,12 @@ class _MemoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final caption = memory.caption?.trim();
     final hasCaption = caption != null && caption.isNotEmpty;
-    return BondCard(
+    return Semantics(
+      button: true,
+      label: hasCaption
+          ? 'Memory: $caption, ${memoryLongDate(memory.takenAt)}'
+          : 'Memory from ${memoryLongDate(memory.takenAt)}',
+      child: BondCard(
       onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.sm),
       radius: AppRadius.xl,
@@ -280,6 +285,7 @@ class _MemoryCard extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -300,7 +306,10 @@ class _OnThisDayBand extends StatelessWidget {
     return Material(
       color: AppColors.accentWash,
       borderRadius: radius,
-      child: InkWell(
+      child: Semantics(
+        button: true,
+        label: '${found.eyebrow}: ${found.title}',
+        child: InkWell(
         borderRadius: radius,
         onTap: onTap,
         child: Padding(
@@ -339,6 +348,7 @@ class _OnThisDayBand extends StatelessWidget {
               Icon(Icons.arrow_forward_rounded, color: AppColors.onAccentWash),
             ],
           ),
+        ),
         ),
       ),
     );
