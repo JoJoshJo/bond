@@ -63,13 +63,15 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
             setState(() => _listening = false);
           }
         },
-        onError: (_) {
+        onError: (err) {
+          debugPrint('speech recognition error: $err');
           if (mounted) setState(() => _listening = false);
         },
       );
       if (mounted) setState(() => _speechReady = ok);
-    } catch (_) {
+    } catch (e) {
       // Voice unavailable → type-only; mic stays hidden via _speechReady.
+      debugPrint('speech init failed (mic hidden): $e');
       if (mounted) setState(() => _speechReady = false);
     }
   }
@@ -198,6 +200,7 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
         ),
         if (m.movies.isNotEmpty) _movieRow(m.movies),
         if (m.places.isNotEmpty) _placeRow(m.places),
+        if (m.sources.isNotEmpty) _sourceLinks(m.sources),
         if (m.proposal case final p?)
           _CalendarProposalCard(
             proposal: p,
@@ -222,6 +225,19 @@ class _CreatureChatSheetState extends ConsumerState<CreatureChatSheet> {
             ),
           ),
       ],
+    );
+  }
+
+  /// "Source:" links for web_search results — so the couple can sanity-check.
+  Widget _sourceLinks(List<WebSourceRef> sources) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 2, bottom: AppSpacing.xs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final s in sources) _SourceLink(source: s),
+        ],
+      ),
     );
   }
 
@@ -595,6 +611,10 @@ class _CalendarProposalCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           ..._body(),
+          if (proposal.source case final src?) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _SourceLink(source: src),
+          ],
           const SizedBox(height: AppSpacing.md),
           _footer(yesLabel, doneLabel),
           if (error != null) ...[
@@ -686,6 +706,41 @@ class _CalendarProposalCard extends StatelessWidget {
           onPressed: busy ? null : onYes,
         ),
       ],
+    );
+  }
+}
+
+/// A tappable "Source: <title>" line (opens in the browser).
+class _SourceLink extends StatelessWidget {
+  const _SourceLink({required this.source});
+
+  final WebSourceRef source;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final uri = Uri.tryParse(source.url);
+        if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.link_rounded, size: 14, color: AppColors.anchor),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text('Source: ${source.title}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.bodySmall.copyWith(
+                      color: AppColors.anchor,
+                      decoration: TextDecoration.underline)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

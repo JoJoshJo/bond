@@ -78,7 +78,9 @@ class PushService {
     if (uid == null) return;
     try {
       await _client.from('users').update({'fcm_token': null}).eq('id', uid);
-    } catch (_) {/* best-effort */}
+    } catch (e) {
+      debugPrint('clearing fcm_token failed: $e');
+    }
   }
 
   Future<void> _writeToken(String token) async {

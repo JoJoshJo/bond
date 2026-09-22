@@ -88,10 +88,13 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
         replyText,
         movies: reply.movies,
         places: reply.places,
+        sources: reply.sources,
         proposal: proposal,
         showUpgrade: showUpgrade,
       );
-    } catch (_) {
+    } catch (e, st) {
+      // Every AI failure looks the same to the user ('foggy') — log the cause.
+      debugPrint('creature chat failed: $e\n$st');
       _replaceThinking(_foggy);
     } finally {
       _sending = false;
@@ -103,8 +106,11 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
     return _ref
         .read(aiRepositoryProvider)
         .getAI('creature', CreaturePersona.prompt(text, spicy: spicy),
-            context: _context(), history: history)
-        .timeout(const Duration(seconds: 30));
+            // The raw message rides along separately for the router's date
+            // guard (stripped from the model prompt server-side).
+            context: {..._context(), 'userMessage': text},
+            history: history)
+        .timeout(const Duration(seconds: 60)); // multi-step turns (search → propose)
   }
 
   // Short, bounded memory so "it" / "that" / "there" resolve across turns.
@@ -142,6 +148,11 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
     }
     if (m.places.isNotEmpty) {
       lines.add('[Found places: ${m.places.take(_historyItems).map((x) => x.address.isEmpty ? x.name : '${x.name} — ${x.address}').join('; ')}]');
+    }
+    // Echo web sources so a later "add it" can be grounded in what was found
+    // (the router only trusts these from Usora's own turns).
+    for (final w in m.sources.take(3)) {
+      lines.add('[Web source: ${w.title.replaceAll(RegExp(r'[|\]]'), ' ')} | ${w.url} | ${w.snippet.replaceAll(RegExp(r'[|\]]'), ' ')}]');
     }
     final p = m.proposal;
     if (p != null) {
@@ -187,6 +198,7 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
   void _replaceThinking(String text,
       {List<MovieCard> movies = const [],
       List<PlaceCard> places = const [],
+      List<WebSourceRef> sources = const [],
       CalendarProposal? proposal,
       bool showUpgrade = false}) {
     if (!mounted) return;
@@ -198,6 +210,7 @@ class CreatureChatController extends StateNotifier<List<CreatureChatMessage>> {
           text: text,
           movies: movies,
           places: places,
+          sources: sources,
           proposal: proposal,
           showUpgrade: showUpgrade);
       state = list;

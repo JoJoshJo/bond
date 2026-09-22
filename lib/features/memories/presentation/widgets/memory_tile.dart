@@ -114,7 +114,8 @@ class _VideoThumbState extends State<_VideoThumb> {
         _genBytes = bytes;
         _done = true;
       });
-    } catch (_) {
+    } catch (e) {
+      debugPrint('video thumbnail generation failed: $e');
       _genCache[widget.memory.id] = null;
       if (mounted) setState(() => _done = true);
     }

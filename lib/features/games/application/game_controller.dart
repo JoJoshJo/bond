@@ -125,7 +125,9 @@ class GameController extends StateNotifier<GameState> {
       await _repo.submitMove(
           sessionId: _sessionId, userId: _me, round: round, choice: choice);
       await _refreshMoves();
-    } catch (_) {
+    } catch (e) {
+      // The move silently vanishes for the player — log why.
+      debugPrint('game move rejected: $e');
       await _refreshMoves(); // reconcile on failure
     }
   }

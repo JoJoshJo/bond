@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -25,7 +26,9 @@ final creatureStateProvider =
   ConnectionSnapshot snap;
   try {
     snap = await ref.watch(creatureRepositoryProvider).fetchSnapshot();
-  } catch (_) {
+  } catch (e) {
+    // Creature freezes at a neutral mood when the snapshot RPC fails.
+    debugPrint('creature snapshot failed (neutral fallback): $e');
     snap = ConnectionSnapshot.neutral;
   }
   return _derive(snap, DateTime.now());

@@ -15,6 +15,7 @@ class CreatureChatMessage {
     this.thinking = false,
     this.movies = const [],
     this.places = const [],
+    this.sources = const [],
     this.proposal,
     this.proposalStatus = ProposalStatus.pending,
     this.showUpgrade = false,
@@ -26,6 +27,9 @@ class CreatureChatMessage {
   final bool thinking; // a transient "…" placeholder while awaiting a reply
   final List<MovieCard> movies;
   final List<PlaceCard> places;
+
+  /// Web pages Usora looked at this turn (shown as Source links).
+  final List<WebSourceRef> sources;
 
   /// A calendar change awaiting Yes/No (shown as a confirmation card).
   final CalendarProposal? proposal;
@@ -51,6 +55,7 @@ class CreatureChatMessage {
         thinking: thinking ?? this.thinking,
         movies: movies ?? this.movies,
         places: places ?? this.places,
+        sources: sources,
         proposal: proposal,
         proposalStatus: proposalStatus ?? this.proposalStatus,
         showUpgrade: showUpgrade,

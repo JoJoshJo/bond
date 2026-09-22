@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math';
@@ -163,7 +164,10 @@ class AuthRepository {
       if (existing == null || existing.isEmpty) {
         await _client.from('users').update({'display_name': name}).eq('id', uid);
       }
-    } catch (_) {/* non-fatal — sign-in already succeeded */}
+    } catch (e) {
+      // Non-fatal — sign-in already succeeded; the name just isn't stored.
+      debugPrint('display_name save failed: $e');
+    }
   }
 
   static String _randomNonce([int length = 32]) {

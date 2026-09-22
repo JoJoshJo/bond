@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -149,7 +150,8 @@ class ChatController extends StateNotifier<ChatState> {
         replyToId: replyToId,
       );
       _setDeliveryState(id, DeliveryState.sent);
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('send text message failed: $e\n$st');
       _setDeliveryState(id, DeliveryState.failed);
     }
   }
@@ -236,7 +238,8 @@ class ChatController extends StateNotifier<ChatState> {
           ),
         );
       }
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('send media message failed: $e\n$st');
       _setDeliveryState(id, DeliveryState.failed);
     }
   }
@@ -264,7 +267,8 @@ class ChatController extends StateNotifier<ChatState> {
           replyToId: m.replyToId,
         );
         _setDeliveryState(messageId, DeliveryState.sent);
-      } catch (_) {
+      } catch (e, st) {
+        debugPrint('retry send failed: $e\n$st');
         _setDeliveryState(messageId, DeliveryState.failed);
       }
       return;
@@ -314,7 +318,8 @@ class ChatController extends StateNotifier<ChatState> {
         emoji: emoji,
         alreadyReacted: already,
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('message reaction failed: $e');
       _reconcileReactions();
     }
   }

@@ -390,8 +390,9 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
         backgroundColor: AppColors.surface,
         title: const Text('Delete account?'),
         content: Text(
-          'This permanently deletes your account and removes you from your '
-          'shared space. This can\'t be undone.\n\n'
+          'This permanently deletes your account and everything you shared '
+          'with your partner — messages, memories, and photos. This can\'t be '
+          'undone.\n\n'
           'Deleting your account does not cancel your App Store subscription — '
           'manage that in your App Store settings.',
           style: AppText.bodyMedium,

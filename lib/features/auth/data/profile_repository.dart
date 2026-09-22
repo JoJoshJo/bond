@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -29,8 +30,9 @@ class ProfileRepository {
       await _client
           .from('users')
           .update({'home_timezone': tz.identifier}).eq('id', user.id);
-    } catch (_) {
+    } catch (e) {
       // Non-fatal: timezone can be re-captured later at couple setup.
+      debugPrint('home_timezone save failed: $e');
     }
   }
 }

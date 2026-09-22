@@ -126,17 +126,47 @@ class ProposedEvent {
 
 enum CalendarOp { add, update, delete }
 
+/// A web page Usora's web_search drew on (shown as a "Source" link, and echoed
+/// back in chat history so a later "add it" can be grounded in it).
+@immutable
+class WebSourceRef {
+  const WebSourceRef({required this.title, required this.url, this.snippet = ''});
+
+  final String title;
+  final String url;
+  final String snippet;
+
+  /// Only http(s) links with a title; anything else is dropped.
+  static WebSourceRef? tryParse(Object? raw) {
+    if (raw is! Map) return null;
+    final title = (raw['title'] as String?)?.trim() ?? '';
+    final url = (raw['url'] as String?)?.trim() ?? '';
+    final uri = Uri.tryParse(url);
+    if (title.isEmpty || uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
+      return null;
+    }
+    final snippet = (raw['snippet'] as String?)?.trim() ?? '';
+    return WebSourceRef(
+        title: title.length > 140 ? title.substring(0, 140) : title,
+        url: url,
+        snippet: snippet.length > 200 ? snippet.substring(0, 200) : snippet);
+  }
+}
+
 /// A calendar change Usora PROPOSED. Nothing is written until the couple taps
 /// Yes; the app then writes through its normal calendar controller (same RLS).
 @immutable
 class CalendarProposal {
   const CalendarProposal(
-      {required this.op, this.eventId, this.before, this.after});
+      {required this.op, this.eventId, this.before, this.after, this.source});
 
   final CalendarOp op;
   final String? eventId; // update / delete
   final ProposedEvent? before; // update / delete (as the router saw it)
   final ProposedEvent? after; // add / update
+
+  /// When the date came from a web search: the page it was found on.
+  final WebSourceRef? source;
 
   /// Null unless the payload is complete and well-formed for its op.
   static CalendarProposal? tryParse(Object? raw) {
@@ -158,7 +188,12 @@ class CalendarProposal {
       CalendarOp.delete => id != null && before != null,
     };
     if (!valid) return null;
-    return CalendarProposal(op: op, eventId: id, before: before, after: after);
+    return CalendarProposal(
+        op: op,
+        eventId: id,
+        before: before,
+        after: after,
+        source: WebSourceRef.tryParse(j['source']));
   }
 }
 
@@ -176,6 +211,7 @@ class AiResponse {
     this.needsLocation = false,
     this.calendarAction,
     this.premiumRequired = false,
+    this.sources = const [],
   });
 
   final String text;
@@ -190,6 +226,9 @@ class AiResponse {
 
   /// The router's server-side check says this needs Usora+ (nothing changed).
   final bool premiumRequired;
+
+  /// Web pages a web_search in this turn drew on.
+  final List<WebSourceRef> sources;
 
   factory AiResponse.fromJson(Map<String, dynamic> json) {
     final meta = (json['meta'] as Map?)?.cast<String, dynamic>() ?? const {};
@@ -212,6 +251,11 @@ class AiResponse {
       needsLocation: json['needsLocation'] == true,
       calendarAction: CalendarProposal.tryParse(json['calendarAction']),
       premiumRequired: json['premiumRequired'] == true,
+      sources: switch (json['sources']) {
+        final List<dynamic> l =>
+          l.map(WebSourceRef.tryParse).whereType<WebSourceRef>().take(3).toList(),
+        _ => const <WebSourceRef>[],
+      },
     );
   }
 }

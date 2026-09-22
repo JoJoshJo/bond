@@ -167,7 +167,8 @@ class _EventEditorSheetState extends ConsumerState<EventEditorSheet> {
           .read(calendarControllerProvider(widget.coupleId).notifier)
           .remove(widget.existing!.id);
       if (mounted) Navigator.of(context).pop();
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('calendar delete failed: $e\n$st');
       if (mounted) {
         setState(() => _saving = false);
         ScaffoldMessenger.of(context).showSnackBar(

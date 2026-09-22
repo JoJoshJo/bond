@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'spicy_models.dart';
@@ -16,7 +17,9 @@ class SpicyRepository {
       final rows = await _client.rpc('spicy_status') as List<dynamic>;
       if (rows.isEmpty) return SpicyStatus.empty;
       return SpicyStatus.fromRow(rows.first as Map<String, dynamic>);
-    } catch (_) {
+    } catch (e) {
+      // Shows as 'no spicy session' — log it so a broken RPC is visible.
+      debugPrint('spicy_status failed (treated as empty): $e');
       return SpicyStatus.empty;
     }
   }

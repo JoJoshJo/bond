@@ -49,7 +49,8 @@ class _VoiceBubbleState extends State<VoiceBubble> {
         await _player.setUrl(url);
       }
       _loaded = true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('voice note load failed: $e');
       _loadError = true;
     }
   }

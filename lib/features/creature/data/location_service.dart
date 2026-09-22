@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
 /// Fetches the device location — only called when the creature needs it for a
@@ -25,7 +26,9 @@ class LocationService {
         ),
       );
       return (lat: pos.latitude, lng: pos.longitude);
-    } catch (_) {
+    } catch (e) {
+      // Indistinguishable from 'permission denied' without this line.
+      debugPrint('location lookup failed: $e');
       return null;
     }
   }
