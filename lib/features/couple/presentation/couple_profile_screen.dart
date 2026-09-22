@@ -21,6 +21,7 @@ import '../../calendar/presentation/calendar_screen.dart';
 import '../../insights/presentation/insights_screen.dart';
 import '../../premium/application/entitlement_providers.dart';
 import '../../premium/presentation/paywall_screen.dart';
+import '../../premium/presentation/redeem_code_sheet.dart';
 import '../../spicy/presentation/spicy_section.dart';
 import '../application/couple_providers.dart';
 
@@ -202,6 +203,22 @@ class _CoupleProfileScreenState extends ConsumerState<CoupleProfileScreen> {
                     : 'Unlimited memories, a fully custom creature & more',
                 subtitleColor: _tintText,
                 onTap: () => PaywallScreen.open(context),
+                trailing: Icon(Icons.chevron_right,
+                    color: AppColors.inkFaint),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _GoldCard(
+              child: BondListTile(
+                badgeColor:
+                    AppColors.usMembership == null ? null : AppColors.accent,
+                iconColor:
+                    AppColors.usMembership == null ? null : AppColors.surface,
+                leadingIcon: Icons.redeem_rounded,
+                title: 'Redeem a code',
+                subtitle: 'Have a Usora+ code? Unlock it here',
+                subtitleColor: _tintText,
+                onTap: () => RedeemCodeSheet.open(context),
                 trailing: Icon(Icons.chevron_right,
                     color: AppColors.inkFaint),
               ),
