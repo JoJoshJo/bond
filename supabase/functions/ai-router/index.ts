@@ -28,7 +28,11 @@
 // CURRENT message (a day/date reference). Otherwise NO calendarAction — Usora
 // shares what she found (with the source) and asks them to confirm.
 // - Secrets: GEMINI_API_KEY (required), TMDB_API_KEY (movies),
-//   GOOGLE_PLACES_API_KEY (places), TAVILY_API_KEY (web_search). SUPABASE_URL / SUPABASE_ANON_KEY are
+//   GOOGLE_PLACES_API_KEY (places), TAVILY_API_KEY (web_search). Keys travel in
+//   HEADERS where the API allows it (Gemini: x-goog-api-key; Places:
+//   X-Goog-Api-Key; Tavily: Authorization). TMDB v3 only accepts ?api_key=, so
+//   every log line goes through redact() — no key can reach the logs or a
+//   client response. SUPABASE_URL / SUPABASE_ANON_KEY are
 //   auto-injected. Never in the app. JWT ON.
 //
 // All outbound fetches (Gemini, TMDB, Google Places, RPCs) have a ~20s
@@ -83,6 +87,27 @@ const MODEL_FALLBACK_SEED = [
   "gemini-3.6-flash",
   "gemini-3.7-flash",
 ];
+
+// ---------- secret redaction (logs must never carry a key) ----------
+// Replaces any configured secret value, plus anything that looks like a key in
+// a query string, with ***. Used by EVERY log line in this function.
+const SECRET_ENV = [
+  "GEMINI_API_KEY", "TMDB_API_KEY", "GOOGLE_PLACES_API_KEY", "TAVILY_API_KEY",
+  "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY",
+];
+function redact(input: unknown): string {
+  let text = typeof input === "string" ? input : String(input);
+  for (const name of SECRET_ENV) {
+    const v = Deno.env.get(name);
+    if (v && v.length >= 8) text = text.split(v).join("***");
+  }
+  // Defence in depth: strip key-ish query params even if the value is unknown.
+  return text.replace(/([?&](?:api_)?key=)[^&\s"']+/gi, "$1***");
+}
+// deno-lint-ignore no-explicit-any
+function logErr(...parts: any[]): void {
+  console.error(parts.map(redact).join(" "));
+}
 
 // ---------- error handling / retry ----------
 // 503 / UNAVAILABLE / "high demand" = Google-side OVERLOAD → switch MODELS
@@ -195,13 +220,13 @@ async function getModelChain(apiKey: string, deadline?: number): Promise<string[
   if (cachedChain) return cachedChain;
   try {
     const res = await fetchWithTimeout(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
-      { method: "GET" },
+      "https://generativelanguage.googleapis.com/v1beta/models",
+      { method: "GET", headers: { "x-goog-api-key": apiKey } },
       8000,
       deadline,
     );
     if (!res.ok) {
-      console.error(`ListModels failed ${res.status}: ${await res.text()}`);
+      logErr(`ListModels failed ${res.status}: ${await res.text()}`);
       return MODEL_FALLBACK_SEED;
     }
     const data = await res.json();
@@ -225,7 +250,7 @@ async function getModelChain(apiKey: string, deadline?: number): Promise<string[
         !n.includes("thinking")
       );
     if (names.length === 0) {
-      console.error("ListModels returned no usable flash models; using seed");
+      logErr("ListModels returned no usable flash models; using seed");
       return MODEL_FALLBACK_SEED;
     }
     // Order: lite (fastest/cheapest) before full flash; newer version first.
@@ -243,10 +268,10 @@ async function getModelChain(apiKey: string, deadline?: number): Promise<string[
       ...names,
     ].filter((n, i, arr) => arr.indexOf(n) === i).slice(0, 3);
     cachedChain = ordered;
-    console.error(`model chain: ${ordered.join(" -> ")}`);
+    logErr(`model chain: ${ordered.join(" -> ")}`);
     return cachedChain;
   } catch (e) {
-    console.error(`ListModels error: ${e}`);
+    logErr(`ListModels error: ${e}`);
     return MODEL_FALLBACK_SEED;
   }
 }
@@ -260,8 +285,9 @@ async function generateOnModel(
   systemInstruction?: string,
   opts: GenOpts = {},
 ): Promise<Record<string, unknown>> {
+  // Key travels as a header (never in the URL, which can surface in logs).
   const endpoint =
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const body: Record<string, unknown> = { contents };
   if (tools) body.tools = tools;
   // Final wording call: tools stay declared (the history contains function
@@ -278,13 +304,16 @@ async function generateOnModel(
     try {
       res = await fetchWithTimeout(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
+        },
         body: JSON.stringify(body),
       }, FETCH_TIMEOUT_MS, opts.deadline);
     } catch (e) {
       if (e instanceof DeadlineExceeded) throw e;
       // network error or timeout — treat as transient on this model.
-      console.error(`Gemini ${model} network/timeout: ${String(e).slice(0, 120)}`);
+      logErr(`Gemini ${model} network/timeout: ${String(e).slice(0, 120)}`);
       if (attempt < BACKOFF_MS.length &&
           (opts.deadline === undefined || Date.now() + BACKOFF_MS[attempt] < opts.deadline)) {
         await sleep(BACKOFF_MS[attempt]); continue;
@@ -297,7 +326,7 @@ async function generateOnModel(
     const status = res.status;
     const overloaded = OVERLOAD_STATUS.has(status) ||
       /UNAVAILABLE|overloaded|high demand/i.test(detail);
-    console.error(`Gemini ${model} error ${status}: ${detail.slice(0, 200)}`);
+    logErr(`Gemini ${model} error ${status}: ${detail.slice(0, 200)}`);
 
     // Overloaded → don't retry this model; signal an immediate model switch.
     if (overloaded) throw new ModelAttemptError(model, status, true, detail);
@@ -344,7 +373,7 @@ async function geminiGenerate(
       last = e instanceof ModelAttemptError
         ? `${model} [${e.status}]${e.overloaded ? " overloaded" : ""}: ${e.message}`
         : String(e);
-      console.error(`model ${model} failed → trying next: ${last}`);
+      logErr(`model ${model} failed → trying next: ${last}`);
       continue;
     }
   }
@@ -414,6 +443,9 @@ interface MovieCard {
   posterUrl: string | null; overview: string;
 }
 async function executeMovieSearch(args: { genre?: string; query?: string }, deadline?: number): Promise<MovieCard[]> {
+  // TMDB v3 keys are query-string only (a Bearer header needs a *different*
+  // v4 read token). The key therefore stays in the URL — but the URL is never
+  // logged, and redact() strips `api_key=` from anything that is.
   const key = Deno.env.get("TMDB_API_KEY");
   if (!key) throw new Error("TMDB_API_KEY secret is not set");
   const base = "https://api.themoviedb.org/3";
@@ -715,7 +747,7 @@ async function isCouplePremium(coupleId: string, authHeader: string, deadline?: 
     if (r.expires_at && new Date(r.expires_at).getTime() < Date.now()) return false;
     return true;
   } catch (e) {
-    console.error("premium check failed:", e);
+    logErr("premium check failed:", e);
     return false;
   }
 }
@@ -982,7 +1014,7 @@ async function consumeAiCall(authHeader: string, deadline?: number): Promise<"ok
     if (r?.ok === true) return "ok";
     return r?.reason === "daily_limit" ? "limit" : "error";
   } catch (e) {
-    console.error("consume_ai_call failed:", e);
+    logErr("consume_ai_call failed:", e);
     return "error";
   }
 }
@@ -994,7 +1026,7 @@ async function consumeWebSearch(authHeader: string, deadline?: number): Promise<
     if (r?.ok === true) return "ok";
     return r?.reason === "daily_limit" ? "limit" : "error";
   } catch (e) {
-    console.error("consume_web_search failed:", e);
+    logErr("consume_web_search failed:", e);
     return "error";
   }
 }
@@ -1346,7 +1378,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           try {
             movies = await executeMovieSearch(fc.args ?? {}, deadline);
           } catch (e) {
-            console.error("movies tool failed:", e);
+            logErr("movies tool failed:", e);
             return reply("I reached for the movie shelf but it's a little foggy right now — try me again in a bit? 🌫️");
           }
           lastFallback = "Ooh, movie night? Here are a few I think you two would love 🍿";
@@ -1364,7 +1396,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           try {
             places = await executePlaceSearch(fc.args ?? {}, lat, lng, deadline);
           } catch (e) {
-            console.error("places tool failed:", e);
+            logErr("places tool failed:", e);
             return reply("I peeked out the window but it's a bit foggy right now — try me again in a bit? 🌫️");
           }
           if (places.length === 0) {
@@ -1391,7 +1423,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           try {
             result = await executeWebSearch(q, deadline);
           } catch (e) {
-            console.error("web_search failed:", e);
+            logErr("web_search failed:", e);
             return reply("I tried to look that up but it's a little foggy right now — can you tell me the details? 🌫️");
           }
           grounding.answer = result.answer ?? grounding.answer;
@@ -1411,7 +1443,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           try {
             result = await executeListUpcoming(fc.args ?? {}, authHeader, deadline);
           } catch (e) {
-            console.error("calendar list tool failed:", e);
+            logErr("calendar list tool failed:", e);
             return reply("I tried to peek at your calendar but it's a little foggy — try me again in a bit? 🌫️");
           }
           const ok = result?.ok === true;
@@ -1430,7 +1462,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           try {
             outcome = await runCalendarProposal(fc.name, fc.args ?? {}, authHeader, grounding, deadline);
           } catch (e) {
-            console.error(`calendar ${fc.name} failed:`, e);
+            logErr(`calendar ${fc.name} failed:`, e);
             return reply("I tried to peek at your calendar but it's a little foggy — try me again in a bit? 🌫️");
           }
           if (fc.name === "find_events" && !outcome.premiumRequired) {
@@ -1469,10 +1501,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
   } catch (err) {
     // Every model in the chain was overloaded/unavailable → calm "busy" reply.
     if (err instanceof GeminiUnavailable) {
-      console.error("ai-router all models unavailable:", err.message);
+      logErr("ai-router all models unavailable:", err.message);
       return aiBusyResponse(meta);
     }
-    console.error("ai-router error:", err);
-    return json({ error: "ai_call_failed", detail: String(err) }, 502);
+    logErr("ai-router error:", err);
+    // Generic code only — internal detail stays in the logs.
+    return json({ error: "ai_call_failed" }, 502);
   }
 });

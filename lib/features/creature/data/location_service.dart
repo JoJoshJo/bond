@@ -20,9 +20,13 @@ class LocationService {
         return null;
       }
 
+      // Hard time limit: this runs inside the chat send, so a slow or blocked
+      // fix must not hold up the reply. On timeout we return null and the
+      // router simply answers without coordinates.
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 7),
         ),
       );
       return (lat: pos.latitude, lng: pos.longitude);
