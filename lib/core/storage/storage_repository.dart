@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -55,7 +56,9 @@ class StorageRepository {
         minHeight: 1600,
       );
       return result == null ? File(srcPath) : File(result.path);
-    } catch (_) {
+    } catch (e) {
+      // Falls back to the FULL-SIZE file — worth knowing about (upload size).
+      debugPrint('image compression failed, uploading original: $e');
       return File(srcPath);
     }
   }

@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
+import '../../../../shared/utils/input_limits.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_spacing.dart';
 import '../../../../shared/theme/app_typography.dart';
@@ -20,6 +21,9 @@ class MessageInput extends StatefulWidget {
     required this.onSendImage,
     this.replyingToText,
     this.onCancelReply,
+    this.controller,
+    this.focusNode,
+    this.background,
   });
 
   final void Function(String text) onSendText;
@@ -28,13 +32,24 @@ class MessageInput extends StatefulWidget {
   final String? replyingToText;
   final VoidCallback? onCancelReply;
 
+  /// Optional external text controller/focus (e.g. so empty-state starter
+  /// chips can pre-fill the draft). Owned by the caller when provided.
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+
+  /// The screen color the composer blends into. It paints a soft scrim that
+  /// fades from transparent to this color — so it always sits on clean color
+  /// with NO divider line, even when the keyboard lifts it over faint doodles.
+  final Color? background;
+
   @override
   State<MessageInput> createState() => _MessageInputState();
 }
 
 class _MessageInputState extends State<MessageInput> {
-  final _controller = TextEditingController();
-  final _focus = FocusNode();
+  late final TextEditingController _controller =
+      widget.controller ?? TextEditingController();
+  late final FocusNode _focus = widget.focusNode ?? FocusNode();
   final _recorder = AudioRecorder();
   final _picker = ImagePicker();
 
@@ -56,8 +71,9 @@ class _MessageInputState extends State<MessageInput> {
   @override
   void dispose() {
     _timer?.cancel();
-    _controller.dispose();
-    _focus.dispose();
+    // Only dispose what we created; external ones belong to the caller.
+    if (widget.controller == null) _controller.dispose();
+    if (widget.focusNode == null) _focus.dispose();
     _recorder.dispose();
     super.dispose();
   }
@@ -124,7 +140,7 @@ class _MessageInputState extends State<MessageInput> {
           children: [
             ListTile(
               leading: Icon(Icons.photo_camera_outlined,
-                  color: AppColors.mint),
+                  color: AppColors.chatMine),
               title: Text('Take a photo', style: AppText.bodyLarge),
               onTap: () {
                 Navigator.of(ctx).pop();
@@ -133,7 +149,7 @@ class _MessageInputState extends State<MessageInput> {
             ),
             ListTile(
               leading: Icon(Icons.photo_library_outlined,
-                  color: AppColors.mint),
+                  color: AppColors.chatMine),
               title: Text('Choose from gallery', style: AppText.bodyLarge),
               onTap: () {
                 Navigator.of(ctx).pop();
@@ -155,10 +171,17 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
+    final base = widget.background ?? AppColors.bg;
     return Container(
+      // No top border (no divider). A short transparent→opaque scrim instead,
+      // so the composer blends into the screen with no visible seam.
       decoration: BoxDecoration(
-        color: AppColors.bg,
-        border: Border(top: BorderSide(color: AppColors.borderSoft)),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [base.withValues(alpha: 0), base],
+          stops: const [0.0, 0.35],
+        ),
       ),
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
@@ -184,7 +207,8 @@ class _MessageInputState extends State<MessageInput> {
       children: [
         IconButton(
           onPressed: _attachSheet,
-          icon: Icon(Icons.add_circle_outline, color: AppColors.mint),
+          tooltip: 'Add a photo',
+          icon: Icon(Icons.add_circle_outline, color: AppColors.chatMine),
         ),
         Expanded(
           child: TextField(
@@ -192,6 +216,8 @@ class _MessageInputState extends State<MessageInput> {
             focusNode: _focus,
             minLines: 1,
             maxLines: 5,
+            maxLength: kMaxChatMessageChars,
+            buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
             textCapitalization: TextCapitalization.sentences,
             style: AppText.bodyMedium,
             decoration: InputDecoration(
@@ -202,6 +228,16 @@ class _MessageInputState extends State<MessageInput> {
               fillColor: AppColors.surfaceAlt,
               contentPadding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+              // Soft rounded field (xl stays soft when it grows to 5 lines): a
+              // hairline at rest, brand green on focus.
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                borderSide: BorderSide(color: AppColors.borderSoft),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                borderSide: BorderSide(color: AppColors.chatMine, width: 1.4),
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.xl),
                 borderSide: BorderSide.none,
@@ -218,14 +254,16 @@ class _MessageInputState extends State<MessageInput> {
   Widget _trailingButton() {
     final icon = _hasText ? Icons.arrow_upward_rounded : Icons.mic_none_rounded;
     return Material(
-      color: AppColors.mint,
+      color: AppColors.chatMine,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: _hasText ? _sendText : _startRecording,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
-          child: Icon(icon, color: AppColors.onMint),
+          child: Icon(icon,
+              color: AppColors.onChatMine,
+              semanticLabel: _hasText ? 'Send' : 'Record a voice note'),
         ),
       ),
     );
@@ -236,6 +274,7 @@ class _MessageInputState extends State<MessageInput> {
       children: [
         IconButton(
           onPressed: _cancelRecording,
+          tooltip: 'Delete recording',
           icon: Icon(Icons.delete_outline, color: AppColors.error),
         ),
         Icon(Icons.fiber_manual_record, color: AppColors.error, size: 14),
@@ -243,14 +282,16 @@ class _MessageInputState extends State<MessageInput> {
         Text('Recording  ${_fmt(_seconds)}', style: AppText.bodyMedium),
         const Spacer(),
         Material(
-          color: AppColors.mint,
+          color: AppColors.chatMine,
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: _stopAndSend,
             child: Padding(
-              padding: EdgeInsets.all(AppSpacing.md),
-              child: Icon(Icons.arrow_upward_rounded, color: AppColors.onMint),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Icon(Icons.arrow_upward_rounded,
+                  color: AppColors.onChatMine,
+                  semanticLabel: 'Send voice note'),
             ),
           ),
         ),
@@ -263,14 +304,14 @@ class _MessageInputState extends State<MessageInput> {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
         children: [
-          Container(width: 3, height: 32, color: AppColors.mint),
+          Container(width: 3, height: 32, color: AppColors.chatMine),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Replying to',
-                    style: AppText.bodySmall.copyWith(color: AppColors.mintDeep)),
+                    style: AppText.bodySmall.copyWith(color: AppColors.chatMine)),
                 Text(widget.replyingToText!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -279,6 +320,7 @@ class _MessageInputState extends State<MessageInput> {
             ),
           ),
           IconButton(
+            tooltip: 'Cancel reply',
             icon: Icon(Icons.close, size: 18, color: AppColors.inkMuted),
             onPressed: widget.onCancelReply,
           ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Reads the couple's entitlement from the `subscriptions` table.
@@ -40,8 +41,10 @@ class SubscriptionRepository {
         }
       }
       return entitlementPlus;
-    } catch (_) {
+    } catch (e) {
       // Table not deployed yet / transient error → treat as free (fail-locked).
+      // MUST be logged: this is how a paying couple can silently read as free.
+      debugPrint('entitlement read failed (treated as free): $e');
       return entitlementFree;
     }
   }

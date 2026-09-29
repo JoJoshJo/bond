@@ -7,6 +7,7 @@ import '../../../core/storage/storage_providers.dart';
 import '../../auth/application/auth_providers.dart';
 import '../data/memory_models.dart';
 import '../data/memory_repository.dart';
+import 'memory_resurface.dart';
 
 final memoryRepositoryProvider = Provider<MemoryRepository>(
   (ref) => MemoryRepository(
@@ -26,13 +27,14 @@ class MemoryVaultState {
   const MemoryVaultState({
     this.loading = true,
     this.groups = const [],
-    this.flashbacks = const [],
+    this.flashback,
     this.saving = false,
   });
 
   final bool loading;
   final List<MemoryGroup> groups;
-  final List<Memory> flashbacks; // "N years ago today"
+  /// "On this day" (±3 days, previous years) — same logic as the home slot.
+  final ResurfacedMemory? flashback;
   final bool saving;
 
   bool get isEmpty => groups.isEmpty;
@@ -44,13 +46,13 @@ class MemoryVaultState {
   MemoryVaultState copyWith({
     bool? loading,
     List<MemoryGroup>? groups,
-    List<Memory>? flashbacks,
+    ResurfacedMemory? Function()? flashback,
     bool? saving,
   }) =>
       MemoryVaultState(
         loading: loading ?? this.loading,
         groups: groups ?? this.groups,
-        flashbacks: flashbacks ?? this.flashbacks,
+        flashback: flashback != null ? flashback() : this.flashback,
         saving: saving ?? this.saving,
       );
 }
@@ -82,7 +84,7 @@ class MemoryVaultController extends StateNotifier<MemoryVaultState> {
     state = state.copyWith(
       loading: false,
       groups: _group(memories),
-      flashbacks: _flashbacks(memories),
+      flashback: () => resurfaceMemory(memories, DateTime.now()),
     );
   }
 
@@ -96,18 +98,9 @@ class MemoryVaultController extends StateNotifier<MemoryVaultState> {
     return groups.entries.map((e) => MemoryGroup(e.key, e.value)).toList();
   }
 
-  List<Memory> _flashbacks(List<Memory> memories) {
-    final now = DateTime.now();
-    return memories
-        .where((m) =>
-            m.takenAt.month == now.month &&
-            m.takenAt.day == now.day &&
-            m.takenAt.year < now.year)
-        .toList();
-    // TODO(notifications): a daily Edge-Function check on taken_at month/day
-    // fires an FCM push for flashbacks when the notifications layer lands.
-    // This in-app card is the launch surface.
-  }
+  // TODO(notifications): a daily Edge-Function check on taken_at month/day
+  // fires an FCM push for flashbacks when the notifications layer lands.
+  // The in-app "on this day" band is the launch surface.
 
   Future<String> signedUrl(String path) => _repo.signedUrl(path);
 

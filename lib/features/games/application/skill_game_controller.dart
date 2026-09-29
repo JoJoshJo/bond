@@ -133,7 +133,8 @@ class SkillGameController extends StateNotifier<SkillGameState> {
       await _repo.submitRawMove(
           sessionId: _sessionId, userId: me, moveData: moveData);
       await _refresh();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('skill game move rejected: $e');
       await _refresh(); // reconcile on failure
     } finally {
       if (mounted) state = state.copyWith(submitting: false);

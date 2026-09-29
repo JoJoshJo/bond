@@ -146,6 +146,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                 ? 'At least 6 characters'
                 : null,
             suffix: IconButton(
+              tooltip: _obscure ? 'Show password' : 'Hide password',
               icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
               onPressed: () => setState(() => _obscure = !_obscure),
             ),

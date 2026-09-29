@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+
+import '../../../shared/utils/input_limits.dart';
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math';
@@ -161,9 +164,17 @@ class AuthRepository {
           .maybeSingle();
       final existing = row?['display_name'] as String?;
       if (existing == null || existing.isEmpty) {
-        await _client.from('users').update({'display_name': name}).eq('id', uid);
+        // Provider-supplied, never typed here — clamp to the column's cap.
+        await _client.from('users').update({
+          'display_name': name.length > kMaxDisplayNameChars
+              ? name.substring(0, kMaxDisplayNameChars)
+              : name,
+        }).eq('id', uid);
       }
-    } catch (_) {/* non-fatal — sign-in already succeeded */}
+    } catch (e) {
+      // Non-fatal — sign-in already succeeded; the name just isn't stored.
+      debugPrint('display_name save failed: $e');
+    }
   }
 
   static String _randomNonce([int length = 32]) {

@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -37,14 +38,20 @@ class PurchaseService {
     if (!_configured) return;
     try {
       await Purchases.logIn(userId);
-    } catch (_) {/* non-fatal */}
+    } catch (e) {
+      // Non-fatal, but a failed logIn means RC entitlements resolve against the
+      // wrong app user — a payer can look free until the webhook row lands.
+      debugPrint('RevenueCat logIn failed: $e');
+    }
   }
 
   Future<void> logOut() async {
     if (!_configured) return;
     try {
       await Purchases.logOut();
-    } catch (_) {/* non-fatal */}
+    } catch (e) {
+      debugPrint('RevenueCat logOut failed: $e');
+    }
   }
 
   void addCustomerInfoListener(void Function(CustomerInfo) cb) {
@@ -59,7 +66,9 @@ class PurchaseService {
     if (!_configured) return false;
     try {
       return isPremiumFrom(await Purchases.getCustomerInfo());
-    } catch (_) {
+    } catch (e) {
+      // Reported as NOT premium — log it, or a paying user silently looks free.
+      debugPrint('RevenueCat getCustomerInfo failed (treated as free): $e');
       return false;
     }
   }
@@ -120,7 +129,8 @@ class PurchaseService {
         return PurchaseOutcome.cancelled;
       }
       return PurchaseOutcome.error;
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('RevenueCat purchase failed: $e\n$st');
       return PurchaseOutcome.error;
     }
   }
@@ -131,7 +141,9 @@ class PurchaseService {
     if (!_configured) return false;
     try {
       return isPremiumFrom(await Purchases.restorePurchases());
-    } catch (_) {
+    } catch (e, st) {
+      // 'Nothing to restore' and a real failure look identical to the user.
+      debugPrint('RevenueCat restore failed: $e\n$st');
       return false;
     }
   }

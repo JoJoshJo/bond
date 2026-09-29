@@ -79,6 +79,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 (v == null || v.isEmpty) ? 'Enter your password' : null,
             onFieldSubmitted: (_) => _submit(),
             suffix: IconButton(
+              tooltip: _obscure ? 'Show password' : 'Hide password',
               icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
               onPressed: () => setState(() => _obscure = !_obscure),
             ),

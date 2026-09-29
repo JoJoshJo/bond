@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/app_config.dart';
+import '../../../shared/utils/dev_error.dart';
+
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/utils/input_limits.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -123,12 +127,16 @@ class _EventEditorSheetState extends ConsumerState<EventEditorSheet> {
         );
       }
       if (mounted) Navigator.of(context).pop();
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('calendar ${_isEditing ? 'update' : 'add'} failed: $e\n$st');
       if (mounted) {
         setState(() => _saving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Couldn\'t save — try again.')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          duration: Duration(seconds: kShowDevTools ? 12 : 4),
+          content: Text(kShowDevTools
+              ? 'Couldn\'t save — DEV · ${devErrorText(e)}'
+              : 'Couldn\'t save — try again.'),
+        ));
       }
     }
   }
@@ -160,7 +168,8 @@ class _EventEditorSheetState extends ConsumerState<EventEditorSheet> {
           .read(calendarControllerProvider(widget.coupleId).notifier)
           .remove(widget.existing!.id);
       if (mounted) Navigator.of(context).pop();
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('calendar delete failed: $e\n$st');
       if (mounted) {
         setState(() => _saving = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -192,7 +201,10 @@ class _EventEditorSheetState extends ConsumerState<EventEditorSheet> {
           children: [
             Text(_isEditing ? 'Edit event' : 'New event', style: AppText.title),
             const SizedBox(height: AppSpacing.lg),
-            BondTextField(controller: _label, label: 'Title'),
+            BondTextField(
+                controller: _label,
+                label: 'Title',
+                maxLength: kMaxEventTitleChars),
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
@@ -223,7 +235,10 @@ class _EventEditorSheetState extends ConsumerState<EventEditorSheet> {
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
-            BondTextField(controller: _note, label: 'Note (optional)'),
+            BondTextField(
+                controller: _note,
+                label: 'Note (optional)',
+                maxLength: kMaxEventNoteChars),
             const SizedBox(height: AppSpacing.sm),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,

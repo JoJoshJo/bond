@@ -114,7 +114,8 @@ class BoardGameController extends StateNotifier<BoardGameState> {
       await _repo.submitRawMove(
           sessionId: _sessionId, userId: me, moveData: moveData);
       await _refresh();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('board game move rejected: $e');
       await _refresh(); // reconcile on failure
     }
   }

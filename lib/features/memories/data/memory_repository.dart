@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
@@ -105,8 +106,9 @@ class MemoryRepository {
         file,
         'image/jpeg',
       );
-    } catch (_) {
+    } catch (e) {
       // Non-fatal: the tile falls back to the play-icon placeholder.
+      debugPrint('video thumbnail upload failed: $e');
     }
   }
 

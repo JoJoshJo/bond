@@ -8,6 +8,17 @@ import '../../application/prompt_controller.dart';
 import '../../data/prompt_models.dart';
 import '../daily_prompt_screen.dart';
 
+/// The (label, call-to-action, highlight) copy for each daily-prompt phase.
+/// Shared by the chat [PromptBanner] and the home "Today's question" tile so
+/// both always describe the prompt the same way.
+(String, String, bool) promptPhaseCopy(PromptPhase phase) => switch (phase) {
+      PromptPhase.loading => ('Today\'s question', '', false),
+      PromptPhase.answer => ('Today\'s question', 'Tap to answer', true),
+      PromptPhase.waiting =>
+        ('Answered · waiting for your partner', 'Tap to view', false),
+      PromptPhase.revealed => ('Revealed — see your answers', 'Tap to open', true),
+    };
+
 /// Slim, tappable "Today's question" banner pinned at the top of chat. Its label
 /// reflects the daily-prompt phase and it opens the full experience on tap.
 class PromptBanner extends ConsumerWidget {
@@ -19,15 +30,12 @@ class PromptBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(promptControllerProvider(coupleId));
 
-    final (label, cta, highlight) = switch (state.phase) {
-      PromptPhase.loading => ('Today\'s question', '', false),
-      PromptPhase.answer => ('Today\'s question', 'Tap to answer', true),
-      PromptPhase.waiting =>
-        ('Answered · waiting for your partner', 'Tap to view', false),
-      PromptPhase.revealed => ('Revealed — see your answers', 'Tap to open', true),
-    };
+    final (label, cta, highlight) = promptPhaseCopy(state.phase);
 
-    return Material(
+    return Semantics(
+      button: true,
+      label: 'Today\'s question',
+      child: Material(
       color: highlight ? AppColors.mintWash : AppColors.surfaceAlt,
       child: InkWell(
         onTap: () => Navigator.of(context).push(
@@ -67,6 +75,7 @@ class PromptBanner extends ConsumerWidget {
               Icon(Icons.chevron_right, color: AppColors.inkFaint),
             ],
           ),
+        ),
         ),
       ),
     );

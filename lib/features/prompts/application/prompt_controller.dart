@@ -198,8 +198,9 @@ class PromptController extends StateNotifier<PromptState> {
         alreadyReacted: already,
       );
       await _refreshResponses();
-    } catch (_) {
+    } catch (e) {
       // best-effort; realtime will reconcile
+      debugPrint('prompt reaction failed: $e');
     }
   }
 

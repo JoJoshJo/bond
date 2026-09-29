@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/utils/input_limits.dart';
 import '../../../shared/utils/error_messages.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../application/memory_controller.dart';
@@ -91,17 +92,22 @@ class _AddMemoryScreenState extends ConsumerState<AddMemoryScreen> {
               aspectRatio: 1,
               child: widget.isVideo
                   ? Container(
-                      color: const Color(0xFF1E2A25),
-                      child: const Center(
+                      // Theme surface + ink, like the vault's video tiles —
+                      // a fixed dark-green box looked wrong on other themes.
+                      color: AppColors.surfaceAlt,
+                      child: Center(
                         child: Icon(Icons.play_circle_fill,
-                            color: Colors.white70, size: 48),
+                            color: AppColors.inkMuted, size: 48),
                       ),
                     )
                   : Image.file(File(widget.localPath), fit: BoxFit.cover),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          BondTextField(controller: _caption, label: 'Caption (optional)'),
+          BondTextField(
+              controller: _caption,
+              label: 'Caption (optional)',
+              maxLength: kMaxMemoryCaptionChars),
           const SizedBox(height: AppSpacing.md),
           BondCard(
             padding: const EdgeInsets.symmetric(

@@ -13,6 +13,9 @@ class BondListTile extends StatelessWidget {
     this.leadingIcon,
     this.trailing,
     this.onTap,
+    this.subtitleColor,
+    this.badgeColor,
+    this.iconColor,
   });
 
   final String title;
@@ -20,6 +23,11 @@ class BondListTile extends StatelessWidget {
   final IconData? leadingIcon;
   final Widget? trailing;
   final VoidCallback? onTap;
+
+  /// Optional overrides (e.g. ink subtitles on a tinted card, a gold badge).
+  final Color? subtitleColor;
+  final Color? badgeColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +50,10 @@ class BondListTile extends StatelessWidget {
                   height: 40,
                   width: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.mintWash,
+                    color: badgeColor ?? AppColors.mintWash,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(leadingIcon, size: 20, color: AppColors.mint),
+                  child: Icon(leadingIcon, size: 20, color: iconColor ?? AppColors.mint),
                 ),
                 const SizedBox(width: AppSpacing.lg),
               ],
@@ -54,7 +62,10 @@ class BondListTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title, style: AppText.bodyLarge),
-                    if (subtitle case final s?) Text(s, style: AppText.bodySmall),
+                    if (subtitle case final s?)
+                      Text(s,
+                          style: AppText.bodySmall
+                              .copyWith(color: subtitleColor)),
                   ],
                 ),
               ),

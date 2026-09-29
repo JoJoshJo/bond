@@ -58,7 +58,7 @@ class _AnimatedFlameState extends State<AnimatedFlame>
       },
       child: Icon(
         Icons.local_fire_department_rounded,
-        color: widget.lit ? AppColors.mint : AppColors.inkFaint,
+        color: widget.lit ? AppColors.accent : AppColors.inkFaint, // gold accent
         size: 32,
       ),
     );

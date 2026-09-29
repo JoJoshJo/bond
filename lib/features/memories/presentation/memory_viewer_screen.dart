@@ -45,7 +45,9 @@ class _MemoryViewerScreenState extends State<MemoryViewerScreen> {
         _initializing = false;
       });
       c.play();
-    } catch (_) {
+    } catch (e) {
+      // The viewer just stops loading with no message — log the reason.
+      debugPrint('memory video failed to open: $e');
       if (mounted) setState(() => _initializing = false);
     }
   }

@@ -91,7 +91,7 @@ class _SegmentedToggle extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE3ECE8)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [

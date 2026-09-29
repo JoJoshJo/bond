@@ -20,6 +20,19 @@ class GameRepository {
     return GameSession.fromRow(rows.first as Map<String, dynamic>);
   }
 
+  /// The couple's UNFINISHED sessions — READ-ONLY (never creates one, unlike
+  /// [startOrResume]). Used by the hub to work out whose move it is.
+  Future<List<GameSession>> unfinishedSessions(String coupleId) async {
+    final rows = await _client
+        .from('game_sessions')
+        .select('id, game_type, mode, status')
+        .eq('couple_id', coupleId)
+        .neq('status', 'completed');
+    return (rows as List<dynamic>)
+        .map((r) => GameSession.fromRow(r as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<GameSession?> fetchSession(String sessionId) async {
     final row = await _client
         .from('game_sessions')
